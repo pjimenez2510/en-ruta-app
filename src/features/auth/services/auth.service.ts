@@ -1,10 +1,6 @@
 import AxiosClient from "@/core/infrastructure/axios-client";
 import { API_ROUTES } from "@/core/constants/api-routes";
-
-interface LoginInput {
-  email: string;
-  password: string;
-}
+import { LoginInput, RegisterInput } from "../interfaces/auth.interface";
 
 export async function loginService(input: LoginInput): Promise<string> {
   const client = AxiosClient.getInstance();
@@ -14,4 +10,13 @@ export async function loginService(input: LoginInput): Promise<string> {
     { skipAuth: true }
   );
   return response.data.data.token;
+}
+
+export async function register(input: RegisterInput): Promise<void> {
+  const client = AxiosClient.getInstance();
+  await client.post(
+    API_ROUTES.AUTH.REGISTER,
+    input,
+    { skipAuth: true }
+  );
 }

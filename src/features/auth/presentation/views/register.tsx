@@ -1,17 +1,18 @@
 "use client";
 import React, { useState } from "react";
-import { useLogin } from "../../hooks/use-login";
+import { useRegister } from "../../hooks/use-register";
 import { Button } from "@/shared/components/ui/button";
 import Link from "next/link";
 
-const LoginView = () => {
-  const { login, isLoading, error } = useLogin();
+const RegisterView = () => {
+  const { register, isLoading, error } = useRegister();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ email, password });
+    await register({ name, email, password });
   };
 
   return (
@@ -20,7 +21,17 @@ const LoginView = () => {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded shadow-md w-full max-w-sm space-y-6"
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Iniciar sesión</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Registrarse</h2>
+        <div>
+          <label className="block text-sm font-medium mb-1">Nombre</label>
+          <input
+            type="text"
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+          />
+        </div>
         <div>
           <label className="block text-sm font-medium mb-1">Correo electrónico</label>
           <input
@@ -43,15 +54,15 @@ const LoginView = () => {
         </div>
         {error && <div className="text-red-500 text-sm">{error}</div>}
         <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? "Ingresando..." : "Ingresar"}
+          {isLoading ? "Registrando..." : "Registrarse"}
         </Button>
         <div className="text-center text-sm mt-2">
-          ¿No tienes cuenta?{' '}
-          <Link href="/register" className="text-blue-600 hover:underline">Regístrate</Link>
+          ¿Ya tienes cuenta?{' '}
+          <Link href="/login" className="text-blue-600 hover:underline">Inicia sesión</Link>
         </div>
       </form>
     </div>
   );
 };
 
-export default LoginView;
+export default RegisterView;
