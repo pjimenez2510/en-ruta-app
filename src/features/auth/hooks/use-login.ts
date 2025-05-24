@@ -24,8 +24,12 @@ export function useLogin() {
       setCookie("token", token, { path: "/" }); // Guarda el token en cookies para el middleware
       loginAuth(); // Actualiza el estado de autenticación
       router.push("/"); // Redirige al home
-    } catch (err: any) {
-      setError(err.message || "Error al iniciar sesión");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error al iniciar sesión");
+      }
     } finally {
       setIsLoading(false);
     }

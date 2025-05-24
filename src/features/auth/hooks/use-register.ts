@@ -10,8 +10,12 @@ export function useRegister() {
     setError(null);
     try {
       await registerService({ name, email, password });
-    } catch (err: any) {
-      setError(err?.message || "Error al registrar");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error al registrar");
+      }
     } finally {
       setIsLoading(false);
     }

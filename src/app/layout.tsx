@@ -19,30 +19,19 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "EnRuta",
   description: "Aplicación de gestión de rutas de autobuses",
-  manifest: "/manifest.json",
   icons: {
-    apple: "/logo/logo.png",
+    icon: "/favicon.ico",
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="es">
-      <head>
-        <meta name="application-name" content="EnRuta" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="EnRuta" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-        <link rel="apple-touch-icon" href="/logo/logo.png" />
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
         {children}
       </body>
     </html>

@@ -1,0 +1,49 @@
+{
+  "name": "EnRuta",
+  "short_name": "EnRuta",
+  "description": "Aplicación de gestión de rutas de autobuses",
+  "start_url": "/login",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ], 
+  "screenshots": [
+  {
+    "src": "/screenshots/wide.png",
+    "sizes": "1920x1080",
+    "type": "image/png",
+    "form_factor": "wide"
+  },
+  {
+    "src": "/screenshots/narrow.png",
+    "sizes": "1080x1920",
+    "type": "image/png"
+  }
+]
+
+}
