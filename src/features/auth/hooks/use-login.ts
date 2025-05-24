@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { loginService } from "../services/auth.service";
 import { setCookie } from "cookies-next";
+import { useAuthStore } from "../presentation/context/auth.store";
+import { useRouter } from "next/navigation";
 
 interface LoginInput {
   email: string;
@@ -11,15 +13,17 @@ interface LoginInput {
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loginAuth = useAuthStore(state => state.login);
+  const router = useRouter();
 
   const login = async (input: LoginInput) => {
     setIsLoading(true);
     setError(null);
-    try {
-      const token = await loginService(input);
+    try {      const token = await loginService(input);
       localStorage.setItem("token", token);
       setCookie("token", token, { path: "/" }); // Guarda el token en cookies para el middleware
-      // Aquí puedes redirigir o actualizar el estado global
+      loginAuth(); // Actualiza el estado de autenticación
+      router.push("/"); // Redirige al home
     } catch (err: any) {
       setError(err.message || "Error al iniciar sesión");
     } finally {
