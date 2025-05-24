@@ -1,66 +1,92 @@
 "use client";
 import React, { useState } from "react";
 import { useRegister } from "../../hooks/use-register";
-import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import Link from "next/link";
+import { RegisterForm } from "../components/register-form";
 
 const RegisterView = () => {
   const { register, isLoading, error } = useRegister();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    documentType: "cedula",
+    documentNumber: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register({ name, email, password });
+    if (formData.password !== formData.confirmPassword) {
+      // Manejar error de contraseñas diferentes
+      return;
+    }
+    await register({
+      name: `${formData.firstName} ${formData.lastName}`,
+      email: formData.email,
+      password: formData.password,
+      documentType: formData.documentType,
+      documentNumber: formData.documentNumber,
+      phone: formData.phone,
+    });
   };
 
+  const handleFormChange =
+    (field: keyof typeof formData) => (value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-full max-w-sm space-y-6"
-      >
-        <h2 className="text-2xl font-bold mb-4 text-center">Registrarse</h2>
-        <div>
-          <label className="block text-sm font-medium mb-1">Nombre</label>
-          <input
-            type="text"
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Link href="/login" className="text-primary hover:opacity-80">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </Link>
+            <h2 className="text-2xl font-semibold">Crear una cuenta</h2>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {" "}
+          <RegisterForm
+            onSubmit={handleSubmit}
+            form={formData}
+            setForm={{
+              setFirstName: (value) => handleFormChange("firstName")(value),
+              setLastName: (value) => handleFormChange("lastName")(value),
+              setDocumentType: (value) =>
+                handleFormChange("documentType")(value),
+              setDocumentNumber: (value) =>
+                handleFormChange("documentNumber")(value),
+              setEmail: (value) => handleFormChange("email")(value),
+              setPhone: (value) => handleFormChange("phone")(value),
+              setPassword: (value) => handleFormChange("password")(value),
+              setConfirmPassword: (value) =>
+                handleFormChange("confirmPassword")(value),
+            }}
+            isLoading={isLoading}
+            error={error}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Correo electrónico</label>
-          <input
-            type="email"
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Contraseña</label>
-          <input
-            type="password"
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {error && <div className="text-red-500 text-sm">{error}</div>}
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? "Registrando..." : "Registrarse"}
-        </Button>
-        <div className="text-center text-sm mt-2">
-          ¿Ya tienes cuenta?{' '}
-          <Link href="/login" className="text-blue-600 hover:underline">Inicia sesión</Link>
-        </div>
-      </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
