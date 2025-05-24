@@ -37,15 +37,16 @@ const LoginView = () => {
           <p>Inicia Sesión o crea una Cuenta para explorar nuestra App</p>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
+              {" "}
               <TabsTrigger
                 value="login"
-                className="data-[state=active]:bg-[#006D8B] data-[state=active]:text-white"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 Iniciar Sesión
               </TabsTrigger>
               <TabsTrigger
                 value="register"
-                className="data-[state=active]:bg-[#006D8B] data-[state=active]:text-white"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 onClick={() => (window.location.href = "/register")}
               >
                 Registrarse
@@ -86,15 +87,17 @@ const LoginView = () => {
             {error && <div className="text-sm text-red-500 mt-2">{error}</div>}{" "}
             <Button
               type="submit"
-              className="w-full mt-6 bg-[#006D8B] hover:bg-[#005d77]"
+              className="w-full mt-6"
+              variant="default"
               disabled={isLoading}
             >
               {isLoading ? "Ingresando..." : "Iniciar Sesión"}
             </Button>
             <div className="text-center text-sm mt-4">
+              {" "}
               <Link
                 href="/forgot-password"
-                className="text-[#006D8B] hover:underline"
+                className="text-primary hover:underline"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
