@@ -1,8 +1,7 @@
 {
   "name": "EnRuta",
-  "short_name": "EnRuta",
-  "description": "Aplicación de gestión de rutas de autobuses",
-  "start_url": "/",
+  "short_name": "EnRuta",  "description": "Aplicación de gestión de rutas de autobuses",
+  "start_url": "/login",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
