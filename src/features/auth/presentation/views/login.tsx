@@ -21,7 +21,9 @@ const LoginView = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">
+      {" "}
+      <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
           <div className="flex justify-center mb-4">
             <Image
@@ -31,19 +33,20 @@ const LoginView = () => {
               height={100}
               priority
             />
-          </div>          <p>Inicia Sesión o crea una Cuenta para explorar nuestra App</p>
+          </div>{" "}
+          <p>Inicia Sesión o crea una Cuenta para explorar nuestra App</p>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger 
+              <TabsTrigger
                 value="login"
                 className="data-[state=active]:bg-[#006D8B] data-[state=active]:text-white"
               >
                 Iniciar Sesión
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="register"
                 className="data-[state=active]:bg-[#006D8B] data-[state=active]:text-white"
-                onClick={() => window.location.href = '/register'}
+                onClick={() => (window.location.href = "/register")}
               >
                 Registrarse
               </TabsTrigger>
@@ -80,15 +83,19 @@ const LoginView = () => {
                 />
               </div>
             </div>
-            {error && <div className="text-sm text-red-500 mt-2">{error}</div>}            <Button 
-              type="submit" 
-              className="w-full mt-6 bg-[#006D8B] hover:bg-[#005d77]" 
+            {error && <div className="text-sm text-red-500 mt-2">{error}</div>}{" "}
+            <Button
+              type="submit"
+              className="w-full mt-6 bg-[#006D8B] hover:bg-[#005d77]"
               disabled={isLoading}
             >
               {isLoading ? "Ingresando..." : "Iniciar Sesión"}
             </Button>
             <div className="text-center text-sm mt-4">
-              <Link href="/forgot-password" className="text-[#006D8B] hover:underline">
+              <Link
+                href="/forgot-password"
+                className="text-[#006D8B] hover:underline"
+              >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
