@@ -5,7 +5,7 @@ export const AR_KEYS = {
 export const API_ROUTES = {
   AUTH: {
     LOGIN: "/auth/login",
-    REGISTER: "/auth/register",
+    REGISTER: "/auth/registro/cliente",
     LOGOUT: "/auth/logout",
     REFRESH_TOKEN: "/auth/refresh-token",
     FORGOT_PASSWORD: "/auth/forgot-password",
