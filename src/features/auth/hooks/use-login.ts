@@ -19,7 +19,8 @@ export function useLogin() {
   const login = async (input: LoginInput) => {
     setIsLoading(true);
     setError(null);
-    try {      const token = await loginService(input);
+    try {
+      const token = await loginService(input);
       localStorage.setItem("token", token);
       setCookie("token", token, { path: "/" }); // Guarda el token en cookies para el middleware
       loginAuth(); // Actualiza el estado de autenticación
