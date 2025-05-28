@@ -1,36 +1,16 @@
 import { useState } from "react";
 import { register as registerService } from "../services/auth.service";
+import { RegisterInput } from "../interfaces/auth.interface";
 
 export function useRegister() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const register = async ({
-    name,
-    email,
-    password,
-    documentType,
-    documentNumber,
-    phone,
-  }: {
-    name: string;
-    email: string;
-    password: string;
-    documentType: string;
-    documentNumber: string;
-    phone: string;
-  }) => {
+  const register = async (input: RegisterInput) => {
     setIsLoading(true);
     setError(null);
     try {
-      await registerService({
-        name,
-        email,
-        password,
-        documentType,
-        documentNumber,
-        phone,
-      });
+      await registerService(input);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

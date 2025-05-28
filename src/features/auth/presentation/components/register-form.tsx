@@ -4,6 +4,8 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/shared/components/ui/select";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Slider } from "@/shared/components/ui/slider";
 import Link from "next/link";
 
 interface RegisterFormProps
@@ -18,6 +20,9 @@ interface RegisterFormProps
     phone: string;
     password: string;
     confirmPassword: string;
+    birthDate: string;
+    isDisabled: boolean;
+    disabilityPercentage: number;
   };
   setForm: {
     setFirstName: (value: string) => void;
@@ -28,6 +33,9 @@ interface RegisterFormProps
     setPhone: (value: string) => void;
     setPassword: (value: string) => void;
     setConfirmPassword: (value: string) => void;
+    setBirthDate: (value: string) => void;
+    setIsDisabled: (value: boolean) => void;
+    setDisabilityPercentage: (value: number) => void;
   };
   isLoading: boolean;
   error: string | null;
@@ -42,7 +50,7 @@ export const RegisterForm = ({
 }: RegisterFormProps) =>
 {
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="firstName">Nombres</Label>
         <Input
@@ -82,9 +90,9 @@ export const RegisterForm = ({
             <SelectValue placeholder="Selecciona el tipo de documento" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="cedula">Cédula de identidad</SelectItem>
-            <SelectItem value="ruc">RUC</SelectItem>
-            <SelectItem value="passport">Pasaporte</SelectItem>
+            <SelectItem value="CEDULA">Cédula de identidad</SelectItem>
+            <SelectItem value="RUC">RUC</SelectItem>
+            <SelectItem value="PASAPORTE">Pasaporte</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -95,16 +103,16 @@ export const RegisterForm = ({
           id="documentNumber"
           value={form.documentNumber}
           placeholder={
-            form.documentType === 'cedula' ? '1234567890' :
-              form.documentType === 'ruc' ? '1234567890001' :
-                form.documentType === 'passport' ? 'AB123456' :
+            form.documentType === 'CEDULA' ? '1234567890' :
+              form.documentType === 'RUC' ? '1234567890001' :
+                form.documentType === 'PASAPORTE' ? 'AB123456' :
                   'Selecciona tipo de documento'
           }
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           {
             let value = e.target.value;
 
-            if (form.documentType === 'cedula')
+            if (form.documentType === 'CEDULA')
             {
               value = value.replace(/\D/g, '');
               if (value.length <= 10)
@@ -112,7 +120,7 @@ export const RegisterForm = ({
                 setForm.setDocumentNumber(value);
               }
             }
-            else if (form.documentType === 'ruc')
+            else if (form.documentType === 'RUC')
             {
               value = value.replace(/\D/g, '');
               if (value.length <= 13)
@@ -131,7 +139,7 @@ export const RegisterForm = ({
                 }
               }
             }
-            else if (form.documentType === 'passport')
+            else if (form.documentType === 'PASAPORTE')
             {
               value = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
               if (value.length <= 12)
@@ -145,22 +153,22 @@ export const RegisterForm = ({
             }
           }}
           maxLength={
-            form.documentType === 'cedula' ? 10 :
-              form.documentType === 'ruc' ? 13 :
-                form.documentType === 'passport' ? 12 :
+            form.documentType === 'CEDULA' ? 10 :
+              form.documentType === 'RUC' ? 13 :
+                form.documentType === 'PASAPORTE' ? 12 :
                   undefined
           }
           disabled={!form.documentType}
           required
         />
 
-        {form.documentType === 'cedula' && (
+        {form.documentType === 'CEDULA' && (
           <p className="text-xs text-gray-500">Ingresa 10 dígitos de tu cédula</p>
         )}
-        {form.documentType === 'ruc' && (
+        {form.documentType === 'RUC' && (
           <p className="text-xs text-gray-500">Ingresa 10 dígitos, se agregará automáticamente 001</p>
         )}
-        {form.documentType === 'passport' && (
+        {form.documentType === 'PASAPORTE' && (
           <p className="text-xs text-gray-500">Letras y números, máximo 12 caracteres</p>
         )}
       </div>
@@ -184,7 +192,7 @@ export const RegisterForm = ({
         <Input
           id="phone"
           type="tel"
-          placeholder="099 223 3344"
+          placeholder="0999123456"
           value={form.phone}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           {
@@ -196,7 +204,78 @@ export const RegisterForm = ({
           }}
           maxLength={10}
         />
+        <p className="text-xs text-gray-500">Ingresa 10 dígitos (ej: 0999123456)</p>
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="birthDate">Fecha de nacimiento</Label>
+        <Input
+          id="birthDate"
+          type="date"
+          value={form.birthDate}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setForm.setBirthDate(e.target.value)
+          }
+          max={new Date().toISOString().split('T')[0]}
+          required
+        />
+      </div>
+
+      <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+        <Checkbox
+          id="isDisabled"
+          checked={form.isDisabled}
+          onCheckedChange={(checked) => {
+            setForm.setIsDisabled(checked as boolean);
+            if (!checked) {
+              setForm.setDisabilityPercentage(0);
+            }
+          }}
+        />
+        <div className="space-y-1 leading-none">
+          <Label htmlFor="isDisabled" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Tengo alguna discapacidad
+          </Label>
+          <p className="text-sm text-muted-foreground">
+            Si tienes alguna discapacidad, marca esta casilla para habilitar el campo de porcentaje.
+          </p>
+        </div>
+      </div>
+
+      {form.isDisabled && (
+        <div className="space-y-4 rounded-md border p-4 bg-muted/20">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="disabilityPercentage" className="text-sm font-medium">
+              Porcentaje de discapacidad
+            </Label>
+            <span className="text-lg font-semibold text-primary">
+              {form.disabilityPercentage}%
+            </span>
+          </div>
+          
+          <div className="px-2">
+            <Slider
+              id="disabilityPercentage"
+              min={0}
+              max={100}
+              step={0.1}
+              value={[form.disabilityPercentage]}
+              onValueChange={(value) => setForm.setDisabilityPercentage(value[0])}
+              className="w-full"
+            />
+          </div>
+          
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>0%</span>
+            <span>50%</span>
+            <span>100%</span>
+          </div>
+          
+          <p className="text-sm text-muted-foreground">
+            Desliza para ajustar el porcentaje según tu certificado de discapacidad
+          </p>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="password">Contraseña</Label>
