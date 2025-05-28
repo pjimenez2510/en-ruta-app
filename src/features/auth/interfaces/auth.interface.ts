@@ -3,15 +3,20 @@ export interface LoginInput {
   password: string;
 }
 
-export interface RegisterInput {
+interface Cliente {
   nombres: string;
   apellidos: string;
   tipoDocumento: string;
   numeroDocumento: string;
-  telefono: string;
+  telefono?: string;
+  email?: string;
+  fechaNacimiento?: string;
+  esDiscapacitado?: boolean;
+  porcentajeDiscapacidad?: number;
+}
+
+export interface RegisterInput {
   email: string;
-  fechaNacimiento: string;
-  esDiscapacitado: boolean;
-  porcentajeDiscapacidad: number;
   password: string;
+  cliente: Cliente;
 }

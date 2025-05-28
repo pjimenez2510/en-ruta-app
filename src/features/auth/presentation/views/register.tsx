@@ -48,16 +48,19 @@ const RegisterView = () => {
 
     // Formatear los datos según lo que espera el backend
     await register({
-      nombres: formData.firstName,
-      apellidos: formData.lastName,
-      tipoDocumento: formData.documentType,
-      numeroDocumento: formData.documentNumber,
-      telefono: formData.phone,
       email: formData.email,
-      fechaNacimiento: formData.birthDate,
-      esDiscapacitado: formData.isDisabled,
-      porcentajeDiscapacidad: formData.disabilityPercentage,
       password: formData.password,
+      cliente: {
+        nombres: formData.firstName,
+        apellidos: formData.lastName,
+        tipoDocumento: formData.documentType,
+        numeroDocumento: formData.documentNumber,
+        telefono: formData.phone || undefined,
+        email: formData.email,
+        fechaNacimiento: formData.birthDate ? new Date(formData.birthDate).toISOString() : undefined,
+        esDiscapacitado: formData.isDisabled,
+        porcentajeDiscapacidad: formData.isDisabled ? formData.disabilityPercentage : undefined
+      }
     });
   };
 
