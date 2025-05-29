@@ -14,6 +14,7 @@ interface RegisterFormProps
   form: {
     firstName: string;
     lastName: string;
+    username: string; // Nuevo campo para nombre de usuario
     documentType: string;
     documentNumber: string;
     email: string;
@@ -27,6 +28,7 @@ interface RegisterFormProps
   setForm: {
     setFirstName: (value: string) => void;
     setLastName: (value: string) => void;
+    setUsername: (value: string) => void; // Setter para username
     setDocumentType: (value: string) => void;
     setDocumentNumber: (value: string) => void;
     setEmail: (value: string) => void;
@@ -72,6 +74,19 @@ export const RegisterForm = ({
           placeholder="apellido 1 y apellido 2"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setForm.setLastName(e.target.value)
+          }
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="username">Nombre de usuario</Label>
+        <Input
+          id="username"
+          value={form.username}
+          placeholder="Nombre de usuario"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setForm.setUsername(e.target.value)
           }
           required
         />
