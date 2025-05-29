@@ -20,7 +20,7 @@ export function AppSidebar() {
 
   const menuItems = [
     { title: "Dashboard", path: "/main/dashboard", icon: Bus },
-    { title: "Usuarios", path: "/main/usuarios", icon: Users },
+    { title: "Usuarios", path: "/main/users", icon: Users },
     { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
     { title: "Configuración", path: "/main/configuration", icon: Settings },
   ];
