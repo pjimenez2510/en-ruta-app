@@ -3,13 +3,20 @@ import { User, SRIResponse } from "../interfaces/management-users.interface";
 const SRI_API_URL = "https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion";
 
 export const getUsersFromStorage = (): User[] => {
-  if (typeof window === 'undefined') return [];
-  const savedUsers = localStorage.getItem('users');
-  return savedUsers ? JSON.parse(savedUsers) : [];
+  try {
+    const savedUsers = localStorage.getItem('users');
+    return savedUsers ? JSON.parse(savedUsers) : [];
+  } catch {
+    return [];
+  }
 };
 
 export const saveUsersToStorage = (users: User[]): void => {
-  localStorage.setItem('users', JSON.stringify(users));
+  try {
+    localStorage.setItem('users', JSON.stringify(users));
+  } catch (error) {
+    console.error('Error saving users to localStorage:', error);
+  }
 };
 
 export const fetchSRIData = async (cedula: string): Promise<string> => {

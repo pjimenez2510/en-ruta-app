@@ -30,17 +30,26 @@ const defaultFormData: User = {
 };
 
 export function useManagementUsers(): UseManagementUsersReturn {
-  const [users, setUsers] = useState<User[]>(() => getUsersFromStorage());
+  const [users, setUsers] = useState<User[]>([]);
   const [formData, setFormData] = useState<User>(defaultFormData);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    saveUsersToStorage(users);
-  }, [users]);
+    setIsClient(true);
+    const savedUsers = getUsersFromStorage();
+    setUsers(savedUsers);
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      saveUsersToStorage(users);
+    }
+  }, [users, isClient]);
 
   const handleCedulaSearch = async () => {
     if (formData.cedula.length === 10 || formData.cedula.length === 13) {
