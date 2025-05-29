@@ -4,11 +4,8 @@ import { loginService } from "../services/auth.service";
 import { setCookie } from "cookies-next";
 import { useAuthStore } from "../presentation/context/auth.store";
 import { useRouter } from "next/navigation";
+import { LoginInput } from "../interfaces/auth.interface";
 
-interface LoginInput {
-  email: string;
-  password: string;
-}
 
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);

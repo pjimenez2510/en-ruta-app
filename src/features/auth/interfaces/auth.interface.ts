@@ -1,5 +1,5 @@
 export interface LoginInput {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -9,14 +9,14 @@ interface Cliente {
   tipoDocumento: string;
   numeroDocumento: string;
   telefono?: string;
-  email?: string;
+  username?: string;
   fechaNacimiento?: string;
   esDiscapacitado?: boolean;
   porcentajeDiscapacidad?: number;
 }
 
 export interface RegisterInput {
-  email: string;
+  username: string;
   password: string;
   cliente: Cliente;
 }

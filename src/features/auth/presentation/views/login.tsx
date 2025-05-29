@@ -13,13 +13,13 @@ import { Eye, EyeOff } from "lucide-react";
 
 const LoginView = () => {
   const { login, isLoading, error } = useLogin();
-  const [email, setEmail] = useState("");
+  const [username, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ email, password });
+    await login({ username, password });
   };
 
   return (
@@ -61,12 +61,12 @@ const LoginView = () => {
             {" "}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="username">Correo electrónico</Label>
                 <Input
-                  id="email"
-                  type="email"
+                  id="username"
+                  type="username"
                   placeholder="correo_electronico@ejemplo.com"
-                  value={email}
+                  value={username}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setEmail(e.target.value)
                   }
