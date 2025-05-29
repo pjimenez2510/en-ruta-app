@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table";
 import { Eye, EyeOff, Search, Pencil, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/components/ui/dialog";
-import { useManagementUsers } from "../../hooks/use-management-users";
+import { useManagementUsers } from "@/features/auth/hooks/use-management-users";
 
 
 const ManagementUsersView = () => {
@@ -32,7 +32,7 @@ const ManagementUsersView = () => {
   } = useManagementUsers();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start bg-gray-100 p-4">
+    <div className="flex min-h-screen flex-col items-center justify-start p-4">
       <Card className="w-full max-w-4xl">
         <CardHeader className="space-y-2">
           <h2 className="text-2xl font-semibold text-center">Gestión de Usuarios</h2>
