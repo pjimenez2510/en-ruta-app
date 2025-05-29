@@ -21,3 +21,18 @@ export interface RegisterInput {
   password: string;
   cliente: Cliente;
 }
+
+export interface RegisterCooperativaInput {
+  username: string;
+  password: string;
+  tenant: {
+    nombre: string;
+    identificador: string;
+    logoUrl: string;
+    colorPrimario: string;
+    colorSecundario: string;
+    sitioWeb: string;
+    emailContacto: string;
+    telefono: string;
+  };
+}

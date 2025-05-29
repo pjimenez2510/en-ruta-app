@@ -3,13 +3,18 @@ import React from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/shared/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Slider } from "@/shared/components/ui/slider";
 import Link from "next/link";
 
-interface RegisterFormProps
-{
+interface RegisterFormProps {
   onSubmit: (e: React.FormEvent) => Promise<void>;
   form: {
     firstName: string;
@@ -49,8 +54,7 @@ export const RegisterForm = ({
   setForm,
   isLoading,
   error,
-}: RegisterFormProps) =>
-{
+}: RegisterFormProps) => {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <div className="space-y-2">
@@ -98,7 +102,7 @@ export const RegisterForm = ({
           value={form.documentType}
           onValueChange={(value) => {
             setForm.setDocumentType(value);
-            setForm.setDocumentNumber('');
+            setForm.setDocumentNumber("");
           }}
         >
           <SelectTrigger id="documentType">
@@ -118,73 +122,69 @@ export const RegisterForm = ({
           id="documentNumber"
           value={form.documentNumber}
           placeholder={
-            form.documentType === 'CEDULA' ? '1234567890' :
-              form.documentType === 'RUC' ? '1234567890001' :
-                form.documentType === 'PASAPORTE' ? 'AB123456' :
-                  'Selecciona tipo de documento'
+            form.documentType === "CEDULA"
+              ? "1234567890"
+              : form.documentType === "RUC"
+              ? "1234567890001"
+              : form.documentType === "PASAPORTE"
+              ? "AB123456"
+              : "Selecciona tipo de documento"
           }
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             let value = e.target.value;
 
-            if (form.documentType === 'CEDULA')
-            {
-              value = value.replace(/\D/g, '');
-              if (value.length <= 10)
-              {
+            if (form.documentType === "CEDULA") {
+              value = value.replace(/\D/g, "");
+              if (value.length <= 10) {
                 setForm.setDocumentNumber(value);
               }
-            }
-            else if (form.documentType === 'RUC')
-            {
-              value = value.replace(/\D/g, '');
-              if (value.length <= 13)
-              {
-                if (value.length < 10)
-                {
+            } else if (form.documentType === "RUC") {
+              value = value.replace(/\D/g, "");
+              if (value.length <= 13) {
+                if (value.length < 10) {
                   setForm.setDocumentNumber(value);
-                }
-                else if (value.length === 10)
-                {
-                  setForm.setDocumentNumber(value + '001');
-                }
-                else if (value.length <= 13 && value.endsWith('001'))
-                {
+                } else if (value.length === 10) {
+                  setForm.setDocumentNumber(value + "001");
+                } else if (value.length <= 13 && value.endsWith("001")) {
                   setForm.setDocumentNumber(value);
                 }
               }
-            }
-            else if (form.documentType === 'PASAPORTE')
-            {
-              value = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-              if (value.length <= 12)
-              {
+            } else if (form.documentType === "PASAPORTE") {
+              value = value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+              if (value.length <= 12) {
                 setForm.setDocumentNumber(value);
               }
-            }
-            else
-            {
+            } else {
               return;
             }
           }}
           maxLength={
-            form.documentType === 'CEDULA' ? 10 :
-              form.documentType === 'RUC' ? 13 :
-                form.documentType === 'PASAPORTE' ? 12 :
-                  undefined
+            form.documentType === "CEDULA"
+              ? 10
+              : form.documentType === "RUC"
+              ? 13
+              : form.documentType === "PASAPORTE"
+              ? 12
+              : undefined
           }
           disabled={!form.documentType}
           required
         />
 
-        {form.documentType === 'CEDULA' && (
-          <p className="text-xs text-gray-500">Ingresa 10 dígitos de tu cédula</p>
+        {form.documentType === "CEDULA" && (
+          <p className="text-xs text-gray-500">
+            Ingresa 10 dígitos de tu cédula
+          </p>
         )}
-        {form.documentType === 'RUC' && (
-          <p className="text-xs text-gray-500">Ingresa 10 dígitos, se agregará automáticamente 001</p>
+        {form.documentType === "RUC" && (
+          <p className="text-xs text-gray-500">
+            Ingresa 10 dígitos, se agregará automáticamente 001
+          </p>
         )}
-        {form.documentType === 'PASAPORTE' && (
-          <p className="text-xs text-gray-500">Letras y números, máximo 12 caracteres</p>
+        {form.documentType === "PASAPORTE" && (
+          <p className="text-xs text-gray-500">
+            Letras y números, máximo 12 caracteres
+          </p>
         )}
       </div>
 
@@ -209,17 +209,17 @@ export const RegisterForm = ({
           type="tel"
           placeholder="0999123456"
           value={form.phone}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          {
-            const value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 10)
-            {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value.replace(/\D/g, "");
+            if (value.length <= 10) {
               setForm.setPhone(value);
             }
           }}
           maxLength={10}
         />
-        <p className="text-xs text-gray-500">Ingresa 10 dígitos (ej: 0999123456)</p>
+        <p className="text-xs text-gray-500">
+          Ingresa 10 dígitos (ej: 0999123456)
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -231,7 +231,7 @@ export const RegisterForm = ({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setForm.setBirthDate(e.target.value)
           }
-          max={new Date().toISOString().split('T')[0]}
+          max={new Date().toISOString().split("T")[0]}
           required
         />
       </div>
@@ -248,11 +248,15 @@ export const RegisterForm = ({
           }}
         />
         <div className="space-y-1 leading-none">
-          <Label htmlFor="isDisabled" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <Label
+            htmlFor="isDisabled"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             Tengo alguna discapacidad
           </Label>
           <p className="text-sm text-muted-foreground">
-            Si tienes alguna discapacidad, marca esta casilla para habilitar el campo de porcentaje.
+            Si tienes alguna discapacidad, marca esta casilla para habilitar el
+            campo de porcentaje.
           </p>
         </div>
       </div>
@@ -260,14 +264,17 @@ export const RegisterForm = ({
       {form.isDisabled && (
         <div className="space-y-4 rounded-md border p-4 bg-muted/20">
           <div className="flex items-center justify-between">
-            <Label htmlFor="disabilityPercentage" className="text-sm font-medium">
+            <Label
+              htmlFor="disabilityPercentage"
+              className="text-sm font-medium"
+            >
               Porcentaje de discapacidad
             </Label>
             <span className="text-lg font-semibold text-primary">
               {form.disabilityPercentage}%
             </span>
           </div>
-          
+
           <div className="px-2">
             <Slider
               id="disabilityPercentage"
@@ -275,19 +282,22 @@ export const RegisterForm = ({
               max={100}
               step={0.1}
               value={[form.disabilityPercentage]}
-              onValueChange={(value) => setForm.setDisabilityPercentage(value[0])}
+              onValueChange={(value) =>
+                setForm.setDisabilityPercentage(value[0])
+              }
               className="w-full"
             />
           </div>
-          
+
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>0%</span>
             <span>50%</span>
             <span>100%</span>
           </div>
-          
+
           <p className="text-sm text-muted-foreground">
-            Desliza para ajustar el porcentaje según tu certificado de discapacidad
+            Desliza para ajustar el porcentaje según tu certificado de
+            discapacidad
           </p>
         </div>
       )}
@@ -323,19 +333,32 @@ export const RegisterForm = ({
 
       {error && <div className="text-sm text-red-500 mt-2">{error}</div>}
 
-      <Button 
-        type="submit" 
-        className="w-full mt-6" 
-        disabled={isLoading || (Boolean(form.confirmPassword) && form.password !== form.confirmPassword)}
+      <Button
+        type="submit"
+        className="w-full mt-6"
+        disabled={
+          isLoading ||
+          (Boolean(form.confirmPassword) &&
+            form.password !== form.confirmPassword)
+        }
       >
         {isLoading ? "Registrando..." : "Registrarse"}
       </Button>
 
       <div className="text-center text-sm mt-4">
         <p className="text-muted-foreground">
-          ¿Ya tienes una cuenta?{" "}
-          <Link href="/login" className="text-primary hover:underline">
+          ¿Ya tienes una cuenta?
+          <Link href="/login" className="text-primary hover:underline ml-1">
             Inicia Sesión
+          </Link>
+        </p>
+        <p className="text-muted-foreground mt-2">
+          ¿Eres una cooperativa?{" "}
+          <Link
+            href="/register-cooperativa"
+            className="text-primary hover:underline ml-1"
+          >
+            Regístrate aquí
           </Link>
         </p>
       </div>

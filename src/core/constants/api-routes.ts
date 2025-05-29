@@ -6,6 +6,7 @@ export const API_ROUTES = {
   AUTH: {
     LOGIN: "/auth/login",
     REGISTER: "/auth/registro/cliente",
+    REGISTER_COOPERATIVA: "/auth/registro/cooperativa",
     LOGOUT: "/auth/logout",
     REFRESH_TOKEN: "/auth/refresh-token",
     FORGOT_PASSWORD: "/auth/forgot-password",

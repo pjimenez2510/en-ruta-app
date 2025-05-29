@@ -7,7 +7,7 @@ import { RegisterForm } from "../components/register-form";
 
 const RegisterView = () => {
   const { register, isLoading, error } = useRegister();
-  
+
   // Estado actualizado con todos los campos requeridos
   const [formData, setFormData] = useState({
     firstName: "",
@@ -36,7 +36,8 @@ const RegisterView = () => {
     const age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     const dayDiff = today.getDate() - birthDate.getDate();
-    const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+    const actualAge =
+      monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
     if (actualAge < 6) {
       alert("Debes tener al menos 6 años para registrarte");
       return;
@@ -54,17 +55,20 @@ const RegisterView = () => {
         email: formData.email, // Volver a enviar email dentro de cliente
         fechaNacimiento: formData.birthDate, // Enviar como YYYY-MM-DD
         esDiscapacitado: formData.isDisabled,
-        porcentajeDiscapacidad: formData.isDisabled ? formData.disabilityPercentage : undefined
-      }
+        porcentajeDiscapacidad: formData.isDisabled
+          ? formData.disabilityPercentage
+          : undefined,
+      },
     });
   };
 
-  const handleFormChange = (field: keyof typeof formData) => (value: string | boolean | number) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const handleFormChange =
+    (field: keyof typeof formData) => (value: string | boolean | number) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">
@@ -94,18 +98,28 @@ const RegisterView = () => {
             onSubmit={handleSubmit}
             form={formData}
             setForm={{
-              setFirstName: (value: string) => handleFormChange("firstName")(value),
-              setLastName: (value: string) => handleFormChange("lastName")(value),
-              setUsername: (value: string) => handleFormChange("username")(value), // Nuevo setter
-              setDocumentType: (value: string) => handleFormChange("documentType")(value),
-              setDocumentNumber: (value: string) => handleFormChange("documentNumber")(value),
+              setFirstName: (value: string) =>
+                handleFormChange("firstName")(value),
+              setLastName: (value: string) =>
+                handleFormChange("lastName")(value),
+              setUsername: (value: string) =>
+                handleFormChange("username")(value), // Nuevo setter
+              setDocumentType: (value: string) =>
+                handleFormChange("documentType")(value),
+              setDocumentNumber: (value: string) =>
+                handleFormChange("documentNumber")(value),
               setEmail: (value: string) => handleFormChange("email")(value),
               setPhone: (value: string) => handleFormChange("phone")(value),
-              setPassword: (value: string) => handleFormChange("password")(value),
-              setConfirmPassword: (value: string) => handleFormChange("confirmPassword")(value),
-              setBirthDate: (value: string) => handleFormChange("birthDate")(value),
-              setIsDisabled: (value: boolean) => handleFormChange("isDisabled")(value),
-              setDisabilityPercentage: (value: number) => handleFormChange("disabilityPercentage")(value),
+              setPassword: (value: string) =>
+                handleFormChange("password")(value),
+              setConfirmPassword: (value: string) =>
+                handleFormChange("confirmPassword")(value),
+              setBirthDate: (value: string) =>
+                handleFormChange("birthDate")(value),
+              setIsDisabled: (value: boolean) =>
+                handleFormChange("isDisabled")(value),
+              setDisabilityPercentage: (value: number) =>
+                handleFormChange("disabilityPercentage")(value),
             }}
             isLoading={isLoading}
             error={error}
