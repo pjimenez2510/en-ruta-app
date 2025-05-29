@@ -61,11 +61,11 @@ const LoginView = () => {
             {" "}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Correo electrónico</Label>
+                <Label htmlFor="username">Nombre de usuario</Label>
                 <Input
                   id="username"
                   type="username"
-                  placeholder="correo_electronico@ejemplo.com"
+                  placeholder="username-example"
                   value={username}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setEmail(e.target.value)
