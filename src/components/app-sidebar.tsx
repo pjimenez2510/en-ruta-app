@@ -1,4 +1,6 @@
-import { Home, Users, Bus, Clock, LogOut } from "lucide-react";
+"use client";
+import { Users, Bus, Clock, LogOut, Settings } from "lucide-react";
+import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 
 import {
   Sidebar,
@@ -11,29 +13,23 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/shared/components/ui/sidebar";
+export function AppSidebar() {
+  //const userRole = useAuthStore((state) => state.userRole);
 
-type Props = {
-  role?: "admin" | "user";
-};
+  //if (userRole !== "PERSONAL_COOPERATIVA") return null;
 
-export function AppSidebar({ role = "user" }: Props) {
-  // Define menu items based on role
-  const menuItems =
-    role === "admin"
-      ? [
-          { title: "Inicio", path: "/", icon: Home },
-          { title: "Usuarios", path: "/usuarios", icon: Users },
-          { title: "Cooperativas", path: "/cooperativas", icon: Bus },
-          { title: "Frecuencias", path: "/frecuencias", icon: Clock },
-        ]
-      : [{ title: "Inicio", path: "/", icon: Home }];
+  const menuItems = [
+    { title: "Dashboard", path: "/main/dashboard", icon: Bus },
+    { title: "Usuarios", path: "/main/usuarios", icon: Users },
+    { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
+    { title: "Configuración", path: "/main/configuration", icon: Settings },
+  ];
 
   return (
     <Sidebar>
       <SidebarHeader>
         <div className="p-4 text-lg font-bold">EnRuta</div>
       </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -52,16 +48,21 @@ export function AppSidebar({ role = "user" }: Props) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <button className="flex w-full items-center gap-2 text-red-500 hover:text-red-600">
+                  <button
+                    className="flex items-center gap-2 w-full"
+                    onClick={() => {
+                      useAuthStore.getState().logout();
+                      window.location.href = "/login";
+                    }}
+                  >
                     <LogOut className="h-4 w-4" />
-                    <span>Cerrar Sesión</span>
+                    <span>Cerrar sesión</span>
                   </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
