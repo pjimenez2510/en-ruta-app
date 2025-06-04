@@ -15,28 +15,32 @@ export function useLogin() {
     setError(null);
 
     try {
+      console.log("=== Inicio del proceso de login ===");
+      console.log("Credenciales a enviar:", {
+        username: input.username,
+        password: "***",
+      });
+
       const result = await signIn("credentials", {
         username: input.username,
         password: input.password,
         redirect: false,
       });
 
+      console.log("=== Resultado del login ===");
+      console.log("Resultado completo:", result);
+
       if (!result?.ok) {
+        console.error("Error de login:", result?.error);
         setError(result?.error || "Error al iniciar sesión");
         return;
       }
 
-      // Redirección basada en rol
-      if (session?.user?.role === "PERSONAL_COOPERATIVA") {
-        router.push("/main/dashboard");
-      } else if (session?.user?.role === "ADMIN_SISTEMA") {
-        router.push("/main/admin");
-      } else {
-        router.push("/");
-      }
+      console.log("✅ Login exitoso");
     } catch (err) {
+      console.error("=== Error inesperado en login ===");
+      console.error("Error completo:", err);
       setError("Error inesperado al iniciar sesión");
-      console.error("Error de autenticación:", err);
     } finally {
       setIsLoading(false);
     }

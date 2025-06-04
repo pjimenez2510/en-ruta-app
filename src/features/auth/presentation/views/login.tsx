@@ -38,6 +38,7 @@ const LoginView = () => {
     if (!username || !password) {
       return;
     }
+    console.log("Iniciando proceso de login...");
     await login({ username, password });
   };
 
@@ -126,8 +127,9 @@ const LoginView = () => {
               </div>
             </div>
             {error && (
-              <div className="text-sm text-red-500 mt-2 text-center">
-                {error}
+              <div className="text-sm text-red-500 mt-2 text-center p-2 bg-red-50 rounded">
+                <p className="font-medium">Error de autenticación:</p>
+                <p>{error}</p>
               </div>
             )}
             <Button
