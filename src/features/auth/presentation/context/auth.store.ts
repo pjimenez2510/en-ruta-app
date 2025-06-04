@@ -6,6 +6,7 @@ interface AuthState {
   userRole?: string;
   login: (token?: string) => void;
   logout: () => void;
+  setUserRole: (role: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -31,4 +32,5 @@ export const useAuthStore = create<AuthState>((set) => ({
     document.cookie = "token=; Max-Age=0; path=/;";
     set({ isAuthenticated: false, userRole: undefined });
   },
+  setUserRole: (role: string) => set({ userRole: role }),
 }));
