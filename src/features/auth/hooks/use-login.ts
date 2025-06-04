@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { LoginInput } from "../interfaces/auth.interface";
 
@@ -8,7 +8,6 @@ export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { data: session } = useSession();
 
   const login = async (input: LoginInput) => {
     setIsLoading(true);
@@ -37,6 +36,7 @@ export function useLogin() {
       }
 
       console.log("✅ Login exitoso");
+      // La redirección será manejada por el middleware
     } catch (err) {
       console.error("=== Error inesperado en login ===");
       console.error("Error completo:", err);

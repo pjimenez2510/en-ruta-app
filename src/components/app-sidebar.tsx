@@ -1,6 +1,8 @@
 "use client";
 import { Users, Bus, Clock, LogOut, Settings } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   Sidebar,
@@ -13,10 +15,30 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/shared/components/ui/sidebar";
-export function AppSidebar() {
-  //const userRole = useAuthStore((state) => state.userRole);
 
-  //if (userRole !== "PERSONAL_COOPERATIVA") return null;
+export function AppSidebar() {
+  const router = useRouter();
+  const userRole = useAuthStore((state) => state.userRole);
+
+  useEffect(() => {
+    // Redirigir basado en el rol
+    if (!userRole) return; // Esperar a que el rol esté disponible
+
+    if (userRole === "PERSONAL_COOPERATIVA") {
+      // Ya estamos en la vista correcta, no hacer nada
+      return;
+    } else if (userRole === "ADMIN_SISTEMA") {
+      router.push("/admin/dashboard");
+    } else if (userRole === "CLIENTE") {
+      router.push("/cliente/dashboard");
+    } else {
+      // Para cualquier otro rol no manejado
+      router.push("/unauthorized");
+    }
+  }, [userRole, router]);
+
+  // Si no es PERSONAL_COOPERATIVA, no mostrar el sidebar
+  if (userRole !== "PERSONAL_COOPERATIVA") return null;
 
   const menuItems = [
     { title: "Dashboard", path: "/main/dashboard", icon: Bus },
