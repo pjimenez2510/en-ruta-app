@@ -34,7 +34,7 @@ export function useRegister() {
       if (userRole === "PERSONAL_COOPERATIVA") {
         router.push("/main/dashboard");
       } else if (userRole === "ADMIN_SISTEMA") {
-        router.push("/main/admin");
+        router.push("/main/admin/dashboard");
       } else {
         router.push("/");
       }

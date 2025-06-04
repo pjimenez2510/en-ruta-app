@@ -26,7 +26,7 @@ const LoginView = () => {
       if (session.user.role === "PERSONAL_COOPERATIVA") {
         router.push("/main/dashboard");
       } else if (session.user.role === "ADMIN_SISTEMA") {
-        router.push("/main/admin");
+        router.push("/main/admin/dashboard");
       } else {
         router.push("/");
       }

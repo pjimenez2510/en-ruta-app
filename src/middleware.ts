@@ -31,20 +31,20 @@ export async function middleware(request: NextRequest) {
   // Si hay sesión y es una página de autenticación, redirige según el rol
   if (token && isAuthPage) {
     const role = token.role as string;
-    switch (role) {
-      case "PERSONAL_COOPERATIVA":
-        return NextResponse.redirect(new URL("/main/dashboard", request.url));
-      case "ADMIN_SISTEMA":
-        return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-      case "CLIENTE":
-        return NextResponse.redirect(
-          new URL("/cliente/dashboard", request.url)
-        );
-      default:
-        return NextResponse.redirect(new URL("/unauthorized", request.url));
+    if (role === "ADMIN_SISTEMA") {
+      return NextResponse.redirect(new URL("/main/admin/dashboard", request.url));
     }
+    if (role === "PERSONAL_COOPERATIVA") {
+      return NextResponse.redirect(new URL("/main/dashboard", request.url));
+    }
+    if (role === "CLIENTE") {
+      return NextResponse.redirect(new URL("/cliente/dashboard", request.url));
+    }
+    // Si el rol no es reconocido, permite el acceso a la página de login
+    return NextResponse.next();
   }
 
+  // Para todas las demás rutas, permitir el acceso si hay token
   return NextResponse.next();
 }
 
