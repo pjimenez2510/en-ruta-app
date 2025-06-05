@@ -13,9 +13,7 @@ interface AxiosConfig {
 }
 
 const DEFAULT_CONFIG: AxiosConfig = {
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_API_URL ||
-    "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -25,6 +23,13 @@ class AxiosClient {
   private axiosInstance: AxiosInstance;
 
   private constructor(config: AxiosConfig = DEFAULT_CONFIG) {
+    console.log("=== Inicializando AxiosClient ===");
+    console.log("Configuración:", {
+      baseURL: config.baseURL,
+      timeout: config.timeout,
+      headers: config.headers,
+    });
+
     this.axiosInstance = axios.create({
       baseURL: config.baseURL,
       timeout: config.timeout,
@@ -33,6 +38,7 @@ class AxiosClient {
 
     this.setupAuthInterceptor();
     this.setupErrorHandling();
+    this.setupRequestLogging();
   }
 
   static getInstance(config?: AxiosConfig): AxiosClient {
@@ -63,6 +69,45 @@ class AxiosClient {
         const apiError = ApiErrorHandler.handle(error);
 
         return Promise.reject(apiError);
+      }
+    );
+  }
+
+  private setupRequestLogging() {
+    this.axiosInstance.interceptors.request.use(
+      (config) => {
+        console.log("=== Axios Request ===");
+        console.log("URL:", config.url);
+        console.log("Method:", config.method);
+        console.log("Base URL:", config.baseURL);
+        console.log("Headers:", config.headers);
+        return config;
+      },
+      (error) => {
+        console.error("=== Axios Request Error ===");
+        console.error(error);
+        return Promise.reject(error);
+      }
+    );
+
+    this.axiosInstance.interceptors.response.use(
+      (response) => {
+        console.log("=== Axios Response ===");
+        console.log("Status:", response.status);
+        console.log("Headers:", response.headers);
+        console.log("Data:", response.data);
+        return response;
+      },
+      (error) => {
+        console.error("=== Axios Response Error ===");
+        console.error("Status:", error.response?.status);
+        console.error("Data:", error.response?.data);
+        console.error("Config:", {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL,
+        });
+        return Promise.reject(error);
       }
     );
   }

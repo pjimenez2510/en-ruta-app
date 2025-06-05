@@ -8,6 +8,7 @@ import { RegisterInput } from "../interfaces/auth.interface";
 import { setCookie } from "cookies-next";
 import { useAuthStore } from "../presentation/context/auth.store";
 import { useRouter } from "next/navigation";
+import { getUserRoleFromToken } from "../services/jwt.utils";
 
 export function useRegister() {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,8 +28,16 @@ export function useRegister() {
       });
       localStorage.setItem("token", token);
       setCookie("token", token, { path: "/" });
-      loginAuth();
-      router.push("/");
+      const userRole = getUserRoleFromToken(token);
+      loginAuth(token); // Actualiza el estado de autenticación y rol
+      // Redirección basada en rol
+      if (userRole === "PERSONAL_COOPERATIVA") {
+        router.push("/main/dashboard");
+      } else if (userRole === "ADMIN_SISTEMA") {
+        router.push("/main/admin/dashboard");
+      } else {
+        router.push("/");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

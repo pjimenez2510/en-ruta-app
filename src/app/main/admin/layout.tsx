@@ -1,35 +1,50 @@
 "use client";
+
+import { AdminSidebar } from "@/components/admin-sidebar";
 import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/shared/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 
-export default function MainLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
+  const userRole = useAuthStore((state) => state.userRole);
 
   useEffect(() => {
-    if (session?.user?.role !== "PERSONAL_COOPERATIVA") {
-      router.push("/unauthorized");
-    }
-  }, [session, router]);
+    if (status === "loading") return;
 
-  if (session?.user?.role !== "PERSONAL_COOPERATIVA") {
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+
+    if (userRole !== "ADMIN_SISTEMA") {
+      router.push("/unauthorized");
+      return;
+    }
+  }, [session, status, userRole, router]);
+
+  if (status === "loading") {
+    return <div>Cargando...</div>;
+  }
+
+  if (!session || userRole !== "ADMIN_SISTEMA") {
     return null;
   }
 
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
-        <AppSidebar />
+        <AdminSidebar />
         <main className="flex-1 overflow-auto">
           <div className="sticky top-0 z-10 bg-background p-4 shadow-sm">
             <SidebarTrigger />

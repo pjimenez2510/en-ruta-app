@@ -1,5 +1,13 @@
 "use client";
-import { Users, Bus, Clock, LogOut, Settings } from "lucide-react";
+import {
+  Users,
+  Building2,
+  Settings,
+  LogOut,
+  Shield,
+  Bus,
+  UserCog,
+} from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -17,22 +25,17 @@ import {
   SidebarFooter,
 } from "@/shared/components/ui/sidebar";
 
-export function AppSidebar() {
+export function AdminSidebar() {
   const router = useRouter();
   const userRole = useAuthStore((state) => state.userRole);
 
   const handleLogout = async () => {
     try {
-      // Primero cerramos la sesión de NextAuth
       await signOut({
         redirect: false,
         callbackUrl: "/login",
       });
-
-      // Luego limpiamos el estado local
       useAuthStore.getState().logout();
-
-      // Finalmente redirigimos al login
       router.push("/login");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
@@ -40,36 +43,69 @@ export function AppSidebar() {
   };
 
   useEffect(() => {
-    // Redirigir basado en el rol
-    if (!userRole) return; // Esperar a que el rol esté disponible
+    if (!userRole) return;
 
-    if (userRole === "PERSONAL_COOPERATIVA") {
-      // Ya estamos en la vista correcta, no hacer nada
+    if (userRole === "ADMIN_SISTEMA") {
       return;
-    } else if (userRole === "ADMIN_SISTEMA") {
-      router.push("/main/admin/dashboard");
+    } else if (userRole === "PERSONAL_COOPERATIVA") {
+      router.push("/main/dashboard");
     } else if (userRole === "CLIENTE") {
       router.push("/cliente/dashboard");
     } else {
-      // Para cualquier otro rol no manejado
       router.push("/unauthorized");
     }
   }, [userRole, router]);
 
-  // Si no es PERSONAL_COOPERATIVA, no mostrar el sidebar
-  if (userRole !== "PERSONAL_COOPERATIVA") return null;
+  if (userRole !== "ADMIN_SISTEMA") return null;
 
   const menuItems = [
-    { title: "Dashboard", path: "/main/dashboard", icon: Bus },
-    { title: "Usuarios", path: "/main/users", icon: Users },
-    { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
-    { title: "Configuración", path: "/main/configuration", icon: Settings },
+    {
+      title: "Dashboard",
+      path: "/main/admin/dashboard",
+      icon: Shield,
+      description: "Panel de control del sistema",
+    },
+    {
+      title: "Cooperativas",
+      path: "/main/admin/cooperativas",
+      icon: Building2,
+      description: "Gestión de cooperativas",
+    },
+    {
+      title: "Usuarios",
+      path: "/main/admin/usuarios",
+      icon: Users,
+      description: "Administración de usuarios",
+    },
+    {
+      title: "Roles",
+      path: "/main/admin/roles",
+      icon: UserCog,
+      description: "Gestión de roles y permisos",
+    },
+    {
+      title: "Rutas",
+      path: "/main/admin/rutas",
+      icon: Bus,
+      description: "Administración de rutas",
+    },
+    {
+      title: "Configuración",
+      path: "/main/admin/configuracion",
+      icon: Settings,
+      description: "Configuración del sistema",
+    },
   ];
 
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="p-4 text-lg font-bold">EnRuta</div>
+        <div className="p-4">
+          <div className="text-lg font-bold">EnRuta</div>
+          <div className="text-sm text-muted-foreground">
+            Panel de Administración
+          </div>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -78,7 +114,11 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.path} className="flex items-center gap-2">
+                    <a
+                      href={item.path}
+                      className="flex items-center gap-2 group"
+                      title={item.description}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </a>
