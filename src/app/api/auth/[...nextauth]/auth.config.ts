@@ -3,23 +3,37 @@ import type { DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { loginService } from "@/features/auth/services/auth.service";
 import { getUserRoleFromTokenServer } from "@/features/auth/services/jwt.utils.server";
+import { jwtDecode } from "jwt-decode";
+
+interface TenantInfo {
+  colorPrimario: string;
+  colorSecundario: string;
+}
+
+interface DecodedToken {
+  sub: string;
+  tenants: { tenant: TenantInfo }[];
+}
 
 declare module "next-auth" {
   interface JWT {
     role?: string;
     accessToken?: string;
     sub?: string;
+    tenantInfo?: TenantInfo;
   }
   interface User {
     role?: string;
-    token?: string;
+    accessToken?: string;
     id?: string;
+    tenantInfo?: TenantInfo;
   }
   interface Session {
     user: {
       role?: string;
       accessToken?: string;
       id?: string;
+      tenantInfo?: TenantInfo;
     } & DefaultSession["user"];
   }
 }
@@ -86,12 +100,16 @@ export const authOptions: NextAuthOptions = {
           const userRole = getUserRoleFromTokenServer(token);
           console.log("👤 Rol de usuario:", userRole);
 
+          const decodedToken = jwtDecode<DecodedToken>(token);
+          const tenantInfo = decodedToken.tenants?.[0]?.tenant;
+
           return {
-            id: credentials.username,
+            id: decodedToken.sub,
             name: credentials.username,
             email: credentials.username,
             role: userRole,
-            token: token,
+            accessToken: token,
+            tenantInfo,
           };
         } catch (error: any) {
           console.error("❌ Error en authorize:", error);
@@ -111,16 +129,15 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       console.log("=== JWT Callback ===");
       console.log("Token recibido:", token);
       console.log("Usuario:", user);
-      console.log("Cuenta:", account);
 
       if (user) {
         token.role = user.role;
-        token.accessToken = user.token;
-        token.sub = user.id;
+        token.accessToken = user.accessToken;
+        token.tenantInfo = user.tenantInfo;
         console.log("Token actualizado:", token);
       }
       return token;
@@ -133,7 +150,7 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.role = token.role as string | undefined;
         session.user.accessToken = token.accessToken as string | undefined;
-        session.user.id = token.sub as string | undefined;
+        session.user.tenantInfo = token.tenantInfo as TenantInfo | undefined;
         console.log("Session actualizada:", session);
       }
       return session;
