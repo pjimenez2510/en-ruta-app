@@ -29,35 +29,6 @@ export const getById = async (id: string): Promise<SeatingTypes | null> => {
     }
 };
 
-export const createSeatingType = async (seatingTypeData: SeatingTypesCreate): Promise<SeatingTypes | null> => {
-    try {
-        const response: AxiosResponse<SeatingTypes> = await api.post('/seating-types', seatingTypeData);
-        return response.data;
-    } catch (error) {
-        handleError(error);
-        return null;
-    }
-};
-
-export const updateSeatingType = async ({ id, ...seatingTypeData }: SeatingTypesUpdate): Promise<SeatingTypes | null> => {
-    try {
-        const response: AxiosResponse<SeatingTypes> = await api.put(`/seating-types/${id}`, seatingTypeData);
-        return response.data;
-    } catch (error) {
-        handleError(error);
-        return null;
-    }
-};
-
-export const deleteSeatType = async (id: string): Promise<boolean> => {
-    try {
-        await api.delete(`/seating-types/${id}`);
-        return true;
-    } catch (error) {
-        handleError(error);
-        return false;
-    }
-};
 
 const handleError = (error: unknown): void => {
     if (axios.isAxiosError(error)) {
