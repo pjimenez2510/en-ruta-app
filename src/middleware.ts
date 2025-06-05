@@ -4,7 +4,9 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login");
+  const isAuthPage =
+    request.nextUrl.pathname.startsWith("/login") ||
+    request.nextUrl.pathname.startsWith("/register");
   const isRootPage = request.nextUrl.pathname === "/";
 
   // Permitir acceso a archivos estáticos y API
@@ -32,7 +34,9 @@ export async function middleware(request: NextRequest) {
   if (token && isAuthPage) {
     const role = token.role as string;
     if (role === "ADMIN_SISTEMA") {
-      return NextResponse.redirect(new URL("/main/admin/dashboard", request.url));
+      return NextResponse.redirect(
+        new URL("/main/admin/dashboard", request.url)
+      );
     }
     if (role === "PERSONAL_COOPERATIVA") {
       return NextResponse.redirect(new URL("/main/dashboard", request.url));
