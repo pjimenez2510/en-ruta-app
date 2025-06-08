@@ -38,6 +38,29 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { title: "Dashboard", path: "/main/dashboard", icon: Bus },
   { title: "Usuarios", path: "/main/users", icon: Users },
+  {
+    title: "Unidades",
+    icon: Bus,
+    children: [
+      {
+        title: "Buses",
+        children: [
+          { title: "Agregar Bus", path: "/main/buses/add", icon: Plus },
+          { title: "Mis Buses", path: "/main/buses", icon: List },
+        ],
+      },
+      {
+        title: "Asientos",
+        children: [
+          {
+            title: "Tipos de Asientos",
+            path: "/main/seating/types",
+            icon: Bus,
+          },
+        ],
+      },
+    ],
+  },
   { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
 ];
