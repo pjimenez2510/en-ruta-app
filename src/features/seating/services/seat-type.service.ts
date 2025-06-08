@@ -11,7 +11,9 @@ const api: AxiosInstance = axios.create({
 
 export const getAll = async (token: string | null = null): Promise<SeatType[]> => {
     try {
-        const response = await api.get('/tipo-asientos',);
+        const response = await api.get('/tipo-asientos', {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        });
         return response.data.data;
     } catch (error) {
         handleError(error);
@@ -21,7 +23,9 @@ export const getAll = async (token: string | null = null): Promise<SeatType[]> =
 
 export const getById = async (id: number, token: string | null = null): Promise<SeatType | null> => {
     try {
-        const response: any = await api.get(`/tipo-asientos/${id}`,);
+        const response: any = await api.get(`/tipo-asientos/${id}`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        });
         return response.data;
     } catch (error) {
         handleError(error);
@@ -31,8 +35,9 @@ export const getById = async (id: number, token: string | null = null): Promise<
 
 export const createSeatingType = async (seatingTypeData: any, token: string | null = null): Promise<SeatType | null> => {
     try {
-        const response: any = await api.post('/tipo-asientos', seatingTypeData
-        );
+        const response: any = await api.post('/tipo-asientos', seatingTypeData, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        });
         return response.data;
     } catch (error) {
         handleError(error);
@@ -42,7 +47,9 @@ export const createSeatingType = async (seatingTypeData: any, token: string | nu
 
 export const updateSeatingType = async (seatingTypeData: any, id: number, token: string | null = null): Promise<SeatType | null> => {
     try {
-        const response: any = await api.put(`/tipo-asientos/${id}`, seatingTypeData);
+        const response: any = await api.put(`/tipo-asientos/${id}`, seatingTypeData, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        });
         return response.data;
     } catch (error) {
         handleError(error);
@@ -52,7 +59,9 @@ export const updateSeatingType = async (seatingTypeData: any, id: number, token:
 
 export const deactivateSeatType = async (id: number, token: string | null = null): Promise<boolean> => {
     try {
-        await api.delete(`/tipo-asientos/${id}`);
+        await api.delete(`/tipo-asientos/${id}`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        });
         return true;
     } catch (error) {
         handleError(error);
@@ -62,7 +71,7 @@ export const deactivateSeatType = async (id: number, token: string | null = null
 
 const handleError = (error: unknown): void => {
     if (axios.isAxiosError(error)) {
-        console.error('Error en la solicitud', {
+        console.error('Error de solicitud:', {
             message: error.message,
             code: error.code,
             status: error.response?.status,
