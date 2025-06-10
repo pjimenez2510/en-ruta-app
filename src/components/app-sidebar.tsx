@@ -1,21 +1,10 @@
 "use client";
-import { Users, Bus, Clock, LogOut, Settings } from "lucide-react";
+import { Users, MapPinned, Clock, LogOut, Settings, LayoutDashboard } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
-} from "@/shared/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter,} from "@/shared/components/ui/sidebar";
 
 export function AppSidebar() {
   const router = useRouter();
@@ -60,8 +49,10 @@ export function AppSidebar() {
   if (userRole !== "PERSONAL_COOPERATIVA") return null;
 
   const menuItems = [
-    { title: "Dashboard", path: "/main/dashboard", icon: Bus },
+    { title: "Dashboard", path: "/main/dashboard", icon: LayoutDashboard },
     { title: "Usuarios", path: "/main/users", icon: Users },
+    { title: "---", path: "/main/frequencies", icon: Clock },
+    { title: "Rutas", path: "/main/routes", icon: MapPinned },
     { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
     { title: "Configuración", path: "/main/configuration", icon: Settings },
   ];

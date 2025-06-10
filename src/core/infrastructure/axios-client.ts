@@ -13,12 +13,11 @@ interface AxiosConfig {
 }
 
 const DEFAULT_CONFIG: AxiosConfig = {
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3002/api",
   headers: {
     "Content-Type": "application/json",
   },
 };
-
 class AxiosClient {
   private axiosInstance: AxiosInstance;
 
