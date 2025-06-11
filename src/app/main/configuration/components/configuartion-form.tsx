@@ -104,10 +104,7 @@ export function ConfiguracionForm() {
     setTimeout(() => {
       console.log(values);
       setIsLoading(false);
-      toast({
-        title: "Configuración guardada",
-        description: "La información general ha sido actualizada.",
-      });
+      toast.success("La información general ha sido actualizada.");
     }, 1000);
   }
 
@@ -118,10 +115,7 @@ export function ConfiguracionForm() {
     setTimeout(() => {
       console.log(values);
       setIsLoading(false);
-      toast({
-        title: "Configuración guardada",
-        description: "Las redes sociales han sido actualizadas.",
-      });
+      toast.success("Las redes sociales han sido actualizadas.");
     }, 1000);
   }
 
@@ -132,10 +126,7 @@ export function ConfiguracionForm() {
     setTimeout(() => {
       console.log(values);
       setIsLoading(false);
-      toast({
-        title: "Configuración guardada",
-        description: "La información de soporte ha sido actualizada.",
-      });
+      toast.success("La información de soporte ha sido actualizada.");
     }, 1000);
   }
 
