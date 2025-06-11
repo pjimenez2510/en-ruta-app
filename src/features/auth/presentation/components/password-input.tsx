@@ -1,40 +1,43 @@
-'use client'
+"use client";
 
-import { EyeIcon, EyeOffIcon } from 'lucide-react'
-import { ComponentProps, forwardRef, useState } from 'react'
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { ComponentProps, forwardRef, useState } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 
-import { cn } from '@/shared/lib/utils'
+import { cn } from "../../@/lib/utils";
 
-const PasswordInput = forwardRef<HTMLInputElement, ComponentProps<"input">>(({ className, ...props }, ref) => {
-  const [showPassword, setShowPassword] = useState(false)
+const PasswordInput = forwardRef<HTMLInputElement, ComponentProps<"input">>(
+  ({ className, ...props }, ref) => {
+    const [showPassword, setShowPassword] = useState(false);
 
-  return (
-    <div className="relative">
-      <Input
-        type={showPassword ? 'text' : 'password'}
-        className={cn('hide-password-toggle pr-10', className)}
-        ref={ref}
-        {...props}
-      />
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-        onClick={() => setShowPassword((prev) => !prev)}
-      >
-        {showPassword ? (
-          <EyeIcon className="h-4 w-4" aria-hidden="true" />
-        ) : (
-          <EyeOffIcon className="h-4 w-4" aria-hidden="true" />
-        )}
-        <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
-      </Button>
+    return (
+      <div className="relative">
+        <Input
+          type={showPassword ? "text" : "password"}
+          className={cn("hide-password-toggle pr-10", className)}
+          ref={ref}
+          {...props}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+          onClick={() => setShowPassword((prev) => !prev)}
+        >
+          {showPassword ? (
+            <EyeIcon className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <EyeOffIcon className="h-4 w-4" aria-hidden="true" />
+          )}
+          <span className="sr-only">
+            {showPassword ? "Hide password" : "Show password"}
+          </span>
+        </Button>
 
-      <style>{`
+        <style>{`
 					.hide-password-toggle::-ms-reveal,
 					.hide-password-toggle::-ms-clear {
 						visibility: hidden;
@@ -42,9 +45,10 @@ const PasswordInput = forwardRef<HTMLInputElement, ComponentProps<"input">>(({ c
 						display: none;
 					}
 				`}</style>
-    </div>
-  )
-})
-PasswordInput.displayName = 'PasswordInput'
+      </div>
+    );
+  }
+);
+PasswordInput.displayName = "PasswordInput";
 
-export { PasswordInput }
+export { PasswordInput };
