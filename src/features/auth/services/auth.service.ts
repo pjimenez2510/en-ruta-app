@@ -1,28 +1,45 @@
 import AxiosClient from "@/core/infrastructure/axios-client";
 import { API_ROUTES } from "@/core/constants/api-routes";
+import { ResponseAPI } from "@/core/interfaces/api.interface";
 import {
   LoginInput,
   RegisterCooperativaInput,
   RegisterInput,
 } from "../interfaces/auth.interface";
 
-interface ApiResponse {
-  data: {
-    accessToken: string;
-    usuario: {
+interface LoginResponse {
+  accessToken: string;
+  usuario: {
+    id: number;
+    username: string;
+    tipoUsuario: string;
+    fechaRegistro: string;
+    ultimoAcceso: string | null;
+    activo: boolean;
+    cliente: any | null;
+    tenants: Array<{
       id: number;
-      username: string;
-      tipoUsuario: string;
-      fechaRegistro: string;
-      ultimoAcceso: string | null;
-      cliente: any | null;
-      tenants: any[];
-    };
+      fechaAsignacion: string;
+      tenantId: number;
+      rol: string;
+      activo: boolean;
+      tenant: {
+        id: number;
+        nombre: string;
+        identificador: string;
+        logoUrl: string;
+        colorPrimario: string;
+        colorSecundario: string;
+        sitioWeb: string;
+        emailContacto: string;
+        telefono: string;
+      };
+      infoPersonal: any | null;
+    }>;
   };
-  message: string | null;
-  error: string | null;
-  statusCode: number;
 }
+
+interface ApiResponse extends ResponseAPI<LoginResponse> {}
 
 export async function loginService(input: LoginInput): Promise<string> {
   const client = AxiosClient.getInstance();
@@ -33,7 +50,7 @@ export async function loginService(input: LoginInput): Promise<string> {
     console.log("URL completa:", `${baseURL}${API_ROUTES.AUTH.LOGIN}`);
     console.log("Credenciales:", { username: input.username, password: "***" });
 
-    const response = await client.post<ApiResponse>(
+    const response = await client.post<LoginResponse>(
       API_ROUTES.AUTH.LOGIN,
       input,
       {
@@ -49,8 +66,7 @@ export async function loginService(input: LoginInput): Promise<string> {
     console.log("Status:", response.status);
     console.log("Data completa:", JSON.stringify(response.data, null, 2));
 
-    // La respuesta tiene esta estructura: { data: { accessToken: string, ... } }
-    const token = response.data?.data?.accessToken;
+    const token = response.data.data.accessToken;
     if (!token) {
       console.error("No se encontró el token en la respuesta");
       throw new Error("La respuesta del servidor no contiene un token válido");

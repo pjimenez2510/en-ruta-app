@@ -1,8 +1,8 @@
 import React from "react";
 import { useFormContext, Controller } from "react-hook-form";
 
-import { Label } from "../ui/label";
-import { Checkbox } from "../ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RHFCheckboxGroupProps {
   name: string;

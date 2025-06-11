@@ -59,7 +59,7 @@ const formSchema = z.object({
   }),
   paradas: z.array(z.string()).optional(),
   observaciones: z.string().optional(),
-  estado: z.boolean().default(true),
+  estado: z.boolean(),
 });
 
 const ciudades = [
@@ -136,10 +136,7 @@ export function FrecuenciaForm() {
     setTimeout(() => {
       console.log(values);
       setIsLoading(false);
-      toast({
-        title: "Frecuencia registrada",
-        description: "La frecuencia ha sido registrada exitosamente.",
-      });
+      toast.success("La frecuencia ha sido registrada exitosamente.");
       router.push("/dashboard/frecuencias");
     }, 1000);
   }

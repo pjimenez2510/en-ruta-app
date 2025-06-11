@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { cn } from "../@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 interface RHFDatePickerProps {
