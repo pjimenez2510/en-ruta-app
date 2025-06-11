@@ -1,15 +1,33 @@
 "use client";
 import React from "react";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Eye, EyeOff, Search, Pencil, Trash2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useManagementUsers } from "@/features/auth/hooks/use-management-users";
-
 
 const ManagementUsersView = () => {
   const {
@@ -28,26 +46,28 @@ const ManagementUsersView = () => {
     handleSubmit,
     handleEdit,
     handleDelete,
-    resetForm
+    resetForm,
   } = useManagementUsers();
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-start p-4">
       <Card className="w-full max-w-4xl">
         <CardHeader className="space-y-2">
-          <h2 className="text-2xl font-semibold text-center">Gestión de Usuarios</h2>
+          <h2 className="text-2xl font-semibold text-center">
+            Gestión de Usuarios
+          </h2>
         </CardHeader>
         <CardContent>
           <div className="flex justify-end mb-4">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={resetForm}>
-                  Nuevo Usuario
-                </Button>
+                <Button onClick={resetForm}>Nuevo Usuario</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>{isEditing ? "Editar Usuario" : "Crear Usuario"}</DialogTitle>
+                  <DialogTitle>
+                    {isEditing ? "Editar Usuario" : "Crear Usuario"}
+                  </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
@@ -57,7 +77,7 @@ const ManagementUsersView = () => {
                         id="cedula"
                         value={formData.cedula}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '');
+                          const value = e.target.value.replace(/\D/g, "");
                           if (value.length <= 13) {
                             setFormData({ ...formData, cedula: value });
                           }
@@ -69,7 +89,10 @@ const ManagementUsersView = () => {
                         type="button"
                         size="icon"
                         onClick={handleCedulaSearch}
-                        disabled={formData.cedula.length !== 10 && formData.cedula.length !== 13}
+                        disabled={
+                          formData.cedula.length !== 10 &&
+                          formData.cedula.length !== 13
+                        }
                       >
                         <Search className="h-4 w-4" />
                       </Button>
@@ -81,7 +104,12 @@ const ManagementUsersView = () => {
                     <Input
                       id="nombreCompleto"
                       value={formData.nombreCompleto}
-                      onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          nombreCompleto: e.target.value,
+                        })
+                      }
                       disabled
                       required
                     />
@@ -91,7 +119,7 @@ const ManagementUsersView = () => {
                     <Label htmlFor="rol">Rol</Label>
                     <Select
                       value={formData.rol}
-                      onValueChange={(value: "chofer" | "vendedor") => 
+                      onValueChange={(value: "chofer" | "vendedor") =>
                         setFormData({ ...formData, rol: value })
                       }
                     >
@@ -100,7 +128,9 @@ const ManagementUsersView = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="chofer">Chofer</SelectItem>
-                        <SelectItem value="vendedor">Vendedor de Boletos</SelectItem>
+                        <SelectItem value="vendedor">
+                          Vendedor de Boletos
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -112,7 +142,9 @@ const ManagementUsersView = () => {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, password: e.target.value })
+                        }
                         required
                       />
                       <Button
@@ -131,7 +163,9 @@ const ManagementUsersView = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                    <Label htmlFor="confirmPassword">
+                      Confirmar Contraseña
+                    </Label>
                     <div className="relative">
                       <Input
                         id="confirmPassword"
@@ -167,7 +201,9 @@ const ManagementUsersView = () => {
                 <TableRow key={user.cedula}>
                   <TableCell>{user.cedula}</TableCell>
                   <TableCell>{user.nombreCompleto}</TableCell>
-                  <TableCell>{user.rol === "chofer" ? "Chofer" : "Vendedor de Boletos"}</TableCell>
+                  <TableCell>
+                    {user.rol === "chofer" ? "Chofer" : "Vendedor de Boletos"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
@@ -196,4 +232,4 @@ const ManagementUsersView = () => {
   );
 };
 
-export default ManagementUsersView; 
+export default ManagementUsersView;

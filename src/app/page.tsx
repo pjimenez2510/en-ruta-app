@@ -1,6 +1,6 @@
 "use client";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
-import { Button } from "@/shared/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -11,7 +11,6 @@ export default function HomePage() {
 
   // Redirigir a dashboard cooperativa si corresponde
   useEffect(() => {
-
     if (userRole === undefined) {
       router.replace("/main/dashboard");
     }

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRegister } from "../../hooks/use-register";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import { RegisterForm } from "../components/register-form";
 

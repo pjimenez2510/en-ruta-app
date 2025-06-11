@@ -28,7 +28,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
-} from "@/shared/components/ui/sidebar";
+} from "@/components/ui/sidebar";
 
 interface MenuItem {
   title: string;

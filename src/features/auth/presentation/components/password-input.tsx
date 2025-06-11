@@ -3,8 +3,8 @@
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { ComponentProps, forwardRef, useState } from "react";
 
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { cn } from "../../@/lib/utils";
 

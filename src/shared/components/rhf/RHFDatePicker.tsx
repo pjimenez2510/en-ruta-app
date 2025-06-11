@@ -3,14 +3,14 @@ import { es } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useFormContext, Controller } from "react-hook-form";
 
-import { Button } from "@/shared/components/ui/button";
-import { Calendar } from "@/shared/components/ui/calendar";
-import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/shared/components/ui/popover";
+} from "@/components/ui/popover";
 
 import { cn } from "../@/lib/utils";
 import { useState } from "react";

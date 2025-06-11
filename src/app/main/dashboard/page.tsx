@@ -1,18 +1,28 @@
 "use client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Overview } from "./overview";
 import { RecentActivity } from "./recent-activity";
-import { Button } from "@/shared/components/ui/button"
-import { PlusCircle } from "lucide-react"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Panel de Control</h1>
-          <p className="text-muted-foreground">Bienvenido al sistema de gestión de cooperativa de transporte.</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Panel de Control
+          </h1>
+          <p className="text-muted-foreground">
+            Bienvenido al sistema de gestión de cooperativa de transporte.
+          </p>
         </div>
         <Link href="/dashboard/buses/new">
           <Button className="w-full sm:w-auto">
@@ -25,29 +35,41 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Buses</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total de Buses
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">+2 desde el mes pasado</p>
+            <p className="text-xs text-muted-foreground">
+              +2 desde el mes pasado
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Frecuencias Activas</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Frecuencias Activas
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">16</div>
-            <p className="text-xs text-muted-foreground">+3 desde el mes pasado</p>
+            <p className="text-xs text-muted-foreground">
+              +3 desde el mes pasado
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Boletos Vendidos</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Boletos Vendidos
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,203</div>
-            <p className="text-xs text-muted-foreground">+10% desde el mes pasado</p>
+            <p className="text-xs text-muted-foreground">
+              +10% desde el mes pasado
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -56,7 +78,9 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$12,234</div>
-            <p className="text-xs text-muted-foreground">+12% desde el mes pasado</p>
+            <p className="text-xs text-muted-foreground">
+              +12% desde el mes pasado
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -81,5 +105,5 @@ export default function Dashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
