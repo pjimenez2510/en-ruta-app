@@ -12,17 +12,14 @@ export interface Bus {
     tipoCombustible: string;
     fechaIngreso: string;
     estado: string;
-    // tenant: {
-    //     id: string;
-    //     nombre: string;
-    // }
+
     modeloBus: {
         id: number;
         marca: string;
         modelo: string;
         tipoChasis: string;
         tipoCarroceria: string;
-        numeroPisos: 2;
+        numeroPisos: number;
     };
     pisos?: Array<{
         id: number;
