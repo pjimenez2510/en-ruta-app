@@ -6,9 +6,9 @@ import {
   Clock,
   LogOut,
   Settings,
-  Plus,
   List,
   ChevronDown,
+  Plus
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect, useState } from "react";
@@ -31,7 +31,7 @@ import {
 interface MenuItem {
   title: string;
   path?: string;
-  icon?: any;
+  icon?: React.ElementType;
   children?: MenuItem[];
 }
 
