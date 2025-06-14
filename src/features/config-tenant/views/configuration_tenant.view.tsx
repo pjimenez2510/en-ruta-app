@@ -1,6 +1,13 @@
+"use client"
 import { ConfiguracionForm } from "../components/configuartion-form";
+import { useTenant } from "../hooks/use_tenant";
 
 export default function ConfiguracionView() {
+  const { data, isLoading, error } = useTenant(1);
+  if (isLoading) return <div>Cargando...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  console.log('Datos del tenant:', data);
   return (
     <div className="space-y-6">
       <div>
