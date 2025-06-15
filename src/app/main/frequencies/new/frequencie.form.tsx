@@ -1,20 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/shared/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form"
-import { Input } from "@/shared/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { toast } from "sonner"
-import { Textarea } from "@/shared/components/ui/textarea"
-import { Switch } from "@/shared/components/ui/switch"
-import { Label } from "@/shared/components/ui/label"
-import { Plus, Trash2 } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Plus, Trash2 } from "lucide-react";
 
 const formSchema = z.object({
   origen: z.string().min(1, {
@@ -40,8 +59,8 @@ const formSchema = z.object({
   }),
   paradas: z.array(z.string()).optional(),
   observaciones: z.string().optional(),
-  estado: z.boolean().default(true),
-})
+  estado: z.boolean(),
+});
 
 const ciudades = [
   "Ambato",
@@ -61,7 +80,7 @@ const ciudades = [
   "Milagro",
   "Cañar",
   "Azogues",
-]
+];
 
 const diasSemana = [
   { id: "lunes", label: "Lunes" },
@@ -71,13 +90,13 @@ const diasSemana = [
   { id: "viernes", label: "Viernes" },
   { id: "sabado", label: "Sábado" },
   { id: "domingo", label: "Domingo" },
-]
+];
 
 export function FrecuenciaForm() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [paradas, setParadas] = useState<string[]>([])
-  const [nuevaParada, setNuevaParada] = useState("")
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [paradas, setParadas] = useState<string[]>([]);
+  const [nuevaParada, setNuevaParada] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,43 +112,42 @@ export function FrecuenciaForm() {
       observaciones: "",
       estado: true,
     },
-  })
+  });
 
   const agregarParada = () => {
     if (nuevaParada && !paradas.includes(nuevaParada)) {
-      const nuevasParadas = [...paradas, nuevaParada]
-      setParadas(nuevasParadas)
-      form.setValue("paradas", nuevasParadas)
-      setNuevaParada("")
+      const nuevasParadas = [...paradas, nuevaParada];
+      setParadas(nuevasParadas);
+      form.setValue("paradas", nuevasParadas);
+      setNuevaParada("");
     }
-  }
+  };
 
   const eliminarParada = (index: number) => {
-    const nuevasParadas = paradas.filter((_, i) => i !== index)
-    setParadas(nuevasParadas)
-    form.setValue("paradas", nuevasParadas)
-  }
+    const nuevasParadas = paradas.filter((_, i) => i !== index);
+    setParadas(nuevasParadas);
+    form.setValue("paradas", nuevasParadas);
+  };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Simulación de envío de datos
     setTimeout(() => {
-      console.log(values)
-      setIsLoading(false)
-      toast({
-        title: "Frecuencia registrada",
-        description: "La frecuencia ha sido registrada exitosamente.",
-      })
-      router.push("/dashboard/frecuencias")
-    }, 1000)
+      console.log(values);
+      setIsLoading(false);
+      toast.success("La frecuencia ha sido registrada exitosamente.");
+      router.push("/dashboard/frecuencias");
+    }, 1000);
   }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Información de la Frecuencia</CardTitle>
-        <CardDescription>Complete todos los campos para registrar una nueva frecuencia.</CardDescription>
+        <CardDescription>
+          Complete todos los campos para registrar una nueva frecuencia.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -141,7 +159,10 @@ export function FrecuenciaForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ciudad de Origen</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione la ciudad de origen" />
@@ -166,7 +187,10 @@ export function FrecuenciaForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ciudad de Destino</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione la ciudad de destino" />
@@ -220,7 +244,12 @@ export function FrecuenciaForm() {
                   <FormItem>
                     <FormLabel>Precio del Boleto ($)</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" placeholder="12.50" {...field} />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="12.50"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -251,18 +280,25 @@ export function FrecuenciaForm() {
                     <FormLabel>Días de Operación</FormLabel>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                       {diasSemana.map((dia) => (
-                        <div key={dia.id} className="flex items-center space-x-2">
+                        <div
+                          key={dia.id}
+                          className="flex items-center space-x-2"
+                        >
                           <input
                             type="checkbox"
                             id={dia.id}
                             checked={field.value?.includes(dia.id) || false}
                             onChange={(e) => {
-                              const checked = e.target.checked
-                              const currentValue = field.value || []
+                              const checked = e.target.checked;
+                              const currentValue = field.value || [];
                               if (checked) {
-                                field.onChange([...currentValue, dia.id])
+                                field.onChange([...currentValue, dia.id]);
                               } else {
-                                field.onChange(currentValue.filter((value) => value !== dia.id))
+                                field.onChange(
+                                  currentValue.filter(
+                                    (value) => value !== dia.id
+                                  )
+                                );
                               }
                             }}
                             className="rounded border-gray-300"
@@ -292,7 +328,7 @@ export function FrecuenciaForm() {
                         (ciudad) =>
                           ciudad !== form.watch("origen") &&
                           ciudad !== form.watch("destino") &&
-                          !paradas.includes(ciudad),
+                          !paradas.includes(ciudad)
                       )
                       .map((ciudad) => (
                         <SelectItem key={ciudad} value={ciudad}>
@@ -301,7 +337,11 @@ export function FrecuenciaForm() {
                       ))}
                   </SelectContent>
                 </Select>
-                <Button type="button" onClick={agregarParada} disabled={!nuevaParada}>
+                <Button
+                  type="button"
+                  onClick={agregarParada}
+                  disabled={!nuevaParada}
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
@@ -309,9 +349,17 @@ export function FrecuenciaForm() {
               {paradas.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {paradas.map((parada, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-gray-50 p-2 rounded"
+                    >
                       <span>{parada}</span>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => eliminarParada(index)}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => eliminarParada(index)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -345,7 +393,10 @@ export function FrecuenciaForm() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                     <FormControl>
-                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Frecuencia Activa</FormLabel>
@@ -372,5 +423,5 @@ export function FrecuenciaForm() {
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }

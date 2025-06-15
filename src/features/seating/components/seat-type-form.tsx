@@ -1,9 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { SeatType } from "../interfaces/seat-type.interface";
 import { useSeatTypeForm } from "../hooks/use-seat-types-form";
 import { SeatTypeFormValues } from "../interfaces/form-schema";
@@ -60,4 +58,4 @@ export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormPr
       </form>
     </Form>
   );
-}; 
+};

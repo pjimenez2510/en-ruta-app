@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,14 +9,13 @@ import { cn } from "@/lib/utils";
 import { BusForm } from "./bus-form";
 import { SeatGrid } from "./seat-grid";
 import { BusFormValues } from "../interfaces/form-schema";
-import { BusCreationData } from "../interfaces/seat-config";
+import { BusCreationData, BusSeat } from "../interfaces/seat-config";
 import { useBusModels } from "../hooks/use-bus-models";
 import { useSeatTypes } from "../hooks/use-seat-types";
 import { useFloorConfiguration } from "../hooks/use-floor-configuration";
 import { useSeatDragDrop } from "../hooks/use-seat-drag-drop";
 import { Armchair, Loader2 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { useSession } from "next-auth/react";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
 import React from "react";
 
@@ -29,13 +28,12 @@ export interface BusCreationStepperProps {
       id: number;
       busId: number;
       numeroPiso: number;
-      asientos: any[];
+      asientos: BusSeat[];
     }>;
   };
 }
 
 export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreationStepperProps) => {
-  const { data: session } = useSession();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [busInfo, setBusInfo] = useState<BusFormValues & { totalAsientos: number }>(() => {
@@ -206,17 +204,15 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                           style={{ borderColor: selectedSeatType === type.id ? type.color : undefined }}
                         >
                           <div className="flex items-center gap-2">
-                            {type.icono ? (
+                            {type.icono && AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS] ? (
                               <div className="h-5 w-5">
                                 {React.createElement(AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS], {
-                                  className: cn("h-5 w-5"),
+                                  className: "h-5 w-5",
                                   style: { color: type.color }
                                 })}
                               </div>
                             ) : (
-                              <Armchair className={cn(
-                                "h-5 w-5"
-                              )} style={{ color: type.color }} />
+                              <Armchair className="h-5 w-5" style={{ color: type.color }} />
                             )}
                             <span>{type.nombre}</span>
                           </div>
@@ -248,39 +244,25 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                                 <Draggable
                                   draggableId={`template-${type.id}`}
                                   index={0}
-                                  isDragDisabled={selectedSeatType !== type.id}
                                 >
-                                  {(provided, snapshot) => (
+                                  {(provided) => (
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className={cn(
-                                        "flex flex-col items-center bg-white p-2 rounded-lg shadow-sm transition-all w-16",
-                                        selectedSeatType === type.id && "ring-2",
-                                        snapshot.isDragging && "shadow-lg transform-gpu"
-                                      )}
-                                      style={{ 
-                                        borderColor: type.color,
-                                        ...(selectedSeatType === type.id && { ringColor: type.color }),
-                                        transform: snapshot.isDragging ? provided.draggableProps.style?.transform : "none",
-                                      }}
+                                      className="flex flex-col items-center"
                                     >
-                                      {type.icono ? (
-                                        <div className="h-5 w-5">
+                                      {type.icono && AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS] ? (
+                                        <div className="h-6 w-6">
                                           {React.createElement(AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS], {
-                                            className: cn("h-5 w-5"),
+                                            className: "h-6 w-6",
                                             style: { color: type.color }
                                           })}
                                         </div>
                                       ) : (
-                                        <Armchair className={cn(
-                                          "h-5 w-5"
-                                        )} style={{ color: type.color }} />
+                                        <Armchair className="h-6 w-6" style={{ color: type.color }} />
                                       )}
-                                      <span className="text-xs font-medium mt-1">
-                                        {type.nombre}
-                                      </span>
+                                      <span className="text-xs mt-1">Arrastrar</span>
                                     </div>
                                   )}
                                 </Draggable>

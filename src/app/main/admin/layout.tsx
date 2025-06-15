@@ -1,10 +1,7 @@
 "use client";
 
 import { AdminSidebar } from "@/components/admin-sidebar";
-import {
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/shared/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

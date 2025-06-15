@@ -29,34 +29,39 @@ export const useSeatGridRenderer = () => {
     }
 
     const maxFila = Math.max(...asientos.map(a => a.fila));
+    const maxColumna = Math.max(...asientos.map(a => a.columna));
+    const minColumna = Math.min(...asientos.map(a => a.columna));
+
+    // Crear un mapa de posiciones ocupadas
+    const posicionesOcupadas = new Set(
+      asientos.map(a => `${a.fila}-${a.columna}`)
+    );
+
+    // Encontrar los espacios vacíos más comunes por fila
+    const espaciosVacios = new Map<number, number>(); // columna -> frecuencia
     
-    // Buscar el gap más grande entre columnas consecutivas (excluyendo la última fila)
-    const columnasExcluyendoUltimaFila = [...new Set(
-      asientos
-        .filter(a => a.fila !== maxFila)
-        .map(a => a.columna)
-    )].sort((a, b) => a - b);
-
-    let posicionPasillo = -1;
-    let maxGap = 0;
-
-    for (let i = 0; i < columnasExcluyendoUltimaFila.length - 1; i++) {
-      const gap = columnasExcluyendoUltimaFila[i + 1] - columnasExcluyendoUltimaFila[i];
-      if (gap > maxGap) {
-        maxGap = gap;
-        posicionPasillo = columnasExcluyendoUltimaFila[i] + Math.floor(gap / 2);
+    for (let fila = 1; fila <= maxFila; fila++) {
+      for (let col = minColumna; col <= maxColumna; col++) {
+        if (!posicionesOcupadas.has(`${fila}-${col}`)) {
+          espaciosVacios.set(col, (espaciosVacios.get(col) || 0) + 1);
+        }
       }
     }
 
-    // Si no se encuentra un gap claro, usar la distribución por defecto
-    if (posicionPasillo === -1) {
-      const totalColumnas = Math.max(...columnasExcluyendoUltimaFila);
-      posicionPasillo = Math.ceil(totalColumnas / 2) + 1;
-    }
+    // Encontrar la columna que más frecuentemente está vacía
+    let posicionPasillo = minColumna;
+    let maxFrecuencia = 0;
+    
+    espaciosVacios.forEach((frecuencia, columna) => {
+      if (frecuencia > maxFrecuencia) {
+        maxFrecuencia = frecuencia;
+        posicionPasillo = columna;
+      }
+    });
 
     // Contar columnas a cada lado del pasillo
-    const leftColumns = columnasExcluyendoUltimaFila.filter(c => c < posicionPasillo).length || 1;
-    const rightColumns = columnasExcluyendoUltimaFila.filter(c => c > posicionPasillo).length || 1;
+    const leftColumns = posicionPasillo - minColumna;
+    const rightColumns = maxColumna - posicionPasillo;
 
     return {
       maxFila,
@@ -67,17 +72,16 @@ export const useSeatGridRenderer = () => {
   };
 
   const renderSeatIcon = (seatType: SeatType | undefined, className: string = "h-4 w-4") => {
-    if (seatType?.icono) {
+    if (seatType?.icono && AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS]) {
+      const IconComponent = AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS];
       return (
         <div className={className}>
-          {React.createElement(AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS], {
-            className,
-            style: { color: seatType?.color }
-          })}
+          <IconComponent className={className} style={{ color: seatType?.color || 'gray' }} />
         </div>
       );
     }
     
+    // Si no hay tipo de asiento o el icono no es válido, mostrar Armchair por defecto
     return (
       <Armchair 
         className={className} 
@@ -116,76 +120,61 @@ export const useSeatGridRenderer = () => {
     }
 
     const grid = [];
+    const minColumna = Math.min(...floor.asientos.map(a => a.columna));
+    const maxColumna = Math.max(...floor.asientos.map(a => a.columna));
 
     for (let fila = 1; fila <= config.maxFila; fila++) {
       const rowCells = [];
-      const isLastRow = fila === config.maxFila;
 
-      // Lado izquierdo
-      for (let col = 1; col <= config.leftColumns; col++) {
+      for (let col = minColumna; col <= maxColumna; col++) {
         const asiento = floor.asientos.find(a => a.fila === fila && a.columna === col);
-        rowCells.push(
-          renderSeatCell(
-            asiento,
-            seatTypes,
-            `${fila}-${col}`,
-            seatSize,
-            interactive,
-            onSeatClick,
-            selectedSeatType,
-            showSeatNumbers
-          )
-        );
-      }
-
-      // Pasillo o asiento central en la última fila
-      const asientoPasillo = floor.asientos.find(a => a.fila === fila && a.columna === config.posicionPasillo);
-      
-      if (isLastRow && asientoPasillo) {
-        // Asiento en la última fila
-        rowCells.push(
-          renderSeatCell(
-            asientoPasillo,
-            seatTypes,
-            `${fila}-${config.posicionPasillo}`,
-            seatSize,
-            interactive,
-            onSeatClick,
-            selectedSeatType,
-            showSeatNumbers
-          )
-        );
-      } else {
-        // Pasillo
-        rowCells.push(
-          <div
-            key={`pasillo-${fila}-${config.posicionPasillo}`}
-            className={cn(
+        
+        if (asiento) {
+          // Renderizar asiento
+          rowCells.push(
+            renderSeatCell(
+              asiento,
+              seatTypes,
+              `${fila}-${col}`,
               seatSize,
-              "rounded-lg border border-dashed bg-gray-100 flex items-center justify-center"
-            )}
-          >
-            <span className="text-xs text-gray-500">Pasillo</span>
-          </div>
-        );
-      }
-
-      // Lado derecho
-      for (let col = 1; col <= config.rightColumns; col++) {
-        const actualCol = config.posicionPasillo + col;
-        const asiento = floor.asientos.find(a => a.fila === fila && a.columna === actualCol);
-        rowCells.push(
-          renderSeatCell(
-            asiento,
-            seatTypes,
-            `${fila}-${actualCol}`,
-            seatSize,
-            interactive,
-            onSeatClick,
-            selectedSeatType,
-            showSeatNumbers
-          )
-        );
+              interactive,
+              onSeatClick,
+              selectedSeatType,
+              showSeatNumbers
+            )
+          );
+        } else {
+          // Verificar si esta posición debería ser un pasillo
+          const esColumnaVacia = !floor.asientos.some(a => a.columna === col);
+          const hayAsientosAntes = floor.asientos.some(a => a.columna < col);
+          const hayAsientosDespues = floor.asientos.some(a => a.columna > col);
+          
+          if (esColumnaVacia && hayAsientosAntes && hayAsientosDespues) {
+            // Renderizar pasillo
+            rowCells.push(
+              <div
+                key={`pasillo-${fila}-${col}`}
+                className={cn(
+                  seatSize,
+                  "rounded-lg border border-dashed bg-gray-100 flex items-center justify-center"
+                )}
+              >
+                <span className="text-xs text-gray-500">Pasillo</span>
+              </div>
+            );
+          } else {
+            // Renderizar espacio vacío
+            rowCells.push(
+              <div
+                key={`empty-${fila}-${col}`}
+                className={cn(
+                  seatSize,
+                  "rounded-lg border border-dashed border-gray-200 flex items-center justify-center"
+                )}
+              />
+            );
+          }
+        }
       }
 
       grid.push(
@@ -212,36 +201,39 @@ export const useSeatGridRenderer = () => {
       return (
         <div
           key={`empty-${key}`}
-          className={seatSize}
+          className={cn(
+            seatSize,
+            "rounded-lg border border-dashed border-gray-200 flex items-center justify-center"
+          )}
         />
       );
     }
 
-    const seatType = seatTypes.find(type => type.id === asiento.tipoId);
+    const seatType = seatTypes.find(t => t.id === asiento.tipoId);
     const isSelected = selectedSeatType === asiento.tipoId;
 
-    const Component = interactive ? 'button' : 'div';
-    const props = interactive && onSeatClick ? {
-      onClick: () => onSeatClick(asiento.fila, asiento.columna)
-    } : {};
-
     return (
-      <Component
-        key={`asiento-${key}`}
+      <div
+        key={`seat-${key}`}
         className={cn(
           seatSize,
-          "rounded-lg border flex flex-col items-center justify-center",
-          interactive && "transition-all hover:shadow-md",
-          isSelected && "ring-2 ring-primary"
+          "rounded-lg border",
+          interactive ? "cursor-pointer hover:bg-gray-50" : "",
+          isSelected ? "border-blue-500" : "border-gray-200"
         )}
-        style={{ borderColor: seatType?.color || 'gray' }}
-        {...props}
+        onClick={() => {
+          if (interactive && onSeatClick) {
+            onSeatClick(asiento.fila, asiento.columna);
+          }
+        }}
       >
-        {renderSeatIcon(seatType, seatSize.includes('h-16') ? "h-6 w-6" : "h-4 w-4")}
-        {showSeatNumbers && (
-          <span className="text-xs mt-1">{asiento.numero}</span>
-        )}
-      </Component>
+        <div className="h-full w-full flex flex-col items-center justify-center gap-1">
+          {renderSeatIcon(seatType)}
+          {showSeatNumbers && (
+            <span className="text-xs font-medium">{asiento.numero}</span>
+          )}
+        </div>
+      </div>
     );
   };
 

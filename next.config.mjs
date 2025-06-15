@@ -14,6 +14,7 @@ const nextConfig = {
     domains: ["res.cloudinary.com",
       "cooperativasanta.ec",
       'obrogwwsrdyrqlwhhont.supabase.co',
+      'example.com'
     ],
   },
 };

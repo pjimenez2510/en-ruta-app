@@ -86,15 +86,15 @@ export const SeatGrid = ({ floor, floorDimensions, availableSeatTypes }: SeatGri
                       transform: snapshot.isDragging ? provided.draggableProps.style?.transform : "none",
                     }}
                   >
-                    {seatType?.icono ? (
+                    {seatType?.icono && AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS] ? (
                       <div className="h-6 w-6">
                         {React.createElement(AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS], {
-                          className: cn("h-6 w-6"),
+                          className: "h-6 w-6",
                           style: { color: seatType?.color || 'gray' }
                         })}
                       </div>
                     ) : (
-                      <Armchair className={cn("h-6 w-6")} style={{ color: seatType?.color || 'gray' }} />
+                      <Armchair className="h-6 w-6" style={{ color: seatType?.color || 'gray' }} />
                     )}
                     <span className="text-xs font-medium mt-1">{currentSeat.numero}</span>
                   </div>

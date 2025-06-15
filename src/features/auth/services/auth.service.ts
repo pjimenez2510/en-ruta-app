@@ -6,22 +6,49 @@ import {
   RegisterInput,
 } from "../interfaces/auth.interface";
 
-interface ApiResponse {
-  data: {
-    accessToken: string;
-    usuario: {
+interface Cliente {
+  id: number;
+  nombre: string;
+  // Agrega aquí más propiedades según la estructura real del cliente
+}
+
+interface InfoPersonal {
+  id: number;
+  nombre: string;
+  apellido: string;
+  // Agrega aquí más propiedades según la estructura real de la información personal
+}
+
+interface LoginResponse {
+  accessToken: string;
+  usuario: {
+    id: number;
+    username: string;
+    tipoUsuario: string;
+    fechaRegistro: string;
+    ultimoAcceso: string | null;
+    activo: boolean;
+    cliente: Cliente | null;
+    tenants: Array<{
       id: number;
-      username: string;
-      tipoUsuario: string;
-      fechaRegistro: string;
-      ultimoAcceso: string | null;
-      cliente: any | null;
-      tenants: any[];
-    };
+      fechaAsignacion: string;
+      tenantId: number;
+      rol: string;
+      activo: boolean;
+      tenant: {
+        id: number;
+        nombre: string;
+        identificador: string;
+        logoUrl: string;
+        colorPrimario: string;
+        colorSecundario: string;
+        sitioWeb: string;
+        emailContacto: string;
+        telefono: string;
+      };
+      infoPersonal: InfoPersonal | null;
+    }>;
   };
-  message: string | null;
-  error: string | null;
-  statusCode: number;
 }
 
 export async function loginService(input: LoginInput): Promise<string> {
@@ -33,7 +60,7 @@ export async function loginService(input: LoginInput): Promise<string> {
     console.log("URL completa:", `${baseURL}${API_ROUTES.AUTH.LOGIN}`);
     console.log("Credenciales:", { username: input.username, password: "***" });
 
-    const response = await client.post<ApiResponse>(
+    const response = await client.post<LoginResponse>(
       API_ROUTES.AUTH.LOGIN,
       input,
       {
@@ -49,8 +76,7 @@ export async function loginService(input: LoginInput): Promise<string> {
     console.log("Status:", response.status);
     console.log("Data completa:", JSON.stringify(response.data, null, 2));
 
-    // La respuesta tiene esta estructura: { data: { accessToken: string, ... } }
-    const token = response.data?.data?.accessToken;
+    const token = response.data.data.accessToken;
     if (!token) {
       console.error("No se encontró el token en la respuesta");
       throw new Error("La respuesta del servidor no contiene un token válido");
@@ -58,11 +84,18 @@ export async function loginService(input: LoginInput): Promise<string> {
 
     console.log("Token obtenido exitosamente");
     return token;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("=== Error en loginService ===");
-    console.error("Mensaje:", error.message);
-    console.error("Status:", error.response?.status);
-    console.error("Datos:", error.response?.data);
+    if (error instanceof Error) {
+      console.error("Mensaje:", error.message);
+      if ("response" in error) {
+        const axiosError = error as {
+          response?: { status?: number; data?: unknown };
+        };
+        console.error("Status:", axiosError.response?.status);
+        console.error("Datos:", axiosError.response?.data);
+      }
+    }
     throw error;
   }
 }

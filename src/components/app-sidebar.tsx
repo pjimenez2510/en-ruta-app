@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import React from "react";
 
 import {
   Sidebar,
@@ -26,7 +27,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
-} from "@/shared/components/ui/sidebar";
+} from "@/components/ui/sidebar";
 
 interface MenuItem {
   title: string;

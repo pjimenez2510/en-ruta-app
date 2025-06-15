@@ -1,5 +1,11 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { SeatType } from '../interfaces/seat-type.interface';
+
+interface ApiResponse<T> {
+    data: T;
+    message?: string;
+    status?: number;
+}
 
 const api: AxiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL,
@@ -31,34 +37,34 @@ export const getAll = async (token: string | null = null): Promise<SeatType[]> =
 
 export const getById = async (id: number, token: string | null = null): Promise<SeatType | null> => {
     try {
-        const response: any = await api.get(`/tipo-asientos/${id}`, {
+        const response: AxiosResponse<ApiResponse<SeatType>> = await api.get(`/tipo-asientos/${id}`, {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         });
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
         return null;
     }
 };
 
-export const createSeatingType = async (seatingTypeData: any, token: string | null = null): Promise<SeatType | null> => {
+export const createSeatingType = async (seatingTypeData: Partial<SeatType>, token: string | null = null): Promise<SeatType | null> => {
     try {
-        const response: any = await api.post('/tipo-asientos', seatingTypeData, {
+        const response: AxiosResponse<ApiResponse<SeatType>> = await api.post('/tipo-asientos', seatingTypeData, {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         });
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
         return null;
     }
 };
 
-export const updateSeatingType = async (seatingTypeData: any, id: number, token: string | null = null): Promise<SeatType | null> => {
+export const updateSeatingType = async (seatingTypeData: Partial<SeatType>, id: number, token: string | null = null): Promise<SeatType | null> => {
     try {
-        const response: any = await api.put(`/tipo-asientos/${id}`, seatingTypeData, {
+        const response: AxiosResponse<ApiResponse<SeatType>> = await api.put(`/tipo-asientos/${id}`, seatingTypeData, {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         });
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
         return null;
