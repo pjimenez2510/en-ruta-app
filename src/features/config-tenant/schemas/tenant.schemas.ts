@@ -1,0 +1,48 @@
+import * as z from "zod";
+
+export const generalFormSchema = z.object({
+  nombreCooperativa: z.string().min(1, {
+    message: "El nombre de la cooperativa es requerido.",
+  }),
+  direccion: z.string().optional(),
+  telefono: z.string().min(1, {
+    message: "El teléfono es requerido.",
+  }),
+  email: z.string().email({
+    message: "Ingrese un correo electrónico válido.",
+  }),
+  ruc: z.string().optional(),
+});
+
+export const socialFormSchema = z.object({
+  facebook: z.string().optional(),
+  twitter: z.string().optional(),
+  instagram: z.string().optional(),
+  youtube: z.string().optional(),
+});
+
+export const soporteFormSchema = z.object({
+  emailSoporte: z.string().email({
+    message: "Ingrese un correo electrónico válido.",
+  }),
+  telefonoSoporte: z.string().min(1, {
+    message: "El teléfono de soporte es requerido.",
+  }),
+  horarioAtencion: z.string().min(1, {
+    message: "El horario de atención es requerido.",
+  }),
+});
+
+export type GeneralFormValues = z.infer<typeof generalFormSchema>;
+export type SocialFormValues = z.infer<typeof socialFormSchema>;
+export type SupportFormValues = z.infer<typeof soporteFormSchema>;
+
+export interface Colors {
+  primario: string;
+  secundario: string;
+}
+
+export interface ColorPickerState {
+  primario: boolean;
+  secundario: boolean;
+}

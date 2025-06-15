@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import React from "react";
 
 import {
   Sidebar,
@@ -33,7 +34,7 @@ import {
 interface MenuItem {
   title: string;
   path?: string;
-  icon?: any;
+  icon?: React.ElementType;
   children?: MenuItem[];
 }
 

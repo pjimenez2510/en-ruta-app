@@ -1,27 +1,41 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import type { DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { loginService } from "@/features/auth/services/auth.service";
-import { getUserRoleFromTokenServer } from "@/features/auth/services/jwt.utils.server";
+import {
+  getUserRoleFromTokenServer,
+  getUserTenantIdFromTokenServer,
+} from "@/features/auth/services/jwt.utils.server";
 
 declare module "next-auth" {
   interface JWT {
     role?: string;
     accessToken?: string;
     sub?: string;
+    tenantId?: number;
   }
   interface User {
     role?: string;
     token?: string;
     id?: string;
+    tenantId?: number;
   }
   interface Session {
     user: {
       role?: string;
       accessToken?: string;
       id?: string;
+      tenantId?: number;
     } & DefaultSession["user"];
   }
+}
+
+interface AuthError extends Error {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
 }
 
 export const authOptions: NextAuthOptions = {
@@ -84,7 +98,9 @@ export const authOptions: NextAuthOptions = {
           }
 
           const userRole = getUserRoleFromTokenServer(token);
+          const userTenantId = getUserTenantIdFromTokenServer(token);
           console.log("👤 Rol de usuario:", userRole);
+          console.log("👤 Tenant de usuario:", userTenantId);
 
           return {
             id: credentials.username,
@@ -92,18 +108,20 @@ export const authOptions: NextAuthOptions = {
             email: credentials.username,
             role: userRole,
             token: token,
+            tenantId: userTenantId,
           };
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error("❌ Error en authorize:", error);
+          const authError = error as AuthError;
           console.error("Detalles del error:", {
-            message: error?.message,
-            stack: error?.stack,
-            response: error?.response?.data,
+            message: authError?.message,
+            stack: authError?.stack,
+            response: authError?.response?.data,
           });
           // Propagar el error para que NextAuth lo maneje
           throw new Error(
-            error?.response?.data?.message ||
-              error?.message ||
+            authError?.response?.data?.message ||
+              authError?.message ||
               "Error de autenticación"
           );
         }
@@ -121,6 +139,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.accessToken = user.token;
         token.sub = user.id;
+        token.tenantId = user.tenantId;
         console.log("Token actualizado:", token);
       }
       return token;
@@ -134,6 +153,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string | undefined;
         session.user.accessToken = token.accessToken as string | undefined;
         session.user.id = token.sub as string | undefined;
+        session.user.tenantId = token.tenantId as number | undefined;
         console.log("Session actualizada:", session);
       }
       return session;

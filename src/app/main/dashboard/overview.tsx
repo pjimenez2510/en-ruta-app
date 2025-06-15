@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { useTenantColors } from "@/core/context/tenant-context";
 
 const data = [
   {
@@ -31,13 +32,21 @@ const data = [
     name: "Jul",
     total: 3600,
   },
-]
+];
 
 export function Overview() {
+  const { colors } = useTenantColors();
+
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>
-        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+        <XAxis
+          dataKey="name"
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+        />
         <YAxis
           stroke="#888888"
           fontSize={12}
@@ -45,8 +54,8 @@ export function Overview() {
           axisLine={false}
           tickFormatter={(value) => `$${value}`}
         />
-        <Bar dataKey="total" fill="#006D8B" radius={[4, 4, 0, 0]}  />
+        <Bar dataKey="total" fill={colors.primary} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
-  )
+  );
 }
