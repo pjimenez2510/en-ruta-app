@@ -14,8 +14,9 @@ import {
 } from "@/features/config-tenant/schemas/tenant.schemas";
 import { Tenant } from "../interfaces/tenant.interface";
 import { tenantService } from "../services/tenant.service";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useTenantColors } from "@/core/context/tenant-context";
+import { configTenantService } from "../services/config-tenant.service";
 
 export const ConfiguracionForm = () => {
   // Estados
@@ -35,6 +36,26 @@ export const ConfiguracionForm = () => {
   });
   const queryClient = useQueryClient();
   const { setColors: setTenantColors } = useTenantColors();
+
+  // Query para obtener la configuración de dirección y RUC
+  const { data: configData } = useQuery({
+    queryKey: ["config-tenant", "direccion-ruc", tenantId],
+    queryFn: async () => {
+      if (!tenantId) throw new Error("Tenant ID is required");
+      const configs = await configTenantService.getAllConfigTenants(tenantId);
+      const direccionConfig = configs.find(
+        (config) => config.clave === "DIRECCION"
+      );
+      const rucConfig = configs.find((config) => config.clave === "RUC");
+      return {
+        direccion: direccionConfig?.valor || "",
+        ruc: rucConfig?.valor || "",
+        direccionId: direccionConfig?.id,
+        rucId: rucConfig?.id,
+      };
+    },
+    enabled: !!tenantId,
+  });
 
   // Efectos para cargar datos iniciales
   useEffect(() => {
@@ -56,8 +77,8 @@ export const ConfiguracionForm = () => {
   const handleGeneralSubmit = async (values: GeneralFormValues) => {
     setIsLoading(true);
     try {
+      // Actualizar datos generales del tenant
       const updateData: Partial<Tenant> = {};
-
       if (values.nombreCooperativa) {
         updateData.nombre = values.nombreCooperativa;
       }
@@ -70,12 +91,55 @@ export const ConfiguracionForm = () => {
 
       await tenantService.updateTenant(tenantData?.data?.id || 0, updateData);
 
-      // Invalidamos la caché para forzar una nueva carga de datos
-      await queryClient.invalidateQueries({ queryKey: ["tenant", tenantId] });
+      // Manejar la configuración de dirección
+      if (values.direccion) {
+        if (configData?.direccionId) {
+          // Actualizar configuración existente
+          await configTenantService.updateConfigTenant(configData.direccionId, {
+            valor: values.direccion,
+            tipo: "TEXTO",
+            descripcion: "Dirección de la cooperativa",
+          });
+        } else {
+          // Crear nueva configuración
+          await configTenantService.createConfigTenant({
+            clave: "DIRECCION",
+            valor: values.direccion,
+            tipo: "TEXTO",
+            descripcion: "Dirección de la cooperativa",
+          });
+        }
+      }
 
-      toast.success("La información general ha sido actualizada.");
+      // Manejar la configuración de RUC
+      if (values.ruc) {
+        if (configData?.rucId) {
+          // Actualizar configuración existente
+          await configTenantService.updateConfigTenant(configData.rucId, {
+            valor: values.ruc,
+            tipo: "TEXTO",
+            descripcion: "RUC de la cooperativa",
+          });
+        } else {
+          // Crear nueva configuración
+          await configTenantService.createConfigTenant({
+            clave: "RUC",
+            valor: values.ruc,
+            tipo: "TEXTO",
+            descripcion: "RUC de la cooperativa",
+          });
+        }
+      }
+
+      // Invalidar las cachés para forzar una nueva carga de datos
+      await queryClient.invalidateQueries({ queryKey: ["tenant", tenantId] });
+      await queryClient.invalidateQueries({
+        queryKey: ["config-tenant", "direccion-ruc"],
+      });
+
+      toast.success("La información ha sido actualizada correctamente.");
     } catch (error) {
-      console.error("Error al guardar los datos generales:", error);
+      console.error("Error al guardar los datos:", error);
       toast.error("Ocurrió un error al guardar los cambios");
     } finally {
       setIsLoading(false);
@@ -185,8 +249,8 @@ export const ConfiguracionForm = () => {
             nombreCooperativa: tenantData?.data?.nombre || "",
             telefono: tenantData?.data?.telefono || "",
             email: tenantData?.data?.emailContacto || "",
-            direccion: "",
-            ruc: "",
+            direccion: configData?.direccion || "",
+            ruc: configData?.ruc || "",
           }}
           onSubmit={handleGeneralSubmit}
           isLoading={isLoading}
