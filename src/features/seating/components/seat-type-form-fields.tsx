@@ -3,6 +3,9 @@ import { SeatTypeFormValues } from "../interfaces/form-schema";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AVAILABLE_ICONS, IconName } from "../constants/available-icons";
+import React from "react";
 
 interface FormFieldsProps {
   control: Control<SeatTypeFormValues>;
@@ -81,18 +84,43 @@ export const FormFields = ({ control }: FormFieldsProps) => (
             <FormField
                 control={control}
                 name="icono"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Icono</FormLabel>
-                    <FormControl>
-                    <Input
-                        type="text"
-                        {...field}
-                    />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
+                render={({ field }) => {
+                    const selectedIcon = field.value ? AVAILABLE_ICONS[field.value as IconName] : null;
+                    return (
+                    <FormItem>
+                        <FormLabel>Icono</FormLabel>
+                        <FormControl>
+                            <Select 
+                                onValueChange={(value: IconName) => field.onChange(value)} 
+                                value={field.value}
+                                defaultValue="Armchair"
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleccione un icono">
+                                        {selectedIcon && (
+                                            <div className="flex items-center gap-2">
+                                                {React.createElement(selectedIcon, { className: "h-4 w-4" })}
+                                                <span>{field.value}</span>
+                                            </div>
+                                        )}
+                                    </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(AVAILABLE_ICONS).map(([name, Icon]) => (
+                                        <SelectItem key={name} value={name}>
+                                            <div className="flex items-center gap-2">
+                                                {React.createElement(Icon, { className: "h-4 w-4" })}
+                                                <span>{name}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    );
+                }}
             />
         </div>
     </>
