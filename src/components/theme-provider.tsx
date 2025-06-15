@@ -4,9 +4,19 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { ThemeProviderProps } from "next-themes";
 import { useTenantColors } from "@/core/context/tenant-context";
 import { getContrastColor } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const { colors } = useTenantColors();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <NextThemesProvider

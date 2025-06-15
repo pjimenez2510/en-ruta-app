@@ -14,14 +14,16 @@ interface TenantContextType {
 
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
 
+const DEFAULT_PRIMARY_COLOR = "#006d8b"; // Definir color primario por defecto
+const DEFAULT_SECONDARY_COLOR = "#0284C7"; // Definir color secundario por defecto
+
 export function TenantProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const [colors, setColors] = useState({
-    primary: "#0D9488", // Color por defecto
-    secondary: "#0284C7", // Color por defecto
+    primary: DEFAULT_PRIMARY_COLOR,
+    secondary: DEFAULT_SECONDARY_COLOR,
   });
 
-  // Solo cargar los datos del tenant si hay una sesión activa
   const tenantId =
     status === "authenticated" ? session?.user?.tenantId : undefined;
   const { data: tenantData } = useTenant(tenantId, {
@@ -31,11 +33,17 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (tenantData?.data) {
       setColors({
-        primary: tenantData.data.colorPrimario || "#0D9488",
-        secondary: tenantData.data.colorSecundario || "#0284C7",
+        primary: tenantData.data.colorPrimario || DEFAULT_PRIMARY_COLOR,
+        secondary: tenantData.data.colorSecundario || DEFAULT_SECONDARY_COLOR,
+      });
+    } else if (status === "unauthenticated") {
+      // Restablecer a los colores por defecto al cerrar sesión
+      setColors({
+        primary: DEFAULT_PRIMARY_COLOR,
+        secondary: DEFAULT_SECONDARY_COLOR,
       });
     }
-  }, [tenantData]);
+  }, [tenantData, status]);
 
   return (
     <TenantContext.Provider value={{ colors, setColors }}>
