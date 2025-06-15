@@ -16,7 +16,7 @@ interface Programacion {
     salida: string;
 }
 
-export default function ProgramacionesTab() {
+export default function ParadasTab() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<Programacion | null>(null);
     const [formData, setFormData] = useState<Partial<Programacion>>({});
