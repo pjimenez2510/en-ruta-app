@@ -80,18 +80,35 @@ export const ConfiguracionForm = () => {
   const handleAppearanceSave = async (newColors: Colors, logoUrl?: string) => {
     setIsLoading(true);
     try {
-      // Actualizar colores locales
-      setColors(newColors);
+      const updateData: Partial<Tenant> = {};
 
-      // Si hay una URL de logo, actualizarla
+      // Solo agregamos los campos que han cambiado
+      if (newColors.primario !== colors.primario) {
+        updateData.colorPrimario = newColors.primario;
+      }
+      if (newColors.secundario !== colors.secundario) {
+        updateData.colorSecundario = newColors.secundario;
+      }
       if (logoUrl) {
-        setLogoPreview(logoUrl);
+        updateData.logoUrl = logoUrl;
       }
 
-      // Aquí iría la lógica para guardar los colores y la URL del logo en el servidor
-      console.log("Colores actualizados:", newColors);
-      console.log("Logo URL:", logoUrl);
-      toast.success("La apariencia ha sido actualizada.");
+      // Solo actualizamos si hay cambios
+      if (Object.keys(updateData).length > 0) {
+        await tenantService.updateTenant(tenantData?.data?.id || 0, updateData);
+
+        // Invalidamos la caché para forzar una nueva carga de datos
+        await queryClient.invalidateQueries({ queryKey: ["tenant", tenantId] });
+
+        // Actualizamos el estado local
+        setColors(newColors);
+        if (logoUrl) {
+          setLogoPreview(logoUrl);
+        }
+
+        toast.success("La apariencia ha sido actualizada.");
+      }
+      console.log("updateData", updateData);
     } catch (error) {
       console.error("Error al guardar la apariencia:", error);
       toast.error("Ocurrió un error al guardar los cambios");
