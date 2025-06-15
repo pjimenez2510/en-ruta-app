@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import ParadasTab from './components/ParadasTab';
-import HorariosTab from './components/HorariosTab';
+import { HorariosTab } from './components/HorariosTab';
 
 type TabType = 'paradas' | 'horarios';
 
@@ -37,7 +37,7 @@ export default function ConfigurationPage() {
                         </TabsContent>
 
                         <TabsContent value="horarios">
-                            <HorariosTab />
+                            <HorariosTab ruta={{ id: 0, nombre: 'Ejemplo de Ruta', resolucionId: 0, activo: false }} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

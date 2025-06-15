@@ -1,209 +1,200 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/shared/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
 import { Badge } from '@/shared/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { HorarioForm } from "./HorarioForm";
 
-interface Segmento {
-    id: string;
-    nombre: string;
-    distancia: string;
-    tiempo: string;
-    tarifa: string;
-    estado: string;
+interface Horario {
+  id?: number;
+  rutaId: number;
+  horaSalida: string;
+  diasSemana: string;
+  activo: boolean;
 }
 
-export default function HorariosTab() {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<Segmento | null>(null);
-    const [formData, setFormData] = useState<Partial<Segmento>>({});
+interface Ruta {
+  id: number;
+  nombre: string;
+  resolucionId: number;
+  descripcion?: string;
+  activo: boolean;
+}
 
-    const [segmentos, setSegmentos] = useState<Segmento[]>([
-        {
-            id: 'SEG001',
-            nombre: 'Ambato - Latacunga',
-            distancia: '45 km',
-            tiempo: '45 min',
-            tarifa: '$2.50',
-            estado: 'Activo'
-        },
-        {
-            id: 'SEG002',
-            nombre: 'Latacunga - Quito',
-            distancia: '89 km',
-            tiempo: '1h 30m',
-            tarifa: '$4.50',
-            estado: 'Activo'
-        }
-    ]);
+const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-    const handleEdit = (seg: Segmento) => {
-        setEditingItem(seg);
-        setFormData(seg);
-        setIsDialogOpen(true);
+export function HorariosTab({ ruta }: { ruta: Ruta }) {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingHorario, setEditingHorario] = useState<Horario | null>(null);
+  const [horarios, setHorarios] = useState<Horario[]>([]);
+
+  useEffect(() => {
+    if (ruta.id) {
+      fetchHorarios();
+    }
+  }, [ruta.id]);
+
+  const fetchHorarios = async () => {
+    try {
+      // TODO: Replace with actual API call
+      const response = await fetch(`/api/horarios-ruta?rutaId=${ruta.id}`);
+      const data = await response.json();
+      setHorarios(data);
+    } catch (error) {
+      console.error("Error fetching horarios:", error);
+    }
+  };
+
+  const formatDiasSemana = (diasBinario: string) => {
+    return DIAS.filter((_, index) => diasBinario[index] === "1")
+      .map(dia => dia.slice(0, 3))
+      .join(", ");
+  };
+
+  const binaryToBooleanArray = (binary: string): boolean[] => {
+    return binary.split("").map(bit => bit === "1");
+  };
+
+  const handleSubmit = async (data: any) => {
+    const horarioData: Horario = {
+      ...editingHorario,
+      rutaId: ruta.id,
+      horaSalida: data.horaSalida,
+      diasSemana: data.diasSemana.map((active: boolean) => active ? "1" : "0").join(""),
+      activo: data.activo,
     };
 
-    const handleDelete = (id: string) => {
-        setSegmentos(prev => prev.filter(item => item.id !== id));
-    };
+    try {
+      if (editingHorario?.id) {
+        // TODO: Replace with actual API call
+        await fetch(`/api/horarios-ruta/${editingHorario.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(horarioData),
+        });
+      } else {
+        // TODO: Replace with actual API call
+        await fetch("/api/horarios-ruta", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(horarioData),
+        });
+      }
+      setOpenDialog(false);
+      setEditingHorario(null);
+      fetchHorarios();
+    } catch (error) {
+      console.error("Error saving horario:", error);
+    }
+  };
 
-    const handleSave = () => {
-        const newId = editingItem ? editingItem.id : `SEG${Date.now()}`;
-        const newItem = { ...formData, id: newId } as Segmento;
+  const handleEdit = (horario: Horario) => {
+    setEditingHorario({
+      ...horario,
+      diasSemana: horario.diasSemana,
+    });
+    setOpenDialog(true);
+  };
 
-        if (editingItem) {
-            setSegmentos(prev => prev.map(item => item.id === editingItem.id ? newItem : item));
-        } else {
-            setSegmentos(prev => [...prev, newItem]);
-        }
+  const handleDelete = async (horario: Horario) => {
+    try {
+      // TODO: Replace with actual API call
+      await fetch(`/api/horarios-ruta/${horario.id}`, {
+        method: "DELETE",
+      });
+      fetchHorarios();
+    } catch (error) {
+      console.error("Error deleting horario:", error);
+    }
+  };
 
-        setIsDialogOpen(false);
-        setFormData({});
-        setEditingItem(null);
-    };
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Horarios de la Ruta</h3>
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setEditingHorario(null)}>
+              Agregar Horario
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingHorario ? "Editar" : "Nuevo"} Horario
+              </DialogTitle>
+              <DialogDescription>
+                {editingHorario ? "Modifique" : "Agregue"} un horario a la ruta {ruta.nombre}
+              </DialogDescription>
+            </DialogHeader>
+            <HorarioForm
+              rutaId={ruta.id}
+              onSubmit={handleSubmit}
+              defaultValues={editingHorario ? {
+                horaSalida: editingHorario.horaSalida,
+                diasSemana: binaryToBooleanArray(editingHorario.diasSemana),
+                activo: editingHorario.activo,
+              } : undefined}
+              isEditing={!!editingHorario}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
 
-    return (
-        <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Segmentos de Ruta</h3>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="w-full sm:w-auto">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Nuevo Segmento
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle>
-                                {editingItem ? 'Editar Segmento' : 'Nuevo Segmento'}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {editingItem ? 'Modifica los datos del segmento' : 'Completa la información del nuevo segmento'}
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4">
-                            <div>
-                                <Label htmlFor="nombre">Nombre del Segmento</Label>
-                                <Input
-                                    id="nombre"
-                                    value={formData.nombre || ''}
-                                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                    placeholder="Ej: Ambato - Latacunga"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="distancia">Distancia</Label>
-                                    <Input
-                                        id="distancia"
-                                        value={formData.distancia || ''}
-                                        onChange={(e) => setFormData({ ...formData, distancia: e.target.value })}
-                                        placeholder="Ej: 45 km"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="tiempo">Tiempo</Label>
-                                    <Input
-                                        id="tiempo"
-                                        value={formData.tiempo || ''}
-                                        onChange={(e) => setFormData({ ...formData, tiempo: e.target.value })}
-                                        placeholder="Ej: 45 min"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="tarifa">Tarifa</Label>
-                                    <Input
-                                        id="tarifa"
-                                        value={formData.tarifa || ''}
-                                        onChange={(e) => setFormData({ ...formData, tarifa: e.target.value })}
-                                        placeholder="Ej: $2.50"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="estado">Estado</Label>
-                                    <Select
-                                        value={formData.estado || ''}
-                                        onValueChange={(value) => setFormData({ ...formData, estado: value })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleccionar estado" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Activo">Activo</SelectItem>
-                                            <SelectItem value="Inactivo">Inactivo</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                Cancelar
-                            </Button>
-                            <Button onClick={handleSave}>
-                                {editingItem ? 'Guardar Cambios' : 'Crear Segmento'}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
-
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Nombre</TableHead>
-                        <TableHead>Distancia</TableHead>
-                        <TableHead>Tiempo</TableHead>
-                        <TableHead>Tarifa</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Acciones</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {segmentos.map((seg) => (
-                        <TableRow key={seg.id}>
-                            <TableCell className="font-medium">{seg.id}</TableCell>
-                            <TableCell>{seg.nombre}</TableCell>
-                            <TableCell>{seg.distancia}</TableCell>
-                            <TableCell>{seg.tiempo}</TableCell>
-                            <TableCell>{seg.tarifa}</TableCell>
-                            <TableCell>
-                                <Badge variant={seg.estado === 'Activo' ? 'default' : 'secondary'}>
-                                    {seg.estado}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex space-x-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleEdit(seg)}
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleDelete(seg.id)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </div>
-    );
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Hora de Salida</TableHead>
+              <TableHead>Días</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="w-[100px]">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {horarios.length > 0 ? (
+              horarios.map((horario) => (
+                <TableRow key={`${horario.rutaId}-${horario.horaSalida}`}>
+                  <TableCell>{horario.horaSalida}</TableCell>
+                  <TableCell>{formatDiasSemana(horario.diasSemana)}</TableCell>
+                  <TableCell>
+                    <Badge variant={horario.activo ? "default" : "secondary"}>
+                      {horario.activo ? "Activo" : "Inactivo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleEdit(horario)}
+                      >
+                        Editar
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-destructive"
+                        onClick={() => handleDelete(horario)}
+                      >
+                        Eliminar
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center">
+                  No hay horarios registrados
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
 }
