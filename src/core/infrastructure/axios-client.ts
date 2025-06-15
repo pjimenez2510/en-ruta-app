@@ -43,16 +43,15 @@ class AxiosClient {
   static getInstance(config?: AxiosConfig): AxiosClient {
     return new AxiosClient(config);
   }
-
   private setupAuthInterceptor() {
     this.axiosInstance.interceptors.request.use(
       async (config: CustomInternalAxiosRequestConfig) => {
         if (config?.skipAuth) return config;
 
-        // const token = useAuthStore.getState().token
-        // if (token) {
-        //   config.headers.Authorization = `${token}`
-        // }
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
 
         return config;
       }
