@@ -17,4 +17,18 @@ export const API_ROUTES = {
     UPDATE_PROFILE: "/user/profile",
     CHANGE_PASSWORD: "/user/change-password",
   },
+  TENANTS: {
+    GET_ALL: "/tenants",
+    POST: "/tenants",
+    GET_BY_ID: "/tenants/:id",
+    UPDATE: "/tenants/:id",
+    DELETE: "/tenants/:id",
+  },
+  CONFIG_TENANT: {
+    GET_ALL:"/configuraciones-tenant",
+    POST:"/configuraciones-tenant",
+    GET_BY_ID:"/configuraciones-tenant/:id",
+    UPDATE:"/configuraciones-tenant/:id",
+    DELETE:"/configuraciones-tenant/:id",
+  },
 };

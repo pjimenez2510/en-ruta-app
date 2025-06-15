@@ -1,11 +1,23 @@
 import AxiosClient from "@/core/infrastructure/axios-client";
 import { API_ROUTES } from "@/core/constants/api-routes";
-import { ResponseAPI } from "@/core/interfaces/api.interface";
 import {
   LoginInput,
   RegisterCooperativaInput,
   RegisterInput,
 } from "../interfaces/auth.interface";
+
+interface Cliente {
+  id: number;
+  nombre: string;
+  // Agrega aquí más propiedades según la estructura real del cliente
+}
+
+interface InfoPersonal {
+  id: number;
+  nombre: string;
+  apellido: string;
+  // Agrega aquí más propiedades según la estructura real de la información personal
+}
 
 interface LoginResponse {
   accessToken: string;
@@ -16,7 +28,7 @@ interface LoginResponse {
     fechaRegistro: string;
     ultimoAcceso: string | null;
     activo: boolean;
-    cliente: any | null;
+    cliente: Cliente | null;
     tenants: Array<{
       id: number;
       fechaAsignacion: string;
@@ -34,12 +46,10 @@ interface LoginResponse {
         emailContacto: string;
         telefono: string;
       };
-      infoPersonal: any | null;
+      infoPersonal: InfoPersonal | null;
     }>;
   };
 }
-
-interface ApiResponse extends ResponseAPI<LoginResponse> {}
 
 export async function loginService(input: LoginInput): Promise<string> {
   const client = AxiosClient.getInstance();
@@ -74,11 +84,18 @@ export async function loginService(input: LoginInput): Promise<string> {
 
     console.log("Token obtenido exitosamente");
     return token;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("=== Error en loginService ===");
-    console.error("Mensaje:", error.message);
-    console.error("Status:", error.response?.status);
-    console.error("Datos:", error.response?.data);
+    if (error instanceof Error) {
+      console.error("Mensaje:", error.message);
+      if ("response" in error) {
+        const axiosError = error as {
+          response?: { status?: number; data?: unknown };
+        };
+        console.error("Status:", axiosError.response?.status);
+        console.error("Datos:", axiosError.response?.data);
+      }
+    }
     throw error;
   }
 }

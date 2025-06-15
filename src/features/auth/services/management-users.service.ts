@@ -31,6 +31,6 @@ export const fetchSRIData = async (cedula: string): Promise<string> => {
     
     return data.contribuyente.nombreComercial;
   } catch (error) {
-    throw new Error("Error al buscar la información");
+    throw new Error("Error al buscar la información" + error);
   }
 }; 

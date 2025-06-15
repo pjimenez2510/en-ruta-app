@@ -1,13 +1,11 @@
 "use client";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { LoginInput } from "../interfaces/auth.interface";
 
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const login = async (input: LoginInput) => {
     setIsLoading(true);

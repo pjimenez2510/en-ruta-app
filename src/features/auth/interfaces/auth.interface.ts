@@ -10,7 +10,7 @@ interface Cliente {
   numeroDocumento: string;
   telefono?: string;
   username?: string;
-  email?: string; // <-- Agregado para permitir email en cliente
+  email?: string; 
   fechaNacimiento?: string;
   esDiscapacitado?: boolean;
   porcentajeDiscapacidad?: number;
