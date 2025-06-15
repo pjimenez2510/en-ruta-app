@@ -27,6 +27,7 @@ export const ImageUploader = ({
   const [isUploading, setIsUploading] = useState(false);
 
   const handleUpload = (result: any) => {
+    console.log("Upload result:", result);
     if (result.info && result.info.secure_url) {
       onImageUpload(result.info.secure_url);
     }
@@ -57,12 +58,19 @@ export const ImageUploader = ({
               maxFiles: 1,
               resourceType: "image",
               folder: folder,
-              cropping: true,
+              cropping: false,
               showSkipCropButton: false,
               croppingAspectRatio: aspectRatio,
               clientAllowedFormats: ["image/jpeg", "image/png", "image/webp"],
             }}
-            onUpload={(result) => handleUpload(result)}
+            onSuccess={(result) => {
+              console.log("Upload success:", result);
+              handleUpload(result);
+            }}
+            onError={(error) => {
+              console.error("Upload error:", error);
+              setIsUploading(false);
+            }}
           >
             {({ open }) => (
               <Button

@@ -15,6 +15,7 @@ import {
 import { Tenant } from "../interfaces/tenant.interface";
 import { tenantService } from "../services/tenant.service";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTenantColors } from "@/core/context/tenant-context";
 
 export const ConfiguracionForm = () => {
   // Estados
@@ -30,6 +31,7 @@ export const ConfiguracionForm = () => {
   const tenantId = session?.user?.tenantId ?? 0;
   const { data: tenantData, isLoading: isLoadingTenant } = useTenant(tenantId);
   const queryClient = useQueryClient();
+  const { setColors: setTenantColors } = useTenantColors();
 
   // Efectos para cargar datos iniciales
   useEffect(() => {
@@ -82,7 +84,6 @@ export const ConfiguracionForm = () => {
     try {
       const updateData: Partial<Tenant> = {};
 
-      // Solo agregamos los campos que han cambiado
       if (newColors.primario !== colors.primario) {
         updateData.colorPrimario = newColors.primario;
       }
@@ -93,11 +94,8 @@ export const ConfiguracionForm = () => {
         updateData.logoUrl = logoUrl;
       }
 
-      // Solo actualizamos si hay cambios
       if (Object.keys(updateData).length > 0) {
         await tenantService.updateTenant(tenantData?.data?.id || 0, updateData);
-
-        // Invalidamos la caché para forzar una nueva carga de datos
         await queryClient.invalidateQueries({ queryKey: ["tenant", tenantId] });
 
         // Actualizamos el estado local
@@ -106,9 +104,14 @@ export const ConfiguracionForm = () => {
           setLogoPreview(logoUrl);
         }
 
+        // Actualizamos los colores en el contexto
+        setTenantColors({
+          primary: newColors.primario,
+          secondary: newColors.secundario,
+        });
+
         toast.success("La apariencia ha sido actualizada.");
       }
-      console.log("updateData", updateData);
     } catch (error) {
       console.error("Error al guardar la apariencia:", error);
       toast.error("Ocurrió un error al guardar los cambios");
