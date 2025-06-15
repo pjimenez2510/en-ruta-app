@@ -23,7 +23,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
-} from "@/shared/components/ui/sidebar";
+} from "@/components/ui/sidebar";
 
 export function AdminSidebar() {
   const router = useRouter();

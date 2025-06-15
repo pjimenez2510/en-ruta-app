@@ -7,7 +7,6 @@ export async function middleware(request: NextRequest) {
   const isAuthPage =
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/register");
-  const isRootPage = request.nextUrl.pathname === "/";
 
   // Permitir acceso a archivos estáticos y API
   if (
@@ -44,16 +43,22 @@ export async function middleware(request: NextRequest) {
     if (role === "CLIENTE") {
       return NextResponse.redirect(new URL("/cliente/dashboard", request.url));
     }
-    // Si el rol no es reconocido, permite el acceso a la página de login
     return NextResponse.next();
   }
 
-  // Para todas las demás rutas, permitir el acceso si hay token
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icons/|screenshots/|manifest.json|sw.js|workbox-|logo/).*)",
+    // Rutas que requieren autenticación
+    "/main/:path*",
+    "/cliente/:path*",
+    "/configuracion/:path*",
+    // Rutas de autenticación
+    "/login",
+    "/register",
+    // Ruta raíz
+    "/",
   ],
 };

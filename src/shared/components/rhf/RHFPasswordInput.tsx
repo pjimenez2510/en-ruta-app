@@ -1,5 +1,5 @@
 import { useFormContext, Controller } from "react-hook-form";
-import { Label } from "@/shared/components/ui/label";
+import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/features/auth/presentation/components/password-input";
 
 interface FormInputProps {

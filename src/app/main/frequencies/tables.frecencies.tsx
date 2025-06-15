@@ -1,6 +1,13 @@
-"use client"
+"use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const data = [
   {
@@ -53,7 +60,7 @@ const data = [
     ingresos: "$7,800",
     estado: "Activa",
   },
-]
+];
 
 export function FrecuenciasTable() {
   return (
@@ -84,7 +91,9 @@ export function FrecuenciasTable() {
               <TableCell>
                 <div
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    row.estado === "Activa" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    row.estado === "Activa"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
                   }`}
                 >
                   {row.estado}
@@ -95,5 +104,5 @@ export function FrecuenciasTable() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

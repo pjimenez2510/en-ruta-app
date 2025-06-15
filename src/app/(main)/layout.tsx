@@ -1,8 +1,5 @@
 "use client";
-import {
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/shared/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";

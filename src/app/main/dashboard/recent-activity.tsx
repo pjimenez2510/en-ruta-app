@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function RecentActivity() {
   const activities = [
@@ -47,7 +47,7 @@ export function RecentActivity() {
       initials: "EM",
       color: "bg-green-100 text-green-600",
     },
-  ]
+  ];
 
   return (
     <div className="space-y-4">
@@ -58,14 +58,20 @@ export function RecentActivity() {
           </Avatar>
           <div className="flex-1 space-y-1">
             <p className="text-sm font-medium leading-none">{activity.type}</p>
-            <p className="text-sm text-muted-foreground">{activity.description}</p>
+            <p className="text-sm text-muted-foreground">
+              {activity.description}
+            </p>
             <p className="text-xs text-muted-foreground">{activity.date}</p>
           </div>
-          <div className={`font-medium ${activity.type === "Reembolso" ? "text-red-600" : "text-green-600"}`}>
+          <div
+            className={`font-medium ${
+              activity.type === "Reembolso" ? "text-red-600" : "text-green-600"
+            }`}
+          >
             {activity.amount}
           </div>
         </div>
       ))}
     </div>
-  )
+  );
 }
