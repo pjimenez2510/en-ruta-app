@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { type ThemeProviderProps } from "next-themes/dist/types";
+import type { ThemeProviderProps } from "next-themes";
 import { useTenantColors } from "@/core/context/tenant-context";
 import { getContrastColor } from "@/lib/utils";
 
@@ -12,9 +12,11 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     <NextThemesProvider
       {...props}
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      enableSystem={false}
       disableTransitionOnChange
+      forcedTheme="light"
+      storageKey="theme"
     >
       <style jsx global>{`
         :root {

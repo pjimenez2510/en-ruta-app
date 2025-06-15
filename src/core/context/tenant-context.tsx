@@ -15,12 +15,17 @@ interface TenantContextType {
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
 
 export function TenantProvider({ children }: { children: React.ReactNode }) {
-  const { data: session } = useSession();
-  const tenantId = session?.user?.tenantId ?? 0;
-  const { data: tenantData } = useTenant(tenantId);
+  const { data: session, status } = useSession();
   const [colors, setColors] = useState({
     primary: "#0D9488", // Color por defecto
     secondary: "#0284C7", // Color por defecto
+  });
+
+  // Solo cargar los datos del tenant si hay una sesión activa
+  const tenantId =
+    status === "authenticated" ? session?.user?.tenantId : undefined;
+  const { data: tenantData } = useTenant(tenantId, {
+    enabled: status === "authenticated",
   });
 
   useEffect(() => {

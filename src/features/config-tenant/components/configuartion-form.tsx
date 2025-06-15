@@ -27,9 +27,12 @@ export const ConfiguracionForm = () => {
   });
 
   // Hooks de contexto y personalizados
-  const { data: session } = useSession();
-  const tenantId = session?.user?.tenantId ?? 0;
-  const { data: tenantData, isLoading: isLoadingTenant } = useTenant(tenantId);
+  const { data: session, status } = useSession();
+  const tenantId =
+    status === "authenticated" ? session?.user?.tenantId : undefined;
+  const { data: tenantData, isLoading: isLoadingTenant } = useTenant(tenantId, {
+    enabled: status === "authenticated",
+  });
   const queryClient = useQueryClient();
   const { setColors: setTenantColors } = useTenantColors();
 
