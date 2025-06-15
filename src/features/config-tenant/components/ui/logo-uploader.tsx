@@ -6,7 +6,10 @@ interface LogoUploaderProps {
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const LogoUploader = ({ logoPreview, onImageChange }: LogoUploaderProps) => {
+export const LogoUploader = ({
+  logoPreview,
+  onImageChange,
+}: LogoUploaderProps) => {
   return (
     <div>
       <h3 className="text-sm font-medium mb-2">Logo</h3>

@@ -4,18 +4,14 @@ export const generalFormSchema = z.object({
   nombreCooperativa: z.string().min(1, {
     message: "El nombre de la cooperativa es requerido.",
   }),
-  direccion: z.string().min(1, {
-    message: "La dirección es requerida.",
-  }),
+  direccion: z.string().optional(),
   telefono: z.string().min(1, {
     message: "El teléfono es requerido.",
   }),
   email: z.string().email({
     message: "Ingrese un correo electrónico válido.",
   }),
-  ruc: z.string().min(1, {
-    message: "El RUC es requerido.",
-  }),
+  ruc: z.string().optional(),
 });
 
 export const socialFormSchema = z.object({
