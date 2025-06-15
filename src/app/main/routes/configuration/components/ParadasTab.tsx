@@ -3,181 +3,162 @@
 import React, { useState } from 'react';
 import { Button } from "@/shared/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
+import { ParadaForm } from "./ParadaForm";
 
-interface Programacion {
-    id: string;
-    origen: string;
-    destino: string;
-    hora: string;
-    salida: string;
+interface Ciudad {
+  id: number;
+  nombre: string;
 }
 
-export default function ParadasTab() {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<Programacion | null>(null);
-    const [formData, setFormData] = useState<Partial<Programacion>>({});
+interface Parada {
+  rutaId: number;
+  ciudadId: number;
+  orden: number;
+  distanciaAcumulada: number;
+  tiempoAcumulado: number;
+  precioAcumulado: number;
+}
 
-    const [programaciones, setProgramaciones] = useState<Programacion[]>([
-        {
-            id: 'RUTA001',
-            origen: 'Ambato',
-            destino: 'Quito',
-            hora: '08:00',
-            salida: '08:30'
-        },
-        {
-            id: 'RUTA002',
-            origen: 'Guayaquil',
-            destino: 'Quito',
-            hora: '09:00',
-            salida: '09:30'
+interface Ruta {
+  id: number;
+  nombre: string;
+  resolucionId: number;
+  descripcion?: string;
+  activo: boolean;
+  paradas?: Parada[];
+}
+
+// Temporary mock data for cities - Replace with API call
+const mockCiudades: Ciudad[] = [
+  { id: 1, nombre: "Quito" },
+  { id: 2, nombre: "Guayaquil" },
+  { id: 3, nombre: "Cuenca" },
+];
+
+export default function ParadasTab({ ruta }: { ruta: Ruta }) {
+    const [openDialog, setOpenDialog] = useState(false);
+    const [editingParada, setEditingParada] = useState<Parada | null>(null);
+
+    const handleSubmit = async (data: Omit<Parada, 'rutaId'>) => {
+        const paradaData: Parada = {
+            ...data,
+            rutaId: ruta.id,
+        };
+
+        try {
+            if (editingParada) {
+                // TODO: Call API to update parada
+                console.log('Updating parada:', paradaData);
+            } else {
+                // TODO: Call API to create parada
+                console.log('Creating parada:', paradaData);
+            }
+            setOpenDialog(false);
+            setEditingParada(null);
+        } catch (error) {
+            console.error('Error saving parada:', error);
         }
-    ]);
-
-    const handleEdit = (prog: Programacion) => {
-        setEditingItem(prog);
-        setFormData(prog);
-        setIsDialogOpen(true);
     };
 
-    const handleDelete = (id: string) => {
-        setProgramaciones(prev => prev.filter(item => item.id !== id));
+    const handleEdit = (parada: Parada) => {
+        setEditingParada(parada);
+        setOpenDialog(true);
     };
 
-    const handleSave = () => {
-        const newId = editingItem ? editingItem.id : `PROG${Date.now()}`;
-        const newItem = { ...formData, id: newId } as Programacion;
-
-        if (editingItem) {
-            setProgramaciones(prev => prev.map(item => item.id === editingItem.id ? newItem : item));
-        } else {
-            setProgramaciones(prev => [...prev, newItem]);
+    const handleDelete = async (parada: Parada) => {
+        try {
+            // TODO: Call API to delete parada
+            console.log('Deleting parada:', parada);
+        } catch (error) {
+            console.error('Error deleting parada:', error);
         }
-
-        setIsDialogOpen(false);
-        setFormData({});
-        setEditingItem(null);
     };
 
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Programaciones de Rutas</h3>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <h3 className="text-lg font-medium">Paradas de la Ruta</h3>
+                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                     <DialogTrigger asChild>
-                        <Button className="w-full sm:w-auto">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Nueva Programación
+                        <Button onClick={() => setEditingParada(null)}>
+                            Agregar Parada
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
+                    <DialogContent>
                         <DialogHeader>
                             <DialogTitle>
-                                {editingItem ? 'Editar Programación' : 'Nueva Programación'}
+                                {editingParada ? "Editar" : "Nueva"} Parada
                             </DialogTitle>
                             <DialogDescription>
-                                {editingItem ? 'Modifica los datos de la programación' : 'Completa la información de la nueva programación'}
+                                {editingParada ? "Modifique" : "Agregue"} una parada a la ruta {ruta.nombre}
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="origen">Origen</Label>
-                                    <Input
-                                        id="origen"
-                                        value={formData.origen || ''}
-                                        onChange={(e) => setFormData({ ...formData, origen: e.target.value })}
-                                        placeholder="Ciudad de origen"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="destino">Destino</Label>
-                                    <Input
-                                        id="destino"
-                                        value={formData.destino || ''}
-                                        onChange={(e) => setFormData({ ...formData, destino: e.target.value })}
-                                        placeholder="Ciudad de destino"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="hora">Hora</Label>
-                                    <Input
-                                        id="hora"
-                                        type="time"
-                                        value={formData.hora || ''}
-                                        onChange={(e) => setFormData({ ...formData, hora: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="salida">Hora de Salida</Label>
-                                    <Input
-                                        id="salida"
-                                        type="time"
-                                        value={formData.salida || ''}
-                                        onChange={(e) => setFormData({ ...formData, salida: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                Cancelar
-                            </Button>
-                            <Button onClick={handleSave}>
-                                {editingItem ? 'Guardar Cambios' : 'Crear Programación'}
-                            </Button>
-                        </DialogFooter>
+                        <ParadaForm
+                            rutaId={ruta.id}
+                            onSubmit={handleSubmit}
+                            defaultValues={editingParada || undefined}
+                            isEditing={!!editingParada}
+                            ciudades={mockCiudades}
+                        />
                     </DialogContent>
                 </Dialog>
             </div>
 
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Origen</TableHead>
-                        <TableHead>Destino</TableHead>
-                        <TableHead>Hora</TableHead>
-                        <TableHead>Hora de Salida</TableHead>
-                        <TableHead>Acciones</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {programaciones.map((prog) => (
-                        <TableRow key={prog.id}>
-                            <TableCell className="font-medium">{prog.id}</TableCell>
-                            <TableCell>{prog.origen}</TableCell>
-                            <TableCell>{prog.destino}</TableCell>
-                            <TableCell>{prog.hora}</TableCell>
-                            <TableCell>{prog.salida}</TableCell>
-                            <TableCell>
-                                <div className="flex space-x-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleEdit(prog)}
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleDelete(prog.id)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </TableCell>
+            <div className="border rounded-lg">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Orden</TableHead>
+                            <TableHead>Ciudad</TableHead>
+                            <TableHead>Distancia Acumulada (km)</TableHead>
+                            <TableHead>Tiempo Acumulado (min)</TableHead>
+                            <TableHead>Precio Acumulado ($)</TableHead>
+                            <TableHead className="w-[100px]">Acciones</TableHead>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {ruta.paradas && ruta.paradas.length > 0 ? (
+                            ruta.paradas.map((parada) => (
+                                <TableRow key={`${parada.rutaId}-${parada.orden}`}>
+                                    <TableCell>{parada.orden === 0 ? 'Origen' : parada.orden}</TableCell>
+                                    <TableCell>
+                                        {mockCiudades.find(c => c.id === parada.ciudadId)?.nombre || `Ciudad ${parada.ciudadId}`}
+                                    </TableCell>
+                                    <TableCell>{parada.distanciaAcumulada} km</TableCell>
+                                    <TableCell>{parada.tiempoAcumulado} min</TableCell>
+                                    <TableCell>${parada.precioAcumulado}</TableCell>
+                                    <TableCell>
+                                        <div className="flex gap-2">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm"
+                                                onClick={() => handleEdit(parada)}
+                                            >
+                                                Editar
+                                            </Button>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="text-destructive"
+                                                onClick={() => handleDelete(parada)}
+                                            >
+                                                Eliminar
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center">
+                                    No hay paradas registradas
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     );
 }

@@ -33,7 +33,7 @@ export default function ConfigurationPage() {
                         </TabsList>
 
                         <TabsContent value="paradas">
-                            <ParadasTab />
+                            <ParadasTab ruta={{ id: 0, nombre: 'Ejemplo de Ruta', resolucionId: 0, activo: false }} />
                         </TabsContent>
 
                         <TabsContent value="horarios">
