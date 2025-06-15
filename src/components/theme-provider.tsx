@@ -3,6 +3,7 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type ThemeProviderProps } from "next-themes/dist/types";
 import { useTenantColors } from "@/core/context/tenant-context";
+import { getContrastColor } from "@/lib/utils";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const { colors } = useTenantColors();
@@ -18,9 +19,9 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       <style jsx global>{`
         :root {
           --primary: ${colors.primary};
-          --primary-foreground: #ffffff;
+          --primary-foreground: ${getContrastColor(colors.primary)};
           --secondary: ${colors.secondary};
-          --secondary-foreground: #ffffff;
+          --secondary-foreground: ${getContrastColor(colors.secondary)};
         }
       `}</style>
       {children}
