@@ -26,9 +26,11 @@ export const SeatTypesView = () => {
   } = useSeatTypes();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedSeatType, setSelectedSeatType] = useState<SeatType | undefined>();
+  const [selectedSeatType, setSelectedSeatType] = useState<
+    SeatType | undefined
+  >();
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: Partial<SeatType>) => {
     try {
       await createSeatType(data);
       setIsDialogOpen(false);
@@ -38,7 +40,7 @@ export const SeatTypesView = () => {
     }
   };
 
-  const handleEdit = async (data: any, id: number) => {
+  const handleEdit = async (data: Partial<SeatType>, id: number) => {
     if (!selectedSeatType) return;
     try {
       await updateSeatType(data, id);
@@ -69,13 +71,13 @@ export const SeatTypesView = () => {
     setIsDialogOpen(true);
   };
 
-if (loading) {
-  return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  );
-}
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -101,7 +103,9 @@ if (loading) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedSeatType ? "Editar Tipo de Asiento" : "Nuevo Tipo de Asiento"}
+              {selectedSeatType
+                ? "Editar Tipo de Asiento"
+                : "Nuevo Tipo de Asiento"}
             </DialogTitle>
           </DialogHeader>
           <SeatTypeForm
@@ -122,4 +126,4 @@ if (loading) {
       </Dialog>
     </div>
   );
-}; 
+};

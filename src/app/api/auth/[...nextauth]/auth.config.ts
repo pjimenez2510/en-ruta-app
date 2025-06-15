@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import type { DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { loginService } from "@/features/auth/services/auth.service";
@@ -28,6 +28,14 @@ declare module "next-auth" {
       tenantId?: number;
     } & DefaultSession["user"];
   }
+}
+
+interface AuthError extends Error {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
 }
 
 export const authOptions: NextAuthOptions = {
@@ -102,17 +110,18 @@ export const authOptions: NextAuthOptions = {
             token: token,
             tenantId: userTenantId,
           };
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error("❌ Error en authorize:", error);
+          const authError = error as AuthError;
           console.error("Detalles del error:", {
-            message: error?.message,
-            stack: error?.stack,
-            response: error?.response?.data,
+            message: authError?.message,
+            stack: authError?.stack,
+            response: authError?.response?.data,
           });
           // Propagar el error para que NextAuth lo maneje
           throw new Error(
-            error?.response?.data?.message ||
-              error?.message ||
+            authError?.response?.data?.message ||
+              authError?.message ||
               "Error de autenticación"
           );
         }

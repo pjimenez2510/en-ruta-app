@@ -7,7 +7,6 @@ export async function middleware(request: NextRequest) {
   const isAuthPage =
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/register");
-  const isRootPage = request.nextUrl.pathname === "/";
 
   // Permitir acceso a archivos estáticos y API
   if (

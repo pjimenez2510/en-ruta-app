@@ -14,6 +14,15 @@ interface ImageUploaderProps {
   folder?: string;
 }
 
+interface CloudinaryUploadResult {
+  info?:
+    | {
+        secure_url: string;
+      }
+    | string
+    | undefined;
+}
+
 export const ImageUploader = ({
   imageUrl,
   onImageUpload,
@@ -26,9 +35,13 @@ export const ImageUploader = ({
 }: ImageUploaderProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleUpload = (result: any) => {
+  const handleUpload = (result: CloudinaryUploadResult) => {
     console.log("Upload result:", result);
-    if (result.info && result.info.secure_url) {
+    if (
+      result.info &&
+      typeof result.info === "object" &&
+      result.info.secure_url
+    ) {
       onImageUpload(result.info.secure_url);
     }
     setIsUploading(false);

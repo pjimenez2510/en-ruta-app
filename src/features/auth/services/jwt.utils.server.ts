@@ -63,13 +63,13 @@ export function getUserTenantIdFromTokenServer(
     }
     
     // 2. Si el token tiene 'tenantId' directamente
-    if (typeof (decoded as any).tenantId === 'number') {
-      return (decoded as any).tenantId;
+    if (typeof (decoded as Record<string, unknown>).tenantId === 'number') {
+      return (decoded as Record<string, unknown>).tenantId as number;
     }
     
     // 3. Si el token tiene 'tenants' como objeto con 'tenantId'
     if (decoded.tenants && typeof decoded.tenants === 'object' && 'tenantId' in decoded.tenants) {
-      const tenantId = (decoded.tenants as any).tenantId;
+      const tenantId = (decoded.tenants as Record<string, unknown>).tenantId;
       return typeof tenantId === 'number' ? tenantId : undefined;
     }
     
