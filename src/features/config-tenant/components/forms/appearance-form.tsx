@@ -19,12 +19,12 @@ import {
 interface AppearanceFormProps {
   initialColors?: Colors;
   initialLogoUrl?: string | null;
-  onSave: (colors: Colors, logoFile?: File) => Promise<void>;
+  onSave: (colors: Colors, logoUrl?: string) => Promise<void>;
   onReset: () => void;
 }
 
 export const AppearanceForm = ({
-  initialColors = { primario: "#0D9488", secundario: "#0284C7" },
+  initialColors = { primario: "#ffffff", secundario: "#ffffff" },
   initialLogoUrl = null,
   onSave,
   onReset,
@@ -36,7 +36,6 @@ export const AppearanceForm = ({
     secundario: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   const handleColorChange = (
     type: "primario" | "secundario",
@@ -55,22 +54,14 @@ export const AppearanceForm = ({
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-        setLogoFile(file);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleImageChange = (url: string) => {
+    setLogoPreview(url);
   };
 
   const handleSave = async () => {
     try {
       setIsLoading(true);
-      await onSave(colors, logoFile || undefined);
+      await onSave(colors, logoPreview || undefined);
       toast.success("Apariencia actualizada correctamente");
     } catch (error) {
       console.error("Error al guardar la apariencia:", error);
@@ -83,7 +74,6 @@ export const AppearanceForm = ({
   const handleReset = () => {
     setColors(initialColors);
     setLogoPreview(initialLogoUrl);
-    setLogoFile(null);
     onReset();
   };
 

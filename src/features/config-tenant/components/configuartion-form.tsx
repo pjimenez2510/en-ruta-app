@@ -77,26 +77,20 @@ export const ConfiguracionForm = () => {
     }
   };
 
-  const handleAppearanceSave = async (newColors: Colors, logoFile?: File) => {
+  const handleAppearanceSave = async (newColors: Colors, logoUrl?: string) => {
     setIsLoading(true);
     try {
       // Actualizar colores locales
       setColors(newColors);
 
-      // Si hay un archivo de logo, procesarlo
-      if (logoFile) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setLogoPreview(reader.result as string);
-        };
-        reader.readAsDataURL(logoFile);
-
-        // Aquí iría la lógica para subir el logo al servidor
-        console.log("Logo cargado:", logoFile);
+      // Si hay una URL de logo, actualizarla
+      if (logoUrl) {
+        setLogoPreview(logoUrl);
       }
 
-      // Aquí iría la lógica para guardar los colores en el servidor
+      // Aquí iría la lógica para guardar los colores y la URL del logo en el servidor
       console.log("Colores actualizados:", newColors);
+      console.log("Logo URL:", logoUrl);
       toast.success("La apariencia ha sido actualizada.");
     } catch (error) {
       console.error("Error al guardar la apariencia:", error);
