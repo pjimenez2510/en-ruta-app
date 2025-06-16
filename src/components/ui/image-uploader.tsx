@@ -71,44 +71,47 @@ export const ImageUploader = ({
             <Upload className="h-8 w-8 text-gray-400" />
           )}
         </div>
-        <div className="relative">
-          <CldUploadWidget
-            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-            options={{
-              maxFiles: 1,
-              resourceType: "image",
-              folder: folder,
-              cropping: false,
-              showSkipCropButton: false,
-              croppingAspectRatio: aspectRatio,
-              clientAllowedFormats: ["image/jpeg", "image/png", "image/webp"],
-            }}
-            onSuccess={(result) => {
-              console.log("Upload success:", result);
-              handleUpload(result);
-            }}
-            onError={(error) => {
-              console.error("Upload error:", error);
-              handleCancel();
-            }}
-          >
-            {({ open }) => (
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                onClick={() => {
-                  setIsUploading(true);
-                  open();
-                }}
-                disabled={isUploading}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                {isUploading ? "Subiendo..." : buttonText}
-              </Button>
-            )}
-          </CldUploadWidget>
-        </div>
+
+        <CldUploadWidget
+          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+          options={{
+            maxFiles: 1,
+            resourceType: "image",
+            folder: folder,
+            cropping: false,
+            showSkipCropButton: false,
+            croppingAspectRatio: aspectRatio,
+            clientAllowedFormats: ["image/jpeg", "image/png", "image/webp"],
+          }}
+          onSuccess={(result) => {
+            console.log("Upload success:", result);
+            handleUpload(result);
+          }}
+          onError={(error) => {
+            console.error("Upload error:", error);
+            handleCancel();
+          }}
+          onClose={() => {
+            console.log("Upload widget closed");
+            setIsUploading(false);
+          }}
+        >
+          {({ open }) => (
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => {
+                setIsUploading(true);
+                open();
+              }}
+              disabled={isUploading}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              {isUploading ? "Subiendo..." : buttonText}
+            </Button>
+          )}
+        </CldUploadWidget>
       </div>
     </div>
   );
