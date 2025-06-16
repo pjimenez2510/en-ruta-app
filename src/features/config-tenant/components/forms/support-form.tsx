@@ -2,11 +2,27 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { SupportFormValues, soporteFormSchema } from "@/features/config-tenant/schemas/tenant.schemas";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  SupportFormValues,
+  soporteFormSchema,
+} from "@/features/config-tenant/schemas/tenant.schemas";
 
 interface SupportFormProps {
   initialData?: Partial<SupportFormValues>;
@@ -14,20 +30,28 @@ interface SupportFormProps {
   isLoading: boolean;
 }
 
-export const SupportForm = ({ initialData, onSubmit, isLoading }: SupportFormProps) => {
+export const SupportForm = ({
+  initialData,
+  onSubmit,
+  isLoading,
+}: SupportFormProps) => {
   const form = useForm<SupportFormValues>({
     resolver: zodResolver(soporteFormSchema),
     defaultValues: {
-      emailSoporte: '',
-      telefonoSoporte: '',
-      horarioAtencion: 'Lunes a Viernes: 8:00 - 17:00, Sábados: 8:00 - 12:00',
-      ...initialData,
+      emailSoporte: initialData?.emailSoporte || "",
+      telefonoSoporte: initialData?.telefonoSoporte || "",
+      horarioAtencion: initialData?.horarioAtencion || "",
     },
   });
 
   const handleSubmit = async (values: SupportFormValues) => {
     try {
-      await onSubmit(values);
+      // Solo enviamos los valores que no estén vacíos
+      const valuesToSubmit = Object.fromEntries(
+        Object.entries(values).filter(([_, value]) => value !== "")
+      ) as SupportFormValues;
+
+      await onSubmit(valuesToSubmit);
       toast.success("La información de soporte ha sido actualizada.");
     } catch (error) {
       console.error("Error al guardar la información de soporte:", error);
@@ -40,12 +64,16 @@ export const SupportForm = ({ initialData, onSubmit, isLoading }: SupportFormPro
       <CardHeader>
         <CardTitle>Soporte</CardTitle>
         <CardDescription>
-          Configure la información de soporte para sus usuarios.
+          Configure la información de soporte para sus usuarios. Puede completar
+          uno o más campos según necesite.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -54,7 +82,11 @@ export const SupportForm = ({ initialData, onSubmit, isLoading }: SupportFormPro
                   <FormItem>
                     <FormLabel>Correo de Soporte</FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} />
+                      <Input
+                        type="email"
+                        placeholder="soporte@ejemplo.com"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -68,7 +100,7 @@ export const SupportForm = ({ initialData, onSubmit, isLoading }: SupportFormPro
                   <FormItem>
                     <FormLabel>Teléfono de Soporte</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="+593..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -82,10 +114,10 @@ export const SupportForm = ({ initialData, onSubmit, isLoading }: SupportFormPro
                   <FormItem className="md:col-span-2">
                     <FormLabel>Horario de Atención</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Ej: Lunes a Viernes: 8:00 - 17:00, Sábados: 8:00 - 12:00"
-                        rows={3} 
-                        {...field} 
+                        rows={3}
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
