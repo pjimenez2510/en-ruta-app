@@ -147,7 +147,7 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                             <Input
                               type="number"
                               min={1}
-                              max={3}
+                              max={2}
                               value={floorDimensions[floor.numeroPiso]?.leftColumns || 2}
                               onChange={(e) => {
                                 const value = parseInt(e.target.value) || 2;
@@ -162,7 +162,7 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                             <Input
                               type="number"
                               min={1}
-                              max={3}
+                              max={2}
                               value={floorDimensions[floor.numeroPiso]?.rightColumns || 2}
                               onChange={(e) => {
                                 const value = parseInt(e.target.value) || 2;
