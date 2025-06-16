@@ -1,0 +1,84 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Trip, TripFilters, CreateTripDTO } from '../interfaces/trips.interface';
+import { TripsService } from '../services/trips.service';
+import { useState } from 'react';
+
+export const useTrips = () => {
+  const queryClient = useQueryClient();
+  const [filters, setFilters] = useState<TripFilters>({});  const { data: trips = [], isLoading, isFetching } = useQuery<Trip[]>({
+    queryKey: ['trips', filters],
+    queryFn: () => TripsService.getAll(filters),
+    staleTime: 1000 * 60 * 5, // Considera los datos frescos por 5 minutos
+    refetchInterval: 1000 * 30, // Refresca cada 30 segundos
+  });
+  const createTrip = useMutation({
+    mutationFn: (newTrip: CreateTripDTO) => TripsService.create(newTrip),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trips'] });
+    }
+  });
+
+  const updateTrip = useMutation({
+    mutationFn: ({ id, trip }: { id: number; trip: CreateTripDTO }) =>
+      TripsService.update(id, trip),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trips'] });
+    }
+  });
+
+  const deleteTrip = useMutation({
+    mutationFn: (id: number) => TripsService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trips'] });
+    }
+  });
+  const filteredTrips = trips.filter((trip: Trip) => {
+    // Filtros de fecha
+    if (filters.fecha && new Date(trip.fecha).toISOString().split('T')[0] !== filters.fecha) {
+      return false;
+    }
+    if (filters.fechaDesde && new Date(trip.fecha) < new Date(filters.fechaDesde)) {
+      return false;
+    }
+    if (filters.fechaHasta && new Date(trip.fecha) > new Date(filters.fechaHasta)) {
+      return false;
+    }
+
+    // Filtros de estado y generación
+    if (filters.estado && trip.estado !== filters.estado) {
+      return false;
+    }
+    if (filters.generacion && trip.generacion !== filters.generacion) {
+      return false;
+    }
+
+    // Filtros de IDs
+    if (filters.rutaId && trip.horarioRuta.ruta.id !== filters.rutaId) {
+      return false;
+    }
+    if (filters.horarioRutaId && trip.horarioRuta.id !== filters.horarioRutaId) {
+      return false;
+    }
+    if (filters.busId && trip.bus.id !== filters.busId) {
+      return false;
+    }
+    if (filters.conductorId && trip.conductorId !== filters.conductorId) {
+      return false;
+    }
+    if (filters.ayudanteId && trip.ayudanteId !== filters.ayudanteId) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return {    trips: filteredTrips,
+    isLoading,
+    isFetching,
+    filters,
+    setFilters,
+    createTrip,
+    updateTrip,
+    deleteTrip
+  };
+};
