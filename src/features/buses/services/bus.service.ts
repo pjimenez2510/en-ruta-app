@@ -217,6 +217,7 @@ export const BusService = {
         try {
             let busesNumber: Bus[] = [];
             let busesPlate: Bus[] = [];
+            console.log(busId);
 
             // Validar número si se proporciona
             if (numero) {

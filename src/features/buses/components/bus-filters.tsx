@@ -39,7 +39,11 @@ export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
     if (value === null || value === "") {
       delete newFilters[key];
     } else {
-      newFilters[key] = value as BusFilters[keyof BusFilters];
+      if (key === "modeloBusId" || key === "anioFabricacion") {
+        newFilters[key] = typeof value === "string" ? parseInt(value) : value;
+      } else {
+        newFilters[key] = value as string;
+      }
     }
     
     setFilters(newFilters);

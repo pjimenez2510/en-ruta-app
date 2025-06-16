@@ -97,7 +97,15 @@ export const EditBusView = ({ busId }: EditBusViewProps) => {
             id: prevBus.pisos?.[index]?.id || 0,
             busId: parseInt(busId),
             numeroPiso: piso.numeroPiso,
-            asientos: piso.asientos
+            asientos: piso.asientos.map(asiento => ({
+              ...asiento,
+              id: (prevBus.pisos?.[index]?.asientos.find(a => 
+                a.numero === asiento.numero && 
+                a.fila === asiento.fila && 
+                a.columna === asiento.columna
+              )?.id || 0),
+              pisoBusId: prevBus.pisos?.[index]?.id || 0
+            }))
           }))
         };
       });
@@ -122,6 +130,7 @@ export const EditBusView = ({ busId }: EditBusViewProps) => {
   }
 
   const basicInfoData = {
+    id: bus.id,
     modeloBusId: bus.modeloBus.id,
     numero: bus.numero,
     placa: bus.placa,
@@ -152,7 +161,7 @@ export const EditBusView = ({ busId }: EditBusViewProps) => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="seats">
+        <TabsContent value="seats" className="flex justify-center items-center">
           <BusSeatTypeEditor
             initialSeats={bus.pisos || []}
             onSave={handleSeatsUpdate}
