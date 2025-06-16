@@ -6,7 +6,6 @@ import { toast } from "sonner";
 export function useParadas(rutaId: number) {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-
   const {
     data: paradas = [],
     isLoading: isLoadingParadas,
@@ -14,6 +13,7 @@ export function useParadas(rutaId: number) {
   } = useQuery({
     queryKey: ['paradas', rutaId],
     queryFn: () => paradasService.getParadasByRuta(rutaId),
+    enabled: rutaId > 0, // Solo ejecutar la query si rutaId es válido
   });
 
   const { mutateAsync: createParada, isPending: isCreating } = useMutation({
