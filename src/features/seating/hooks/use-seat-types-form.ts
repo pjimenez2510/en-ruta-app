@@ -24,8 +24,8 @@ export const useSeatTypeForm = (initialData?: SeatType) => {
             nombre: initialData?.nombre || "",
             descripcion: initialData?.descripcion || "",
             factorPrecio: initialData?.factorPrecio || 1.0,
-            color: initialData?.color || "",
-            icono: initialData?.icono || "",
+            color: initialData?.color || "#000000",
+            icono: initialData?.icono || "Armchair",
         },
     });
 

@@ -17,7 +17,7 @@ interface EditBusViewProps {
 
 export const EditBusView = ({ busId }: EditBusViewProps) => {
   const [bus, setBus] = useState<Bus | null>(null);
-  const { updateBus, getBusById, updateBusSeats } = useBuses();
+  const { updateBus, getBusById } = useBuses();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("basic-info");
@@ -76,46 +76,7 @@ export const EditBusView = ({ busId }: EditBusViewProps) => {
     }
   };
 
-  const handleSeatsUpdate = async (updatedSeats: Array<{
-    numeroPiso: number;
-    asientos: Array<{
-      numero: string;
-      fila: number;
-      columna: number;
-      tipoId: number;
-      estado: "DISPONIBLE" | "OCUPADO" | "MANTENIMIENTO";
-    }>;
-  }>) => {
-    try {
-      await updateBusSeats(busId, updatedSeats);
-      // Actualizar el estado local
-      setBus(prevBus => {
-        if (!prevBus) return null;
-        return {
-          ...prevBus,
-          pisos: updatedSeats.map((piso, index) => ({
-            id: prevBus.pisos?.[index]?.id || 0,
-            busId: parseInt(busId),
-            numeroPiso: piso.numeroPiso,
-            asientos: piso.asientos.map(asiento => ({
-              ...asiento,
-              id: (prevBus.pisos?.[index]?.asientos.find(a => 
-                a.numero === asiento.numero && 
-                a.fila === asiento.fila && 
-                a.columna === asiento.columna
-              )?.id || 0),
-              pisoBusId: prevBus.pisos?.[index]?.id || 0
-            }))
-          }))
-        };
-      });
-      toast.success("Asientos actualizados correctamente");
-      router.push('/main/buses');
-    } catch (error) {
-      console.error("Error al actualizar los asientos:", error);
-      toast.error("No se pudieron actualizar los asientos");
-    }
-  };
+
 
   if (loading) {
     return (
@@ -164,7 +125,6 @@ export const EditBusView = ({ busId }: EditBusViewProps) => {
         <TabsContent value="seats" className="flex justify-center items-center">
           <BusSeatTypeEditor
             initialSeats={bus.pisos || []}
-            onSave={handleSeatsUpdate}
             onCancel={() => router.push('/main/buses')}
           />
         </TabsContent>

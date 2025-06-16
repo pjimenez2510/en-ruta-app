@@ -17,7 +17,7 @@ interface UseSeatDragDropProps {
   reorderSeatNumbers: (seats: BusSeat[]) => BusSeat[];
 }
 
-export const useSeatDragDrop = ({ floorConfigs, setFloorConfigs, reorderSeatNumbers }: UseSeatDragDropProps) => {
+export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeatDragDropProps) => {
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
 
@@ -36,7 +36,7 @@ export const useSeatDragDrop = ({ floorConfigs, setFloorConfigs, reorderSeatNumb
         fila: destRow,
         columna: destCol,
         tipoId: typeId,
-        estado: 'DISPONIBLE'
+        estado: 'DISPONIBLE',
       };
 
       setFloorConfigs(prev => {

@@ -42,7 +42,6 @@ export const AddBusView = () => {
         }
       };
       await createBus(dataWithDefaults);
-      toast.success('Bus creado correctamente');
       router.push('/main/buses'); 
     } catch (error) {
       if (error instanceof Error && error.message === 'No hay una sesión activa') {
@@ -51,7 +50,6 @@ export const AddBusView = () => {
         return;
       }
       console.error('Error al crear el bus:', error);
-      toast.error('No se pudo crear el bus');
     }
   };
 

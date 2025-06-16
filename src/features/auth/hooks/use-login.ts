@@ -23,7 +23,7 @@ export function useLogin() {
 
       // Primero, obtener el token del servicio backend
       const token = await loginService(input);
-      
+
       // Guardar el token en localStorage y en el store
       if (token) {
         localStorage.setItem("token", token);
@@ -37,12 +37,12 @@ export function useLogin() {
       const result = await signIn("credentials", {
         username: input.username,
         password: input.password,
-        redirect: true,
+        redirect: false,
       });
 
       console.log("=== Resultado del login ===");
       console.log("Resultado completo:", result);
-      
+
       if (!result?.ok) {
         console.error("Error de login:", result?.error);
         setError(result?.error || "Error al iniciar sesión");

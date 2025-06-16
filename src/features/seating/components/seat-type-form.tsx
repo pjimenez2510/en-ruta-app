@@ -30,7 +30,7 @@ export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormPr
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit((data: SeatTypeFormValues) => handleSubmit(data))} className="space-y-6">
         <FormFields control={form.control} />
         <div className="flex justify-end space-x-4">
           <Button 

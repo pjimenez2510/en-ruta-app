@@ -1,17 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Bus } from "../interfaces/bus.interface";
-import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
-import { getAll as getAllSeatTypes } from "@/features/seating/services/seat-type.service";
-import { useSession } from "next-auth/react";
-import { toast } from "sonner";
 import { useSeatGridRenderer } from "../hooks/use-seat-grid-renderer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +11,7 @@ import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getStatusColor, getStatusIcon } from "../utils/status-utils";
 import { SeatTypeLegend } from "./seat-type-legend";
+import { useSeatTypes } from "../hooks/use-seat-types";
 
 interface BusDetailsModalProps {
   bus: Bus | null;
@@ -29,21 +20,8 @@ interface BusDetailsModalProps {
 }
 
 export const BusDetailsModal = ({ bus, isOpen, onClose }: BusDetailsModalProps) => {
-  const { data: session } = useSession();
-  const [seatTypes, setSeatTypes] = useState<SeatType[]>([]);
+  const { seatTypes } = useSeatTypes();
   const { renderSeatGrid } = useSeatGridRenderer();
-
-  useEffect(() => {
-    const loadSeatTypes = async () => {
-      try {
-        const types = await getAllSeatTypes(session?.user?.accessToken || "");
-        setSeatTypes(types);
-      } catch {
-        toast.error('Error al cargar los tipos de asiento');
-      }
-    };
-    loadSeatTypes();
-  }, [session?.user?.accessToken]);
 
   if (!bus) return null;
 

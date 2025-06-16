@@ -8,14 +8,29 @@ import { BusCreationData } from '../interfaces/seat-config';
 import { toast } from 'sonner';
 import { SeatUpdate } from '../interfaces/seat.interface';
 
+// Cache global para buses
+let busesCache: Bus[] = [];
+let lastFetch = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+// Cache para buses individuales
+const busDetailsCache: { [key: string]: { bus: Bus, timestamp: number } } = {};
+
 export const useBuses = () => {
     const { data: session } = useSession();
     const token = session?.user?.accessToken;
-    const [buses, setBuses] = useState<Bus[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [buses, setBuses] = useState<Bus[]>(busesCache);
+    const [loading, setLoading] = useState(!busesCache.length);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchBuses = useCallback(async () => {
+    const fetchBuses = useCallback(async (force = false) => {
+        // Si hay datos en caché y no ha pasado el tiempo de expiración, usar caché
+        if (!force && busesCache.length > 0 && Date.now() - lastFetch < CACHE_DURATION) {
+            setBuses(busesCache);
+            setLoading(false);
+            return;
+        }
+
         if (!token) {
             setError('No hay una sesión activa');
             setLoading(false);
@@ -26,6 +41,8 @@ export const useBuses = () => {
             setLoading(true);
             const data = await BusService.getAll(token);
             if (Array.isArray(data)) {
+                busesCache = data;
+                lastFetch = Date.now();
                 setBuses(data);
                 setError(null);
             } else {
@@ -44,17 +61,15 @@ export const useBuses = () => {
         }
     }, [token]);
 
-    useEffect(() => {
-        if (token) {
-            fetchBuses();
-        } else {
-            setLoading(false);
-        }
-    }, [fetchBuses, token]);
-
     const getBusById = useCallback(async (id: string) => {
         if (!token) {
             throw new Error('No hay una sesión activa');
+        }
+
+        // Verificar caché de detalles
+        const cachedBus = busDetailsCache[id];
+        if (cachedBus && Date.now() - cachedBus.timestamp < CACHE_DURATION) {
+            return cachedBus.bus;
         }
 
         try {
@@ -62,6 +77,13 @@ export const useBuses = () => {
             if (!bus) {
                 throw new Error('No se encontró el bus');
             }
+
+            // Actualizar caché
+            busDetailsCache[id] = {
+                bus,
+                timestamp: Date.now()
+            };
+
             return bus;
         } catch (error) {
             console.error("Error getting bus by id:", error);
@@ -80,7 +102,7 @@ export const useBuses = () => {
         try {
             const newBus = await BusService.create(data, token);
             if (newBus) {
-                await fetchBuses();
+                await fetchBuses(true); // Forzar actualización del caché
                 toast.success('Bus creado exitosamente', {
                     description: `El bus número ${data.busInfo.numero} ha sido creado correctamente.`
                 });
@@ -104,7 +126,10 @@ export const useBuses = () => {
         try {
             const updatedBus = await BusService.update(id, data, token);
             if (updatedBus) {
-                await fetchBuses();
+                // Actualizar ambos cachés
+                delete busDetailsCache[id];
+                await fetchBuses(true);
+
                 toast.success('Bus actualizado exitosamente', {
                     description: `La información del bus ha sido actualizada correctamente.`
                 });
@@ -139,7 +164,19 @@ export const useBuses = () => {
 
         try {
             await BusService.updateSeats(busId, seats, token);
-            await fetchBuses();
+            // Invalidar caché de detalles para este bus
+            delete busDetailsCache[busId];
+
+            // Actualizar el bus en el caché global
+            const updatedBus = await getBusById(busId);
+            if (updatedBus) {
+                setBuses(prevBuses =>
+                    prevBuses.map(bus =>
+                        bus.id === busId ? updatedBus : bus
+                    )
+                );
+            }
+
             toast.success('Asientos actualizados exitosamente', {
                 description: 'La configuración de asientos ha sido actualizada correctamente.'
             });
@@ -159,6 +196,17 @@ export const useBuses = () => {
 
         try {
             await BusService.updateSingleSeat(seatId, seatData, token);
+
+            // Limpiar todo el caché de detalles
+            Object.keys(busDetailsCache).forEach(key => {
+                delete busDetailsCache[key];
+            });
+
+            // Limpiar caché global y forzar recarga
+            busesCache = [];
+            lastFetch = 0;
+            await fetchBuses(true);
+
             toast.success('Asiento actualizado', {
                 description: `El asiento ${seatData.numero} ha sido actualizado correctamente.`
             });
@@ -183,6 +231,9 @@ export const useBuses = () => {
                     bus.id === id ? { ...bus, estado: "MANTENIMIENTO" } : bus
                 )
             );
+            // Invalidar caché de detalles
+            delete busDetailsCache[id];
+
             toast.success('Estado actualizado', {
                 description: 'El bus ha sido puesto en mantenimiento.'
             });
@@ -207,6 +258,9 @@ export const useBuses = () => {
                     bus.id === id ? { ...bus, estado: "ACTIVO" } : bus
                 )
             );
+            // Invalidar caché de detalles
+            delete busDetailsCache[id];
+
             toast.success('Estado actualizado', {
                 description: 'El bus ha sido activado correctamente.'
             });
@@ -231,6 +285,9 @@ export const useBuses = () => {
                     bus.id === id ? { ...bus, estado: "RETIRADO" } : bus
                 )
             );
+            // Invalidar caché de detalles
+            delete busDetailsCache[id];
+
             toast.success('Estado actualizado', {
                 description: 'El bus ha sido retirado de servicio.'
             });
@@ -242,6 +299,14 @@ export const useBuses = () => {
             throw error;
         }
     };
+
+    useEffect(() => {
+        if (token) {
+            fetchBuses();
+        } else {
+            setLoading(false);
+        }
+    }, [fetchBuses, token]);
 
     return {
         buses,

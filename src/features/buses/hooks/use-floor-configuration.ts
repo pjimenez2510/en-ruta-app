@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { BusSeat, BusCreationData } from "../interfaces/seat-config";
+import { BusSeat } from "../interfaces/seat-config";
 import { BusFormValues } from "../interfaces/form-schema";
+import { BusModel } from "../interfaces/bus-model.interface";
 
 interface FloorConfig {
   pisoBusId: number;
@@ -14,8 +15,8 @@ interface FloorConfig {
 
 interface UseFloorConfigurationProps {
   busInfo: BusFormValues & { totalAsientos: number };
-  busModels: any[];
-  initialData?: BusFormValues & { 
+  busModels: BusModel[];
+  initialData?: BusFormValues & {
     totalAsientos?: number;
     pisos?: Array<{
       id: number;
@@ -28,7 +29,7 @@ interface UseFloorConfigurationProps {
 
 export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFloorConfigurationProps) => {
   const [floorConfigs, setFloorConfigs] = useState<FloorConfig[]>([]);
-  const [floorDimensions, setFloorDimensions] = useState<{[key: number]: FloorConfig}>({});
+  const [floorDimensions, setFloorDimensions] = useState<{ [key: number]: FloorConfig }>({});
 
   useEffect(() => {
     if (busInfo.modeloBusId && busModels.length > 0) {
@@ -93,7 +94,7 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
         setFloorConfigs(configs);
 
         // Actualizar las dimensiones de los pisos
-        const dimensions: {[key: number]: FloorConfig} = {};
+        const dimensions: { [key: number]: FloorConfig } = {};
         configs.forEach(config => {
           dimensions[config.numeroPiso] = config;
         });
@@ -106,7 +107,7 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
 
   const initializeFloorConfigs = (numPisos: number) => {
     const configs: FloorConfig[] = Array.from(
-      { length: numPisos }, 
+      { length: numPisos },
       (_, i) => ({
         pisoBusId: 0,
         numeroPiso: i + 1,
@@ -117,8 +118,8 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
       })
     );
     setFloorConfigs(configs);
-    
-    const initialDimensions: {[key: number]: FloorConfig} = {};
+
+    const initialDimensions: { [key: number]: FloorConfig } = {};
     for (let i = 1; i <= numPisos; i++) {
       initialDimensions[i] = {
         pisoBusId: 0,
@@ -133,8 +134,8 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
   };
 
   const updateFloorDimensions = (
-    floorNumber: number, 
-    dimension: 'rows' | 'leftColumns' | 'rightColumns', 
+    floorNumber: number,
+    dimension: 'rows' | 'leftColumns' | 'rightColumns',
     value: number
   ) => {
     // Validar y ajustar el valor
@@ -166,7 +167,7 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
     });
 
     // Actualizar floorConfigs
-    setFloorConfigs(prev => 
+    setFloorConfigs(prev =>
       prev.map(config => {
         if (config.numeroPiso === floorNumber) {
           return {

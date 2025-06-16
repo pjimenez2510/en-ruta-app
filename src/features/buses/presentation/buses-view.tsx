@@ -52,18 +52,16 @@ export const BusesView = () => {
   const handleSetActivo = async (id: string) => {
     try {
       await setBusActivo(id);
-      toast.success("Estado del bus cambiado a Activo");
     } catch {
-      toast.error("No se pudo cambiar el estado del bus a Activo");
+      console.error("Error al cambiar el estado del bus a Activo");
     }
   };
 
   const handleSetRetirado = async (id: string) => {
     try {
       await setBusRetirado(id);
-      toast.success("Estado del bus cambiado a Retirado");
     } catch {
-      toast.error("No se pudo cambiar el estado del bus a Retirado");
+      console.error("Error al cambiar el estado del bus a Retirado");
     }
   };
 

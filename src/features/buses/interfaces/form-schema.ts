@@ -22,7 +22,10 @@ export const busFormSchema = z.object({
     fotoUrl: z.string({
         required_error: "Por favor, ingrese la imagen del bus"
     }).min(1, "Por favor, ingrese la imagen del bus"),
-    totalAsientos: z.coerce.number().default(0)
+    totalAsientos: z.coerce.number({
+        required_error: "Por favor, ingrese el total de asientos",
+        invalid_type_error: "El total de asientos debe ser un valor numérico"
+    }).min(0, "El total de asientos no puede ser negativo")
 });
 
 export type BusFormValues = z.infer<typeof busFormSchema>;

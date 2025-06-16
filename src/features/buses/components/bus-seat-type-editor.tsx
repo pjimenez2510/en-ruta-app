@@ -3,17 +3,15 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { BusSeat } from "../interfaces/seat-config";
-import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
-import { useSession } from "next-auth/react";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
-import { getAll as getAllSeatTypes } from "@/features/seating/services/seat-type.service";
-import { Armchair, Loader2 } from "lucide-react";
+import { Armchair } from "lucide-react";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useSeatGridRenderer } from "../hooks/use-seat-grid-renderer";
 import { useBuses } from "../hooks/use-buses";
 import { SeatTypeLegend } from "./seat-type-legend";
+import { useSeatTypes } from "../hooks/use-seat-types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +29,11 @@ interface FloorConfig {
   posicionPasillo?: number;
 }
 
+interface Position {
+  x: number;
+  y: number;
+}
+
 interface BusSeatTypeEditorProps {
   initialSeats: Array<{
     id: number;
@@ -38,78 +41,37 @@ interface BusSeatTypeEditorProps {
     numeroPiso: number;
     asientos: BusSeat[];
   }>;
-  onSave: (seats: Array<{
-    numeroPiso: number;
-    asientos: BusSeat[];
-  }>) => void;
   onCancel: () => void;
 }
 
-interface Position {
-  x: number;
-  y: number;
-}
-
-export const BusSeatTypeEditor = ({ initialSeats, onSave, onCancel }: BusSeatTypeEditorProps) => {
-  const { data: session } = useSession();
+export const BusSeatTypeEditor = ({ initialSeats, onCancel }: BusSeatTypeEditorProps) => {
   const { updateSingleSeat } = useBuses();
-  const [availableSeatTypes, setAvailableSeatTypes] = useState<SeatType[]>([]);
+  const { seatTypes: availableSeatTypes } = useSeatTypes();
   const [floors, setFloors] = useState<FloorConfig[]>([]);
   const [initialized, setInitialized] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [selectedSeat, setSelectedSeat] = useState<BusSeat | null>(null);
   const [menuPosition, setMenuPosition] = useState<Position>({ x: 0, y: 0 });
   const { renderSeatGrid, calculateGridConfig } = useSeatGridRenderer();
 
-  // Cargar tipos de asientos disponibles
+  // Inicializar pisos
   useEffect(() => {
-    const loadSeatTypes = async () => {
-      try {
-        const token = session?.user?.accessToken || null;
-        const types = await getAllSeatTypes(token!);
-        setAvailableSeatTypes(types);
-      } catch (error) {
-        console.error("Error al cargar tipos de asientos:", error);
-        toast.error("Error al cargar tipos de asientos");
-      }
-    };
-    loadSeatTypes();
-  }, [session?.user?.accessToken]);
-
-  // Inicializar la configuración de pisos solo una vez
-  useEffect(() => {
-    if (!initialized && initialSeats.length > 0) {
-      const configs = initialSeats.map(piso => {
-        const asientos = piso.asientos || [];
-        
-        if (asientos.length === 0) {
-          return {
-            pisoBusId: piso.id,
-            numeroPiso: piso.numeroPiso,
-            leftColumns: 2,
-            rightColumns: 2,
-            rows: 3,
-            asientos: []
-          };
-        }
-
-        const gridConfig = calculateGridConfig(asientos);
-
+    if (!initialized && initialSeats) {
+      const floorConfigs = initialSeats.map(floor => {
+        const gridConfig = calculateGridConfig(floor.asientos);
         return {
-          pisoBusId: piso.id,
-          numeroPiso: piso.numeroPiso,
+          pisoBusId: floor.id,
+          numeroPiso: floor.numeroPiso,
           leftColumns: gridConfig.leftColumns,
           rightColumns: gridConfig.rightColumns,
           rows: gridConfig.maxFila,
-          asientos: [...asientos],
+          asientos: floor.asientos,
           posicionPasillo: gridConfig.posicionPasillo
         };
       });
-
-      setFloors(configs);
+      setFloors(floorConfigs);
       setInitialized(true);
     }
-  }, [initialSeats, initialized, calculateGridConfig]);
+  }, [initialized, initialSeats, calculateGridConfig]);
 
   const handleSeatClick = (floorIndex: number, row: number, col: number, event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -128,7 +90,7 @@ export const BusSeatTypeEditor = ({ initialSeats, onSave, onCancel }: BusSeatTyp
   const handleSeatTypeChange = async (seat: BusSeat, newTypeId: number) => {
     try {
       const seatData = {
-        pisoBusId: seat.pisoBusId,
+        pisoBusId: seat.pisoBusId || 0,
         numero: seat.numero,
         fila: seat.fila,
         columna: seat.columna,
@@ -163,19 +125,6 @@ export const BusSeatTypeEditor = ({ initialSeats, onSave, onCancel }: BusSeatTyp
     } catch (error) {
       console.error("Error al actualizar el asiento:", error);
       toast.error("Error al actualizar el tipo de asiento");
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      setIsSaving(true);
-      const updatedSeats = floors.map(floor => ({
-        numeroPiso: floor.numeroPiso,
-        asientos: floor.asientos
-      }));
-      await onSave(updatedSeats);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -214,24 +163,9 @@ export const BusSeatTypeEditor = ({ initialSeats, onSave, onCancel }: BusSeatTyp
 
           <div className="flex justify-end gap-2 mt-4">
             <Button 
-              variant="outline" 
               onClick={onCancel}
-              disabled={isSaving}
             >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                'Guardar Cambios'
-              )}
+              Cerrar
             </Button>
           </div>
         </div>
