@@ -2,10 +2,13 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { LoginInput } from "../interfaces/auth.interface";
+import { useAuthStore } from "../presentation/context/auth.store";
+import { loginService } from "../services/auth.service";
 
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setToken } = useAuthStore();
 
   const login = async (input: LoginInput) => {
     setIsLoading(true);
@@ -18,6 +21,19 @@ export function useLogin() {
         password: "***",
       });
 
+      // Primero, obtener el token del servicio backend
+      const token = await loginService(input);
+      
+      // Guardar el token en localStorage y en el store
+      if (token) {
+        localStorage.setItem("token", token);
+        setToken(token);
+        console.log("✅ Token guardado exitosamente");
+      } else {
+        throw new Error("No se recibió un token válido");
+      }
+
+      // Luego, iniciar sesión en NextAuth para manejar el estado de la sesión
       const result = await signIn("credentials", {
         username: input.username,
         password: input.password,
@@ -26,10 +42,12 @@ export function useLogin() {
 
       console.log("=== Resultado del login ===");
       console.log("Resultado completo:", result);
-
+      
       if (!result?.ok) {
         console.error("Error de login:", result?.error);
         setError(result?.error || "Error al iniciar sesión");
+        localStorage.removeItem("token");
+        setToken(null);
         return;
       }
 
@@ -39,6 +57,8 @@ export function useLogin() {
       console.error("=== Error inesperado en login ===");
       console.error("Error completo:", err);
       setError("Error inesperado al iniciar sesión");
+      localStorage.removeItem("token");
+      setToken(null);
     } finally {
       setIsLoading(false);
     }

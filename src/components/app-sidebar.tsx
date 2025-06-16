@@ -62,6 +62,8 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
+  { title: "Rutas", path: "/main/routes", icon: Bus },
+	{ title: "Viajes", path: "/main/frequencies", icon: Bus },
   { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
 ];
