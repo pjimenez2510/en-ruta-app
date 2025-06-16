@@ -10,6 +10,10 @@ import {
   ChevronDown,
   Plus,
   Angry,
+  Ticket,
+  TicketPlus,
+  CircleDollarSign,
+  Tickets
 
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
@@ -69,6 +73,15 @@ const menuItems: MenuItem[] = [
   { title: "Resoluciones", path: "/main/resolution", icon: Angry },
   { title: "Rutas", path: "/main/routes", icon: Bus },
   { title: "Viajes", path: "/main/frequencies", icon: Bus },
+  {
+    title: "Tickets",
+    icon: Ticket,
+    children: [
+      { title: "Ventas", path: "/main/tickets/sell", icon: CircleDollarSign },
+      { title: "Nueva Venta", path: "/main/tickets/sell/new", icon: TicketPlus },
+      { title: "Boletos", path: "/main/tickets", icon: Tickets },
+    ],
+  },
   { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
 ];
