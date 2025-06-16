@@ -253,11 +253,19 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               <Input
                 id="fechaNacimiento"
                 type="date"
-                value={formData.fechaNacimiento || ""}
+                value={
+                  formData.fechaNacimiento
+                    ? new Date(formData.fechaNacimiento)
+                        .toISOString()
+                        .split("T")[0]
+                    : ""
+                }
                 onChange={(e) =>
                   onFormDataChange({
                     ...formData,
-                    fechaNacimiento: e.target.value,
+                    fechaNacimiento: e.target.value
+                      ? new Date(e.target.value).toISOString()
+                      : "",
                   })
                 }
               />
@@ -296,11 +304,19 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               <Input
                 id="fechaContratacion"
                 type="date"
-                value={formData.fechaContratacion || ""}
+                value={
+                  formData.fechaContratacion
+                    ? new Date(formData.fechaContratacion)
+                        .toISOString()
+                        .split("T")[0]
+                    : ""
+                }
                 onChange={(e) =>
                   onFormDataChange({
                     ...formData,
-                    fechaContratacion: e.target.value,
+                    fechaContratacion: e.target.value
+                      ? new Date(e.target.value).toISOString()
+                      : "",
                   })
                 }
               />
