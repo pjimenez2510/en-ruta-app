@@ -71,20 +71,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   onSubmit,
   onReset,
 }) => {
-  const handleSRIData = (nombreCompleto: string) => {
-    const partes = nombreCompleto.split(" ");
-    if (partes.length >= 4) {
-      // Tomamos los primeros dos elementos como nombres
-      const nombres = partes.slice(0, 2).join(" ");
-      // El resto son apellidos
-      const apellidos = partes.slice(2).join(" ");
-      onFormDataChange({
-        ...formData,
-        nombres,
-        apellidos,
-      });
-    }
-  };
+ 
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -399,7 +386,9 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">
+                {isEditing ? "Nueva Contraseña (opcional)" : "Contraseña"}
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -408,7 +397,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   onChange={(e) =>
                     onFormDataChange({ ...formData, password: e.target.value })
                   }
-                  required
+                  required={!isEditing}
                 />
                 <Button
                   type="button"
@@ -426,14 +415,18 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+              <Label htmlFor="confirmPassword">
+                {isEditing
+                  ? "Confirmar Nueva Contraseña"
+                  : "Confirmar Contraseña"}
+              </Label>
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => onConfirmPasswordChange(e.target.value)}
-                  required
+                  required={!isEditing || formData.password !== ""}
                 />
               </div>
             </div>

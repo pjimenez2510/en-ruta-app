@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   UserTenant,
-  SRIResponse,
   CreateUserTenantDto,
   UpdateUserTenantDto,
 } from "@/features/user-tenant/interfaces/management-users.interface";
@@ -74,97 +73,8 @@ export function useManagementUsers(): UseManagementUsersReturn {
     queryFn: managementUsersService.getAllUsers,
   });
 
-  // Mutación para crear usuario
-  const createMutation = useMutation({
-    mutationFn: (data: FormData) => {
-      const baseInfoPersonal = {
-        nombres: data.nombres,
-        apellidos: data.apellidos,
-        tipoDocumento: "CEDULA",
-        numeroDocumento: data.numeroDocumento,
-        telefono: data.telefono || "",
-        email: data.email || "",
-        fechaNacimiento: data.fechaNacimiento || "",
-        direccion: data.direccion || "",
-        ciudadResidencia: data.ciudadResidencia || "",
-        genero: data.genero || "M",
-        fotoPerfil: data.fotoPerfil || "",
-        fechaContratacion: data.fechaContratacion || "",
-      };
-
-      const userData = {
-        rol: data.rol,
-        usuario: {
-          username: data.username,
-          password: data.password,
-        },
-        infoPersonal:
-          data.rol === "CONDUCTOR"
-            ? {
-                ...baseInfoPersonal,
-                licenciaConducir: data.licenciaConducir || "",
-                tipoLicencia: data.tipoLicencia || "",
-                fechaExpiracionLicencia: data.fechaExpiracionLicencia || "",
-              }
-            : baseInfoPersonal,
-      };
-
-      return managementUsersService.createUser(userData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      resetForm();
-    },
-    onError: (error: Error) => {
-      setError(error.message);
-    },
-  });
-
-  // Mutación para actualizar usuario
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: FormData }) => {
-      const baseInfoPersonal = {
-        nombres: data.nombres,
-        apellidos: data.apellidos,
-        tipoDocumento: "CEDULA",
-        numeroDocumento: data.numeroDocumento,
-        telefono: data.telefono || "",
-        email: data.email || "",
-        fechaNacimiento: data.fechaNacimiento || "",
-        direccion: data.direccion || "",
-        ciudadResidencia: data.ciudadResidencia || "",
-        genero: data.genero || "M",
-        fotoPerfil: data.fotoPerfil || "",
-        fechaContratacion: data.fechaContratacion || "",
-      };
-
-      const userData = {
-        rol: data.rol,
-        usuario: {
-          username: data.username,
-        },
-        infoPersonal:
-          data.rol === "CONDUCTOR"
-            ? {
-                ...baseInfoPersonal,
-                licenciaConducir: data.licenciaConducir || "",
-                tipoLicencia: data.tipoLicencia || "",
-                fechaExpiracionLicencia: data.fechaExpiracionLicencia || "",
-              }
-            : baseInfoPersonal,
-      };
-
-      return managementUsersService.updateUser(id, userData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      resetForm();
-    },
-    onError: (error: Error) => {
-      setError(error.message);
-    },
-  });
-
+ 
+  
   // Mutación para eliminar usuario
   const deleteMutation = useMutation({
     mutationFn: managementUsersService.deleteUser,
@@ -206,9 +116,12 @@ export function useManagementUsers(): UseManagementUsersReturn {
     e.preventDefault();
     setError(null);
 
-    if (formData.password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      return;
+    // Solo validar contraseñas si se está creando un usuario nuevo o si se está cambiando la contraseña
+    if (!isEditing || (isEditing && formData.password !== "")) {
+      if (formData.password !== confirmPassword) {
+        setError("Las contraseñas no coinciden");
+        return;
+      }
     }
 
     try {
@@ -217,6 +130,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
           rol: formData.rol,
           usuario: {
             username: formData.username,
+            ...(formData.password && { password: formData.password }),
           },
           infoPersonal: {
             nombres: formData.nombres,

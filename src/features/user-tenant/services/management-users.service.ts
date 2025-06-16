@@ -6,6 +6,8 @@ import type {
   CreateUserTenantDto,
   UpdateUserTenantDto,
   SRIResponse,
+  BaseInfoPersonal,
+  ConductorInfoPersonal,
 } from "@/features/user-tenant/interfaces/management-users.interface";
 
 const SRI_API_URL =
@@ -101,6 +103,12 @@ export const managementUsersService = {
       // Limpiar los datos antes de enviarlos
       const cleanedData = {
         ...userData,
+        usuario: {
+          username: userData.usuario.username,
+          ...(userData.usuario.password && {
+            password: userData.usuario.password,
+          }),
+        },
         infoPersonal:
           userData.rol === "CONDUCTOR"
             ? userData.infoPersonal
@@ -145,7 +153,7 @@ export const managementUsersService = {
   // Asignar información personal a un usuario
   assignPersonalInfo: async (
     id: number,
-    personalInfo: any
+    personalInfo: BaseInfoPersonal | ConductorInfoPersonal
   ): Promise<UserTenant> => {
     try {
       const api = await createAuthApi();

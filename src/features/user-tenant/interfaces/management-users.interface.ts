@@ -40,7 +40,7 @@ export interface UserTenant {
   usuario: Usuario;
 }
 
-interface BaseInfoPersonal {
+export interface BaseInfoPersonal {
   nombres: string;
   apellidos: string;
   tipoDocumento: string;
@@ -55,7 +55,7 @@ interface BaseInfoPersonal {
   fechaContratacion?: string;
 }
 
-interface ConductorInfoPersonal extends BaseInfoPersonal {
+export interface ConductorInfoPersonal extends BaseInfoPersonal {
   licenciaConducir: string;
   tipoLicencia: string;
   fechaExpiracionLicencia: string;
@@ -74,6 +74,7 @@ export interface UpdateUserTenantDto {
   rol: string;
   usuario: {
     username: string;
+    password?: string;
   };
   infoPersonal: BaseInfoPersonal | ConductorInfoPersonal;
 }
