@@ -33,7 +33,7 @@ export default function ConfigurationPage() {
                     <CardContent className="p-6">
                         <div className="text-center py-8">
                             <p className="text-muted-foreground">
-                                No se ha seleccionado una ruta válida. Por favor, vaya a la lista de rutas y seleccione "Configurar Ruta".
+                                No se ha seleccionado una ruta válida. Por favor, vaya a la lista de rutas y seleccione Configurar Ruta.
                             </p>
                         </div>
                     </CardContent>

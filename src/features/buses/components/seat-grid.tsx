@@ -1,5 +1,24 @@
 import React from "react";
-import { Droppable, Draggable } from "react-beautiful-dnd";
+// TODO: Migrar a @dnd-kit cuando sea necesario
+// import {
+//   DndContext,
+//   closestCenter,
+//   KeyboardSensor,
+//   PointerSensor,
+//   useSensor,
+//   useSensors,
+//   DragEndEvent,
+// } from '@dnd-kit/core';
+// import {
+//   arrayMove,
+//   SortableContext,
+//   sortableKeyboardCoordinates,
+//   verticalListSortingStrategy,
+// } from '@dnd-kit/sortable';
+// import {
+//   useSortable,
+// } from '@dnd-kit/sortable';
+// import { CSS } from '@dnd-kit/utilities';
 import { Armchair, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BusSeat } from "../interfaces/seat-config";
@@ -45,68 +64,38 @@ export const SeatGrid = ({ floor, floorDimensions, availableSeatTypes }: SeatGri
     }
 
     const seatType = availableSeatTypes.find(type => type.id === currentSeat?.tipoId);
-    
-    return (
-      <Droppable
+      return (
+      <div
         key={droppableId}
-        droppableId={droppableId}
-        type="SEAT"
-        isDropDisabled={false}
-        isCombineEnabled={false}
-        ignoreContainerClipping={true}
-      >
-        {(provided, snapshot) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className={cn(
-              "h-16 w-16 rounded-lg border flex flex-col items-center justify-center transition-all",
-              "bg-white",
-              snapshot.isDraggingOver ? "bg-primary/20 border-primary shadow-lg" : "",
-              !currentSeat && "border-dashed"
-            )}
-            style={currentSeat ? { borderColor: seatType?.color || 'gray' } : undefined}
-          >
-            {currentSeat ? (
-              <Draggable
-                draggableId={`seat-${droppableId}`}
-                index={0}
-              >
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className={cn(
-                      "flex flex-col items-center w-full h-full justify-center transition-transform",
-                      snapshot.isDragging && "shadow-lg transform-gpu"
-                    )}
-                    style={{
-                      ...provided.draggableProps.style,
-                      transform: snapshot.isDragging ? provided.draggableProps.style?.transform : "none",
-                    }}
-                  >
-                    {seatType?.icono && AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS] ? (
-                      <div className="h-6 w-6">
-                        {React.createElement(AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS], {
-                          className: "h-6 w-6",
-                          style: { color: seatType?.color || 'gray' }
-                        })}
-                      </div>
-                    ) : (
-                      <Armchair className="h-6 w-6" style={{ color: seatType?.color || 'gray' }} />
-                    )}
-                    <span className="text-xs font-medium mt-1">{currentSeat.numero}</span>
-                  </div>
-                )}
-              </Draggable>
-            ) : (
-              <Plus className="h-4 w-4 text-gray-400" />
-            )}
-            {provided.placeholder}
-          </div>
+        className={cn(
+          "h-16 w-16 rounded-lg border flex flex-col items-center justify-center transition-all",
+          "bg-white",
+          !currentSeat && "border-dashed"
         )}
-      </Droppable>
+        style={currentSeat ? { borderColor: seatType?.color || 'gray' } : undefined}
+      >
+        {currentSeat ? (
+          <div
+            className={cn(
+              "flex flex-col items-center w-full h-full justify-center transition-transform cursor-pointer",
+            )}
+          >
+            {seatType?.icono && AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS] ? (
+              <div className="h-6 w-6">
+                {React.createElement(AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS], {
+                  className: "h-6 w-6",
+                  style: { color: seatType?.color || 'gray' }
+                })}
+              </div>
+            ) : (
+              <Armchair className="h-6 w-6" style={{ color: seatType?.color || 'gray' }} />
+            )}
+            <span className="text-xs font-medium mt-1">{currentSeat.numero}</span>
+          </div>
+        ) : (
+          <Plus className="h-4 w-4 text-gray-400" />
+        )}
+      </div>
     );
   };
 

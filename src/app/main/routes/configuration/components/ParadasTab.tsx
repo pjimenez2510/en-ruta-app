@@ -9,7 +9,7 @@ import { useCiudades } from "@/features/auth/hooks/use-ciudades";
 import { useParadas } from "@/features/auth/hooks/use-paradas";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from 'sonner';
-import { Parada, Ciudad } from "@/features/auth/services/paradas.service";
+import { Parada } from "@/features/auth/services/paradas.service";
 
 interface Ruta {
   id: number;
