@@ -1,5 +1,5 @@
 import { FrecuenciasTable } from "./tables.routes"
-import { Button } from "@/shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import Link from "next/link"
 

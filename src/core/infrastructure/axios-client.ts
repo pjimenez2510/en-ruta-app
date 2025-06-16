@@ -42,15 +42,21 @@ class AxiosClient {
 
   static getInstance(config?: AxiosConfig): AxiosClient {
     return new AxiosClient(config);
-  }
-  private setupAuthInterceptor() {
+  }  private setupAuthInterceptor() {
     this.axiosInstance.interceptors.request.use(
       async (config: CustomInternalAxiosRequestConfig) => {
         if (config?.skipAuth) return config;
 
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        console.log("=== Auth Interceptor ===");
+        console.log("Token exists:", !!token);
+        console.log("Token value:", token?.substring(0, 20) + "...");
+        
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+          console.log("Authorization header:", config.headers.Authorization?.substring(0, 30) + "...");
+        } else {
+          console.warn("No token found in localStorage");
         }
 
         return config;

@@ -9,11 +9,11 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/shared/components/ui/form";
-import { Input } from "@/shared/components/ui/input";
-import { Button } from "@/shared/components/ui/button";
-import { DialogFooter } from "@/shared/components/ui/dialog";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const horarioFormSchema = z.object({
   horaSalida: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato de hora inválido (HH:mm)"),
