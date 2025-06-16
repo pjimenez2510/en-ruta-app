@@ -18,6 +18,27 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useTenantColors } from "@/core/context/tenant-context";
 import { configTenantService } from "../services/config-tenant.service";
 
+interface ConfigData {
+  direccion: string;
+  ruc: string;
+  emailSoporte: string;
+  telefonoSoporte: string;
+  horarioAtencion: string;
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  youtube: string;
+  direccionId?: number;
+  rucId?: number;
+  emailSoporteId?: number;
+  telefonoSoporteId?: number;
+  horarioAtencionId?: number;
+  facebookId?: number;
+  twitterId?: number;
+  instagramId?: number;
+  youtubeId?: number;
+}
+
 export const ConfiguracionForm = () => {
   // Estados
   const [isLoading, setIsLoading] = useState(false);
@@ -38,44 +59,48 @@ export const ConfiguracionForm = () => {
   const { setColors: setTenantColors } = useTenantColors();
 
   // Query para obtener todas las configuraciones
-  const { data: configData } = useQuery({
-    queryKey: ["config-tenant", tenantId],
-    queryFn: async () => {
-      if (!tenantId) throw new Error("Tenant ID is required");
-      const configs = await configTenantService.getAllConfigTenants(tenantId);
+  const { data: configData, isLoading: isLoadingConfig } = useQuery<ConfigData>(
+    {
+      queryKey: ["config-tenant", tenantId],
+      queryFn: async () => {
+        if (!tenantId) throw new Error("Tenant ID is required");
+        const configs = await configTenantService.getAllConfigTenants(tenantId);
 
-      // Extraer valores de las configuraciones
-      const getConfigValue = (clave: string) =>
-        configs.find((config) => config.clave === clave)?.valor || "";
+        // Extraer valores de las configuraciones
+        const getConfigValue = (clave: string) =>
+          configs.find((config) => config.clave === clave)?.valor || "";
 
-      const getConfigId = (clave: string) =>
-        configs.find((config) => config.clave === clave)?.id;
+        const getConfigId = (clave: string) =>
+          configs.find((config) => config.clave === clave)?.id;
 
-      return {
-        // Valores
-        direccion: getConfigValue("DIRECCION"),
-        ruc: getConfigValue("RUC"),
-        emailSoporte: getConfigValue("EMAIL_SOPORTE"),
-        telefonoSoporte: getConfigValue("TELEFONO_SOPORTE"),
-        horarioAtencion: getConfigValue("HORARIO_ATENCION"),
-        facebook: getConfigValue("FACEBOOK"),
-        twitter: getConfigValue("TWITTER"),
-        instagram: getConfigValue("INSTAGRAM"),
-        youtube: getConfigValue("YOUTUBE"),
-        // IDs
-        direccionId: getConfigId("DIRECCION"),
-        rucId: getConfigId("RUC"),
-        emailSoporteId: getConfigId("EMAIL_SOPORTE"),
-        telefonoSoporteId: getConfigId("TELEFONO_SOPORTE"),
-        horarioAtencionId: getConfigId("HORARIO_ATENCION"),
-        facebookId: getConfigId("FACEBOOK"),
-        twitterId: getConfigId("TWITTER"),
-        instagramId: getConfigId("INSTAGRAM"),
-        youtubeId: getConfigId("YOUTUBE"),
-      };
-    },
-    enabled: !!tenantId,
-  });
+        return {
+          // Valores
+          direccion: getConfigValue("DIRECCION"),
+          ruc: getConfigValue("RUC"),
+          emailSoporte: getConfigValue("EMAIL_SOPORTE"),
+          telefonoSoporte: getConfigValue("TELEFONO_SOPORTE"),
+          horarioAtencion: getConfigValue("HORARIO_ATENCION"),
+          facebook: getConfigValue("FACEBOOK"),
+          twitter: getConfigValue("TWITTER"),
+          instagram: getConfigValue("INSTAGRAM"),
+          youtube: getConfigValue("YOUTUBE"),
+          // IDs
+          direccionId: getConfigId("DIRECCION"),
+          rucId: getConfigId("RUC"),
+          emailSoporteId: getConfigId("EMAIL_SOPORTE"),
+          telefonoSoporteId: getConfigId("TELEFONO_SOPORTE"),
+          horarioAtencionId: getConfigId("HORARIO_ATENCION"),
+          facebookId: getConfigId("FACEBOOK"),
+          twitterId: getConfigId("TWITTER"),
+          instagramId: getConfigId("INSTAGRAM"),
+          youtubeId: getConfigId("YOUTUBE"),
+        };
+      },
+      enabled: !!tenantId,
+      staleTime: 0, // Forzar a que siempre se recarguen los datos
+      gcTime: 0, // No cachear los datos
+    }
+  );
 
   // Efectos para cargar datos iniciales
   useEffect(() => {
@@ -346,17 +371,23 @@ export const ConfiguracionForm = () => {
       </TabsList>
 
       <TabsContent value="general">
-        <GeneralForm
-          initialData={{
-            nombreCooperativa: tenantData?.data?.nombre || "",
-            telefono: tenantData?.data?.telefono || "",
-            email: tenantData?.data?.emailContacto || "",
-            direccion: configData?.direccion || "",
-            ruc: configData?.ruc || "",
-          }}
-          onSubmit={handleGeneralSubmit}
-          isLoading={isLoading}
-        />
+        {isLoadingTenant || isLoadingConfig ? (
+          <div className="flex items-center justify-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <GeneralForm
+            initialData={{
+              nombreCooperativa: tenantData?.data?.nombre || "",
+              telefono: tenantData?.data?.telefono || "",
+              email: tenantData?.data?.emailContacto || "",
+              direccion: configData?.direccion || "",
+              ruc: configData?.ruc || "",
+            }}
+            onSubmit={handleGeneralSubmit}
+            isLoading={isLoading}
+          />
+        )}
       </TabsContent>
 
       <TabsContent value="apariencia">
