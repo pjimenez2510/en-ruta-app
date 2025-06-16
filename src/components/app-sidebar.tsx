@@ -9,6 +9,8 @@ import {
   Plus,
   List,
   ChevronDown,
+  Angry,
+
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect, useState } from "react";
@@ -16,6 +18,8 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
+import { useTenantColors } from "@/core/context/tenant-context";
+import Image from "next/image";
 
 import {
   Sidebar,
@@ -62,6 +66,9 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
+  { title: "Resoluciones", path: "/main/resolution", icon: Angry },
+  { title: "Rutas", path: "/main/routes", icon: Bus },
+  { title: "Viajes", path: "/main/frequencies", icon: Bus },
   { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
 ];
@@ -70,6 +77,7 @@ export function AppSidebar() {
   const router = useRouter();
   const userRole = useAuthStore((state) => state.userRole);
   const [openMenus, setOpenMenus] = useState<string[]>([]);
+  const { logoUrl } = useTenantColors();
 
   const handleToggle = (title: string) => {
     setOpenMenus((prev) =>
@@ -137,7 +145,20 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="p-4 text-lg font-bold">EnRuta</div>
+        <div className="p-4">
+          <div className="flex items-center gap-2">
+            {logoUrl && (
+              <Image
+                src={logoUrl}
+                alt="Logo"
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+            )}
+            <div className="text-lg font-bold">EnRuta</div>
+          </div>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

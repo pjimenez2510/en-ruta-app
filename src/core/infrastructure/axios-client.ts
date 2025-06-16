@@ -13,12 +13,11 @@ interface AxiosConfig {
 }
 
 const DEFAULT_CONFIG: AxiosConfig = {
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3002",
   headers: {
     "Content-Type": "application/json",
   },
 };
-
 class AxiosClient {
   private axiosInstance: AxiosInstance;
 
@@ -43,17 +42,22 @@ class AxiosClient {
 
   static getInstance(config?: AxiosConfig): AxiosClient {
     return new AxiosClient(config);
-  }
-
-  private setupAuthInterceptor() {
+  }  private setupAuthInterceptor() {
     this.axiosInstance.interceptors.request.use(
       async (config: CustomInternalAxiosRequestConfig) => {
         if (config?.skipAuth) return config;
 
-        // const token = useAuthStore.getState().token
-        // if (token) {
-        //   config.headers.Authorization = `${token}`
-        // }
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        console.log("=== Auth Interceptor ===");
+        console.log("Token exists:", !!token);
+        console.log("Token value:", token?.substring(0, 20) + "...");
+        
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+          console.log("Authorization header:", config.headers.Authorization?.substring(0, 30) + "...");
+        } else {
+          console.warn("No token found in localStorage");
+        }
 
         return config;
       }
@@ -92,21 +96,9 @@ class AxiosClient {
 
     this.axiosInstance.interceptors.response.use(
       (response) => {
-        console.log("=== Axios Response ===");
-        console.log("Status:", response.status);
-        console.log("Headers:", response.headers);
-        console.log("Data:", response.data);
         return response;
       },
       (error) => {
-        console.error("=== Axios Response Error ===");
-        console.error("Status:", error.response?.status);
-        console.error("Data:", error.response?.data);
-        console.error("Config:", {
-          url: error.config?.url,
-          method: error.config?.method,
-          baseURL: error.config?.baseURL,
-        });
         return Promise.reject(error);
       }
     );

@@ -53,11 +53,8 @@ interface LoginResponse {
 
 export async function loginService(input: LoginInput): Promise<string> {
   const client = AxiosClient.getInstance();
-  try {
-    const baseURL = client.getUri();
-    console.log("=== Login Service ===");
-    console.log("URL base del cliente:", baseURL);
-    console.log("URL completa:", `${baseURL}${API_ROUTES.AUTH.LOGIN}`);
+  try {    console.log("=== Login Service ===");
+    console.log("URL de login:", API_ROUTES.AUTH.LOGIN);
     console.log("Credenciales:", { username: input.username, password: "***" });
 
     const response = await client.post<LoginResponse>(
