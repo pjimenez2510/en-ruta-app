@@ -30,17 +30,13 @@ const paradaFormSchema = z.object({
 
 type ParadaFormValues = z.infer<typeof paradaFormSchema>;
 
-interface Ciudad {
-  id: number;
-  nombre: string;
-}
+import { useCiudades } from "@/features/auth/hooks/use-ciudades";
 
 interface ParadaFormProps {
   rutaId: number;
   onSubmit: (data: ParadaFormValues) => void;
   defaultValues?: Partial<ParadaFormValues>;
   isEditing?: boolean;
-  ciudades: Ciudad[];
 }
 
 export function ParadaForm({
@@ -48,8 +44,8 @@ export function ParadaForm({
   onSubmit,
   defaultValues,
   isEditing = false,
-  ciudades,
 }: ParadaFormProps) {
+  const { ciudadesOptions, isLoading } = useCiudades();
   const form = useForm<ParadaFormValues>({
     resolver: zodResolver(paradaFormSchema),
     defaultValues: {
@@ -69,22 +65,40 @@ export function ParadaForm({
           name="ciudadId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Ciudad</FormLabel>
-              <Select
-                onValueChange={(value) => field.onChange(Number(value))}
-                value={field.value?.toString()}
+              <FormLabel>Ciudad</FormLabel>              <Select
+                onValueChange={(value) => {
+                  // Solo actualizar si es un valor numérico válido
+                  const numValue = Number(value);
+                  if (!isNaN(numValue)) {
+                    field.onChange(numValue);
+                  }
+                }}
+                value={field.value > 0 ? field.value.toString() : undefined}
+                disabled={isLoading}
               >
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione una ciudad" />
+                  <SelectTrigger className={isLoading ? "opacity-50 cursor-not-allowed" : ""}>
+                    <SelectValue placeholder={
+                      isLoading ? "Cargando ciudades..." : "Seleccione una ciudad"
+                    } />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {ciudades.map((ciudad) => (
-                    <SelectItem key={ciudad.id} value={ciudad.id.toString()}>
-                      {ciudad.nombre}
+                  {isLoading ? (
+                    <SelectItem value="loading" disabled>
+                      Cargando ciudades...
                     </SelectItem>
-                  ))}
+                  ) : ciudadesOptions.length === 0 ? (
+                    <SelectItem value="no-data" disabled>
+                      No hay ciudades disponibles
+                    </SelectItem>
+                  ) : (
+                    ciudadesOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
