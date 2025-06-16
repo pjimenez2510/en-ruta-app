@@ -11,7 +11,7 @@ export const API_ROUTES = {
     REFRESH_TOKEN: "/auth/refresh-token",
     FORGOT_PASSWORD: "/auth/forgot-password",
     RESET_PASSWORD: "/auth/reset-password",
-  },  USER: {
+  },  ER: {
     PROFILE: "/user/profile",
     UPDATE_PROFILE: "/user/profile",
     CHANGE_PASSWORD: "/user/change-password",
@@ -65,5 +65,13 @@ export const API_ROUTES = {
     GET_BY_ID: "/ciudades/:id",
     GET_BY_NOMBRE: "/ciudades/nombre/:nombre",
     GET_BY_PROVINCIA: "/ciudades/provincia/:provincia",
+  },
+  USER_TENANT: {
+    GET_ALL: "/usuario-tenant",
+    POST: "/usuario-tenant",
+    GET_BY_ID: "/usuario-tenant/:id",
+    UPDATE: "/usuario-tenant/:id",
+    DELETE: "/usuario-tenant/:id",
+    POST_PERSONAL_INFO: "/usuario-tenant/:id/asignar-info-personal",
   },
 };
