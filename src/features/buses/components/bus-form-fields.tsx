@@ -20,22 +20,24 @@ export const FormFields = ({ control, onImageChange, initialImageUrl, isEdit }: 
     const { busModels, loading } = useBusModels();
     const [previewUrl, setPreviewUrl] = useState<string | null>(initialImageUrl || null);
 
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
         const file = event.target.files?.[0];
         if (file) {
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
             onImageChange?.(file);
+            onChange(url);
         }
     };
 
-    const handleRemoveImage = () => {
+    const handleRemoveImage = (onChange: (value: string) => void) => {
         setPreviewUrl(null);
         onImageChange?.(null);
+        onChange("");
     };
 
     return (
-        <>
+        <div className="space-y-6">
             <FormField
                 control={control}
                 name="fotoUrl"
@@ -59,9 +61,8 @@ export const FormFields = ({ control, onImageChange, initialImageUrl, isEdit }: 
                                         type="file"
                                         accept="image/*"
                                         className="hidden"
-                                        onChange={handleImageChange}
+                                        onChange={(e) => handleImageChange(e, field.onChange)}
                                     />
-                                    <input type="hidden" {...field} />
                                 </div>
                                 
                                 {previewUrl && (
@@ -77,7 +78,7 @@ export const FormFields = ({ control, onImageChange, initialImageUrl, isEdit }: 
                                             variant="destructive"
                                             size="icon"
                                             className="absolute -top-2 -right-2 h-6 w-6"
-                                            onClick={handleRemoveImage}
+                                            onClick={() => handleRemoveImage(field.onChange)}
                                         >
                                             <X className="h-4 w-4" />
                                         </Button>
@@ -90,147 +91,130 @@ export const FormFields = ({ control, onImageChange, initialImageUrl, isEdit }: 
                 )}
             />
 
-            {!isEdit && (
-              <FormField
-                  control={control}
-                  name="modeloBusId"
-                  render={({ field }) => (
-                      <FormItem>
-                          <FormLabel>Modelo de Bus</FormLabel>
-                          <FormControl>
-                              <Select 
-                                  onValueChange={(value) => field.onChange(parseInt(value))} 
-                                  value={field.value ? field.value.toString() : undefined}
-                                  disabled={loading}
-                              >
-                                  <SelectTrigger>
-                                      <SelectValue placeholder="Seleccione el modelo del bus" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      {busModels.length > 0 ? (
-                                          busModels.map((model) => (
-                                              <SelectItem key={model.id} value={model.id.toString()}>
-                                                  {model.marca} - {model.modelo}
-                                              </SelectItem>
-                                          ))
-                                      ) : (
-                                          <SelectItem value="0">
-                                              No hay modelos disponibles
-                                          </SelectItem>
-                                      )}
-                                  </SelectContent>
-                              </Select>
-                          </FormControl>
-                          <FormMessage />
-                      </FormItem>
-                  )}
-              />
-            )}
-
-            <FormField
-                control={control}
-                name="numero"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Número</FormLabel>
-                        <FormControl>
-                            <Input 
-                                type="number" 
-                                placeholder="Número de Bus" 
-                                value={field.value || ''}
-                                onChange={event => {
-                                    const value = event.target.value ? parseInt(event.target.value) : undefined;
-                                    field.onChange(value);
-                                }}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {!isEdit && (
+                    <FormField
+                        control={control}
+                        name="modeloBusId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Modelo de Bus</FormLabel>
+                                <FormControl>
+                                    <Select 
+                                        onValueChange={(value) => field.onChange(parseInt(value))} 
+                                        value={field.value ? field.value.toString() : undefined}
+                                        disabled={loading}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seleccione el modelo del bus" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {busModels.length > 0 ? (
+                                                busModels.map((model) => (
+                                                    <SelectItem key={model.id} value={model.id.toString()}>
+                                                        {model.marca} - {model.modelo}
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <SelectItem value="0">
+                                                    No hay modelos disponibles
+                                                </SelectItem>
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 )}
-            />
 
-            <FormField
-                control={control}
-                name="placa"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Placa</FormLabel>
-                        <FormControl>
-                            <Input 
-                                placeholder="Ejemplo: ABC-123" 
-                                {...field} 
-                                value={field.value?.toUpperCase()}
-                                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
+                <FormField
+                    control={control}
+                    name="numero"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Número</FormLabel>
+                            <FormControl>
+                                <Input 
+                                    type="number" 
+                                    placeholder="Número de Bus" 
+                                    value={field.value || ''}
+                                    onChange={event => {
+                                        const value = event.target.value ? parseInt(event.target.value) : undefined;
+                                        field.onChange(value);
+                                    }}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
-            <FormField
-                control={control}
-                name="anioFabricacion"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Año de Fabricación</FormLabel>
-                        <FormControl>
-                            <Input
-                                type="number"
-                                value={field.value || ''}
-                                onChange={event => {
-                                    const value = event.target.value ? parseInt(event.target.value) : undefined;
-                                    field.onChange(value);
-                                }}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
+                <FormField
+                    control={control}
+                    name="placa"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Placa</FormLabel>
+                            <FormControl>
+                                <Input 
+                                    placeholder="Ejemplo: ABC-123" 
+                                    {...field} 
+                                    value={field.value?.toUpperCase()}
+                                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
-            <FormField
-                control={control}
-                name="tipoCombustible"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Tipo de Combustible</FormLabel>
-                        <FormControl>
-                            <Select 
-                                onValueChange={field.onChange} 
-                                value={field.value}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Seleccione el tipo de combustible" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Diésel">Diésel</SelectItem>
-                                    <SelectItem value="Gasolina">Gasolina</SelectItem>
-                                    <SelectItem value="Gas Natural">Gas Natural</SelectItem>
-                                    <SelectItem value="Eléctrico">Eléctrico</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
+                <FormField
+                    control={control}
+                    name="anioFabricacion"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Año de Fabricación</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="number"
+                                    placeholder="Ejemplo: 2024"
+                                    value={field.value || ''}
+                                    onChange={event => {
+                                        const value = event.target.value ? parseInt(event.target.value) : undefined;
+                                        field.onChange(value);
+                                    }}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
-            <FormField
-                control={control}
-                name="totalAsientos"
-                render={({ field }) => (
-                    <FormItem className="hidden">
-                        <FormControl>
-                            <Input 
-                                type="number" 
-                                {...field}
-                                value={field.value || 0}
-                            />
-                        </FormControl>
-                    </FormItem>
-                )}
-            />
-        </>
+                <FormField
+                    control={control}
+                    name="tipoCombustible"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Tipo de Combustible</FormLabel>
+                            <FormControl>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione el tipo de combustible" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Diésel">Diésel</SelectItem>
+                                        <SelectItem value="Gasolina">Gasolina</SelectItem>
+                                        <SelectItem value="GNV">Gas Natural Vehicular</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+        </div>
     );
 }; 
