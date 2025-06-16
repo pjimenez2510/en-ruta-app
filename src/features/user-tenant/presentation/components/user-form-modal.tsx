@@ -17,7 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Eye, EyeOff, Search } from "lucide-react";
-import { ImageUploader } from "@/components/ui/image-uploader";
+import { CloudinaryUploader } from "@/components/ui/cloudinary-uploader";
 
 interface FormData {
   id?: number;
@@ -372,8 +372,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             )}
 
             <div className="col-span-2">
-              <Label>Foto de Perfil</Label>
-              <ImageUploader
+              <CloudinaryUploader
                 imageUrl={formData.fotoPerfil || null}
                 onImageUpload={(url) =>
                   onFormDataChange({ ...formData, fotoPerfil: url })
