@@ -1,4 +1,4 @@
-// app/admin/resoluciones-ant/create/page.tsx
+// app/main/resolution/crear/page.tsx
 
 import { ResolucionAntForm } from "@/features/resolution/components/resolucion-ant-form";
 

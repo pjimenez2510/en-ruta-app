@@ -15,7 +15,7 @@ export const useCreateResolucionAntMutation = () => {
     mutationFn: (data: ResolucionAntCreate) => service.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: RESOLUCION_ANT_QUERY_KEYS.lists() 
+        queryKey: RESOLUCION_ANT_QUERY_KEYS.key 
       });
     },
   });
@@ -30,10 +30,7 @@ export const useUpdateResolucionAntMutation = () => {
       service.update(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ 
-        queryKey: RESOLUCION_ANT_QUERY_KEYS.lists() 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: RESOLUCION_ANT_QUERY_KEYS.detail(id) 
+        queryKey: RESOLUCION_ANT_QUERY_KEYS.key
       });
     },
   });
@@ -47,7 +44,7 @@ export const useDeleteResolucionAntMutation = () => {
     mutationFn: (id: number) => service.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: RESOLUCION_ANT_QUERY_KEYS.lists() 
+        queryKey: RESOLUCION_ANT_QUERY_KEYS.key
       });
     },
   });

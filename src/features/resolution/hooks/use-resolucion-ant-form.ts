@@ -78,7 +78,7 @@ export const useResolucionAntForm = (resolucion?: ResolucionAnt) => {
         await createMutation.mutateAsync(mapSchemaToCreatePayload(data));
         toast.success("Resolución ANT creada exitosamente");
       }
-      router.push("/admin/resoluciones-ant");
+      router.push("/main/resolution");
     } catch (error) {
       console.error("Error al guardar resolución ANT:", error);
       toast.error(

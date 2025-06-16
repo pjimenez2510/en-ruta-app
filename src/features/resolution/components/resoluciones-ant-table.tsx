@@ -66,15 +66,15 @@ export function ResolucionesAntTable() {
   };
 
   const handleView = (id: number) => {
-    router.push(`/admin/resoluciones-ant/${id}`);
+    router.push(`/main/resolution/${id}`);
   };
 
   const handleEdit = (id: number) => {
-    router.push(`/admin/resoluciones-ant/${id}/edit`);
+    router.push(`/main/resolution/${id}/edit`);
   };
 
   const handleCreate = () => {
-    router.push("/admin/resoluciones-ant/create");
+    router.push("/main/resolution/crear");
   };
 
   const openDocument = (url: string) => {

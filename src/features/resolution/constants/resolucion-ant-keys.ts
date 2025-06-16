@@ -4,6 +4,7 @@ import type { ResolucionAntFilter } from "../interfaces/resolucion-ant.interface
 const BASE_KEY = "resoluciones-ant";
 
 export const RESOLUCION_ANT_QUERY_KEYS = {
+  key: [BASE_KEY],
   all: (filter?: ResolucionAntFilter) => [BASE_KEY, filter],
   lists: () => [BASE_KEY, "list"],
   list: (filter?: ResolucionAntFilter) => [BASE_KEY, "list", filter],

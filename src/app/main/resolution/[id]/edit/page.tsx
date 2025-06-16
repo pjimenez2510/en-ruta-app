@@ -1,4 +1,4 @@
-// app/admin/resoluciones-ant/[id]/edit/page.tsx
+// app/main/resolution/[id]/edit/page.tsx
 "use client";
 
 

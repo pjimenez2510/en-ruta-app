@@ -29,11 +29,11 @@ export function ResolucionAntDetail({ id }: ResolucionAntDetailProps) {
   const { data: resolucion, isLoading, error } = useFindResolucionAntByIdQuery(id);
 
   const handleEdit = () => {
-    router.push(`/admin/resoluciones-ant/${id}/edit`);
+    router.push(`/main/resolution/${id}/edit`);
   };
 
   const handleBack = () => {
-    router.push("/admin/resoluciones-ant");
+    router.push("/main/resolution");
   };
 
   const openDocument = () => {

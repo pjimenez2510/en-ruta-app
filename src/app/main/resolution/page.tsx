@@ -1,4 +1,4 @@
-// app/admin/resoluciones-ant/page.tsx
+// app/main/resolution/page.tsx
 
 import { ResolucionesAntTable } from "@/features/resolution/components/resoluciones-ant-table";
 
