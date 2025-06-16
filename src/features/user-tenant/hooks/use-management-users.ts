@@ -77,30 +77,38 @@ export function useManagementUsers(): UseManagementUsersReturn {
   // Mutación para crear usuario
   const createMutation = useMutation({
     mutationFn: (data: FormData) => {
+      const baseInfoPersonal = {
+        nombres: data.nombres,
+        apellidos: data.apellidos,
+        tipoDocumento: "CEDULA",
+        numeroDocumento: data.numeroDocumento,
+        telefono: data.telefono || "",
+        email: data.email || "",
+        fechaNacimiento: data.fechaNacimiento || "",
+        direccion: data.direccion || "",
+        ciudadResidencia: data.ciudadResidencia || "",
+        genero: data.genero || "M",
+        fotoPerfil: data.fotoPerfil || "",
+        fechaContratacion: data.fechaContratacion || "",
+      };
+
       const userData = {
         rol: data.rol,
         usuario: {
           username: data.username,
           password: data.password,
         },
-        infoPersonal: {
-          nombres: data.nombres,
-          apellidos: data.apellidos,
-          tipoDocumento: "CEDULA",
-          numeroDocumento: data.numeroDocumento,
-          telefono: data.telefono || "",
-          email: data.email || "",
-          fechaNacimiento: data.fechaNacimiento || "",
-          direccion: data.direccion || "",
-          ciudadResidencia: data.ciudadResidencia || "",
-          genero: data.genero || "M",
-          fotoPerfil: data.fotoPerfil || "",
-          fechaContratacion: data.fechaContratacion || "",
-          licenciaConducir: data.licenciaConducir || "",
-          tipoLicencia: data.tipoLicencia || "",
-          fechaExpiracionLicencia: data.fechaExpiracionLicencia || "",
-        },
+        infoPersonal:
+          data.rol === "CONDUCTOR"
+            ? {
+                ...baseInfoPersonal,
+                licenciaConducir: data.licenciaConducir || "",
+                tipoLicencia: data.tipoLicencia || "",
+                fechaExpiracionLicencia: data.fechaExpiracionLicencia || "",
+              }
+            : baseInfoPersonal,
       };
+
       return managementUsersService.createUser(userData);
     },
     onSuccess: () => {
@@ -115,29 +123,37 @@ export function useManagementUsers(): UseManagementUsersReturn {
   // Mutación para actualizar usuario
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: FormData }) => {
+      const baseInfoPersonal = {
+        nombres: data.nombres,
+        apellidos: data.apellidos,
+        tipoDocumento: "CEDULA",
+        numeroDocumento: data.numeroDocumento,
+        telefono: data.telefono || "",
+        email: data.email || "",
+        fechaNacimiento: data.fechaNacimiento || "",
+        direccion: data.direccion || "",
+        ciudadResidencia: data.ciudadResidencia || "",
+        genero: data.genero || "M",
+        fotoPerfil: data.fotoPerfil || "",
+        fechaContratacion: data.fechaContratacion || "",
+      };
+
       const userData = {
         rol: data.rol,
         usuario: {
           username: data.username,
         },
-        infoPersonal: {
-          nombres: data.nombres,
-          apellidos: data.apellidos,
-          tipoDocumento: "CEDULA",
-          numeroDocumento: data.numeroDocumento,
-          telefono: data.telefono || "",
-          email: data.email || "",
-          fechaNacimiento: data.fechaNacimiento || "",
-          direccion: data.direccion || "",
-          ciudadResidencia: data.ciudadResidencia || "",
-          genero: data.genero || undefined,
-          fotoPerfil: data.fotoPerfil || "",
-          fechaContratacion: data.fechaContratacion || "",
-          licenciaConducir: data.licenciaConducir || "",
-          tipoLicencia: data.tipoLicencia || "",
-          fechaExpiracionLicencia: data.fechaExpiracionLicencia || "",
-        },
+        infoPersonal:
+          data.rol === "CONDUCTOR"
+            ? {
+                ...baseInfoPersonal,
+                licenciaConducir: data.licenciaConducir || "",
+                tipoLicencia: data.tipoLicencia || "",
+                fechaExpiracionLicencia: data.fechaExpiracionLicencia || "",
+              }
+            : baseInfoPersonal,
       };
+
       return managementUsersService.updateUser(id, userData);
     },
     onSuccess: () => {

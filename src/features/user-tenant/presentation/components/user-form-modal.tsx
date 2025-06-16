@@ -183,7 +183,15 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               <Select
                 value={formData.rol}
                 onValueChange={(value: FormData["rol"]) =>
-                  onFormDataChange({ ...formData, rol: value })
+                  onFormDataChange({
+                    ...formData,
+                    rol: value,
+                    ...(value !== "CONDUCTOR" && {
+                      licenciaConducir: undefined,
+                      tipoLicencia: undefined,
+                      fechaExpiracionLicencia: undefined,
+                    }),
+                  })
                 }
               >
                 <SelectTrigger>
@@ -265,7 +273,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     ...formData,
                     fechaNacimiento: e.target.value
                       ? new Date(e.target.value).toISOString()
-                      : "",
+                      : undefined,
                   })
                 }
               />
@@ -316,7 +324,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     ...formData,
                     fechaContratacion: e.target.value
                       ? new Date(e.target.value).toISOString()
-                      : "",
+                      : undefined,
                   })
                 }
               />
@@ -332,7 +340,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     onChange={(e) =>
                       onFormDataChange({
                         ...formData,
-                        licenciaConducir: e.target.value,
+                        licenciaConducir: e.target.value || undefined,
                       })
                     }
                   />
@@ -346,7 +354,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     onChange={(e) =>
                       onFormDataChange({
                         ...formData,
-                        tipoLicencia: e.target.value,
+                        tipoLicencia: e.target.value || undefined,
                       })
                     }
                   />
@@ -359,11 +367,19 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   <Input
                     id="fechaExpiracionLicencia"
                     type="date"
-                    value={formData.fechaExpiracionLicencia || ""}
+                    value={
+                      formData.fechaExpiracionLicencia
+                        ? new Date(formData.fechaExpiracionLicencia)
+                            .toISOString()
+                            .split("T")[0]
+                        : ""
+                    }
                     onChange={(e) =>
                       onFormDataChange({
                         ...formData,
-                        fechaExpiracionLicencia: e.target.value,
+                        fechaExpiracionLicencia: e.target.value
+                          ? new Date(e.target.value).toISOString()
+                          : undefined,
                       })
                     }
                   />

@@ -42,9 +42,33 @@ export const managementUsersService = {
   createUser: async (userData: CreateUserTenantDto): Promise<UserTenant> => {
     try {
       const api = await createAuthApi();
+
+      // Limpiar los datos antes de enviarlos
+      const cleanedData = {
+        ...userData,
+        infoPersonal:
+          userData.rol === "CONDUCTOR"
+            ? userData.infoPersonal
+            : {
+                nombres: userData.infoPersonal.nombres,
+                apellidos: userData.infoPersonal.apellidos,
+                tipoDocumento: userData.infoPersonal.tipoDocumento,
+                numeroDocumento: userData.infoPersonal.numeroDocumento,
+                telefono: userData.infoPersonal.telefono || "",
+                email: userData.infoPersonal.email || "",
+                fechaNacimiento: userData.infoPersonal.fechaNacimiento || "",
+                direccion: userData.infoPersonal.direccion || "",
+                ciudadResidencia: userData.infoPersonal.ciudadResidencia || "",
+                genero: userData.infoPersonal.genero || "M",
+                fotoPerfil: userData.infoPersonal.fotoPerfil || "",
+                fechaContratacion:
+                  userData.infoPersonal.fechaContratacion || "",
+              },
+      };
+
       const { data } = await api.post<UserTenantResponse>(
         API_ROUTES.USER_TENANT.POST,
-        userData
+        cleanedData
       );
       return data.data[0];
     } catch (error) {
@@ -73,8 +97,32 @@ export const managementUsersService = {
   ): Promise<UserTenant> => {
     try {
       const api = await createAuthApi();
+
+      // Limpiar los datos antes de enviarlos
+      const cleanedData = {
+        ...userData,
+        infoPersonal:
+          userData.rol === "CONDUCTOR"
+            ? userData.infoPersonal
+            : {
+                nombres: userData.infoPersonal.nombres,
+                apellidos: userData.infoPersonal.apellidos,
+                tipoDocumento: userData.infoPersonal.tipoDocumento,
+                numeroDocumento: userData.infoPersonal.numeroDocumento,
+                telefono: userData.infoPersonal.telefono || "",
+                email: userData.infoPersonal.email || "",
+                fechaNacimiento: userData.infoPersonal.fechaNacimiento || "",
+                direccion: userData.infoPersonal.direccion || "",
+                ciudadResidencia: userData.infoPersonal.ciudadResidencia || "",
+                genero: userData.infoPersonal.genero || "M",
+                fotoPerfil: userData.infoPersonal.fotoPerfil || "",
+                fechaContratacion:
+                  userData.infoPersonal.fechaContratacion || "",
+              },
+      };
+
       const url = buildUrl(API_ROUTES.USER_TENANT.UPDATE, { id });
-      const { data } = await api.put<UserTenantResponse>(url, userData);
+      const { data } = await api.put<UserTenantResponse>(url, cleanedData);
       return data.data[0];
     } catch (error) {
       console.error("Error en managementUsersService.updateUser:", error);

@@ -40,29 +40,34 @@ export interface UserTenant {
   usuario: Usuario;
 }
 
+interface BaseInfoPersonal {
+  nombres: string;
+  apellidos: string;
+  tipoDocumento: string;
+  numeroDocumento: string;
+  telefono?: string;
+  email?: string;
+  fechaNacimiento?: string;
+  direccion?: string;
+  ciudadResidencia?: string;
+  genero?: "M" | "F" | "O";
+  fotoPerfil?: string;
+  fechaContratacion?: string;
+}
+
+interface ConductorInfoPersonal extends BaseInfoPersonal {
+  licenciaConducir: string;
+  tipoLicencia: string;
+  fechaExpiracionLicencia: string;
+}
+
 export interface CreateUserTenantDto {
   rol: string;
   usuario: {
     username: string;
     password: string;
   };
-  infoPersonal: {
-    nombres: string;
-    apellidos: string;
-    tipoDocumento: string;
-    numeroDocumento: string;
-    telefono?: string;
-    email?: string;
-    fechaNacimiento?: string;
-    direccion?: string;
-    ciudadResidencia?: string;
-    genero?: "M" | "F" | "O";
-    fotoPerfil?: string;
-    fechaContratacion?: string;
-    licenciaConducir?: string;
-    tipoLicencia?: string;
-    fechaExpiracionLicencia?: string;
-  };
+  infoPersonal: BaseInfoPersonal | ConductorInfoPersonal;
 }
 
 export interface UpdateUserTenantDto {
@@ -70,23 +75,7 @@ export interface UpdateUserTenantDto {
   usuario: {
     username: string;
   };
-  infoPersonal: {
-    nombres: string;
-    apellidos: string;
-    tipoDocumento: string;
-    numeroDocumento: string;
-    telefono: string;
-    email: string;
-    fechaNacimiento: string;
-    direccion: string;
-    ciudadResidencia: string;
-    genero: "M" | "F" | "O" | undefined;
-    fotoPerfil: string;
-    fechaContratacion: string;
-    licenciaConducir: string;
-    tipoLicencia: string;
-    fechaExpiracionLicencia: string;
-  };
+  infoPersonal: BaseInfoPersonal | ConductorInfoPersonal;
 }
 
 export interface UserTenantResponse {
