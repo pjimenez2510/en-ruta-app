@@ -19,7 +19,7 @@ export interface InfoPersonal {
   fechaNacimiento: string;
   direccion: string;
   ciudadResidencia: string;
-  genero: string;
+  genero: "Masculino" | "Femenino" | "Otro";
   fotoPerfil: string | null;
   licenciaConducir: string | null;
   tipoLicencia: string | null;
@@ -32,27 +32,12 @@ export interface InfoPersonal {
 
 export interface UserTenant {
   id: number;
+  fechaAsignacion: string;
+  tenantId: number;
   rol: string;
-  usuario: {
-    username: string;
-  };
-  infoPersonal: {
-    nombres: string;
-    apellidos: string;
-    tipoDocumento: string;
-    numeroDocumento: string;
-    telefono: string;
-    email: string;
-    fechaNacimiento: string;
-    direccion: string;
-    ciudadResidencia: string;
-    genero: string;
-    fotoPerfil: string;
-    fechaContratacion: string;
-    licenciaConducir: string;
-    tipoLicencia: string;
-    fechaExpiracionLicencia: string;
-  };
+  activo: boolean;
+  infoPersonal: InfoPersonal | null;
+  usuario: Usuario;
 }
 
 export interface CreateUserTenantDto {

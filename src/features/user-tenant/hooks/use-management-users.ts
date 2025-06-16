@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   UserTenant,
   SRIResponse,
-} from "@/core/interfaces/management-users.interface";
+} from "@/features/user-tenant/interfaces/management-users.interface";
 import { managementUsersService } from "../services/management-users.service";
 
 interface FormData {

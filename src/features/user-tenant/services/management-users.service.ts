@@ -6,7 +6,7 @@ import type {
   CreateUserTenantDto,
   UpdateUserTenantDto,
   SRIResponse,
-} from "@/core/interfaces/management-users.interface";
+} from "@/features/user-tenant/interfaces/management-users.interface";
 
 const SRI_API_URL =
   "https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion";
