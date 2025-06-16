@@ -96,7 +96,7 @@ export const useSeatGridRenderer = () => {
     options: {
       seatSize?: string;
       interactive?: boolean;
-      onSeatClick?: (fila: number, columna: number) => void;
+      onSeatClick?: (fila: number, columna: number, event: React.MouseEvent<HTMLDivElement>) => void;
       selectedSeatType?: number;
       showSeatNumbers?: boolean;
     } = {}
@@ -193,7 +193,7 @@ export const useSeatGridRenderer = () => {
     key: string,
     seatSize: string,
     interactive: boolean,
-    onSeatClick?: (fila: number, columna: number) => void,
+    onSeatClick?: (fila: number, columna: number, event: React.MouseEvent<HTMLDivElement>) => void,
     selectedSeatType?: number,
     showSeatNumbers: boolean = true
   ) => {
@@ -221,9 +221,10 @@ export const useSeatGridRenderer = () => {
           interactive ? "cursor-pointer hover:bg-gray-50" : "",
           isSelected ? "border-blue-500" : "border-gray-200"
         )}
-        onClick={() => {
+        onClick={(event) => {
           if (interactive && onSeatClick) {
-            onSeatClick(asiento.fila, asiento.columna);
+            event.stopPropagation();
+            onSeatClick(asiento.fila, asiento.columna, event);
           }
         }}
       >
