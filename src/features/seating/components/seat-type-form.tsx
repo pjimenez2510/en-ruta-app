@@ -6,46 +6,54 @@ import { SeatType } from "../interfaces/seat-type.interface";
 import { useSeatTypeForm } from "../hooks/use-seat-types-form";
 import { SeatTypeFormValues } from "../interfaces/form-schema";
 import { FormFields } from "./seat-type-form-fields";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 interface SeatTypeFormProps {
   initialData?: SeatType;
-  onSubmit: (data: Partial<SeatType>) => void;
+  onSubmit: (data: SeatTypeFormValues) => Promise<void>;
   onCancel: () => void;
 }
 
-export const SeatTypeForm = ({
-  initialData,
-  onSubmit,
-  onCancel,
-}: SeatTypeFormProps) => {
-  const { form, tenantId } = useSeatTypeForm(initialData);
+export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormProps) => {
+  const { form } = useSeatTypeForm(initialData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (values: SeatTypeFormValues) => {
-    if (!initialData && tenantId === null) {
-      console.error("Tenant ID no disponible");
-      return;
+  const handleSubmit = async (values: SeatTypeFormValues) => {
+    try {
+      setIsSubmitting(true);
+      await onSubmit(values);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const submitData = initialData
-      ? {
-          ...values,
-          tenantId: initialData.tenantId,
-          activo: initialData.activo,
-        }
-      : values;
-
-    onSubmit(submitData);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit((data: SeatTypeFormValues) => handleSubmit(data))} className="space-y-6">
         <FormFields control={form.control} />
         <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Cancelar
           </Button>
-          <Button type="submit">{initialData ? "Actualizar" : "Crear"}</Button>
+          <Button 
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {initialData?.id ? "Actualizando..." : "Guardando..."}
+              </>
+            ) : (
+              initialData?.id ? "Actualizar" : "Crear"
+            )}
+          </Button>
         </div>
       </form>
     </Form>
