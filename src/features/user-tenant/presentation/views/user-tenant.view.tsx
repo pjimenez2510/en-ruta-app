@@ -23,6 +23,16 @@ import {
 } from "@/components/ui/select";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ManagementUsersView = () => {
   const {
@@ -47,6 +57,21 @@ const ManagementUsersView = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<number | null>(null);
+
+  const handleDeleteClick = (id: number) => {
+    setUserToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (userToDelete) {
+      handleDelete(userToDelete);
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+    }
+  };
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -213,7 +238,7 @@ const ManagementUsersView = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(user.id)}
+                          onClick={() => handleDeleteClick(user.id)}
                           className="text-red-500 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -227,6 +252,27 @@ const ManagementUsersView = () => {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente el
+              usuario y toda su información asociada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
