@@ -32,7 +32,7 @@ interface FormData {
   fechaNacimiento?: string;
   direccion?: string;
   ciudadResidencia?: string;
-  genero?: "Masculino" | "Femenino" | "Otro";
+  genero?: "M" | "F" | "O";
   fotoPerfil?: string;
   fechaContratacion?: string;
   licenciaConducir?: string;
@@ -88,11 +88,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-    <DialogTrigger asChild>
-  <span>
-    <Button onClick={onReset}>Nuevo Usuario</Button>
-  </span>
-</DialogTrigger>
+      <DialogTrigger asChild>
+        <span>
+          <Button onClick={onReset}>Nuevo Usuario</Button>
+        </span>
+      </DialogTrigger>
 
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -204,7 +204,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               <Label htmlFor="genero">Género</Label>
               <Select
                 value={formData.genero}
-                onValueChange={(value: "Masculino" | "Femenino" | "Otro") =>
+                onValueChange={(value: "M" | "F" | "O") =>
                   onFormDataChange({ ...formData, genero: value })
                 }
               >
@@ -212,9 +212,9 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   <SelectValue placeholder="Selecciona un género" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Masculino">Masculino</SelectItem>
-                  <SelectItem value="Femenino">Femenino</SelectItem>
-                  <SelectItem value="Otro">Otro</SelectItem>
+                  <SelectItem value="M">Masculino</SelectItem>
+                  <SelectItem value="F">Femenino</SelectItem>
+                  <SelectItem value="O">Otro</SelectItem>
                 </SelectContent>
               </Select>
             </div>

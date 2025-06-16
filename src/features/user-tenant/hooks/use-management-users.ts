@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   UserTenant,
   SRIResponse,
+  CreateUserTenantDto,
+  UpdateUserTenantDto,
 } from "@/features/user-tenant/interfaces/management-users.interface";
 import { managementUsersService } from "../services/management-users.service";
 
@@ -20,7 +22,7 @@ interface FormData {
   fechaNacimiento?: string;
   direccion?: string;
   ciudadResidencia?: string;
-  genero?: string;
+  genero?: "M" | "F" | "O";
   fotoPerfil?: string;
   fechaContratacion?: string;
   licenciaConducir?: string;
@@ -91,7 +93,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
           fechaNacimiento: data.fechaNacimiento || "",
           direccion: data.direccion || "",
           ciudadResidencia: data.ciudadResidencia || "",
-          genero: data.genero || "",
+          genero: data.genero || undefined,
           fotoPerfil: data.fotoPerfil || "",
           fechaContratacion: data.fechaContratacion || "",
           licenciaConducir: data.licenciaConducir || "",
@@ -128,7 +130,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
           fechaNacimiento: data.fechaNacimiento || "",
           direccion: data.direccion || "",
           ciudadResidencia: data.ciudadResidencia || "",
-          genero: data.genero || "",
+          genero: data.genero || undefined,
           fotoPerfil: data.fotoPerfil || "",
           fechaContratacion: data.fechaContratacion || "",
           licenciaConducir: data.licenciaConducir || "",
@@ -184,20 +186,77 @@ export function useManagementUsers(): UseManagementUsersReturn {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     if (formData.password !== confirmPassword) {
       setError("Las contraseñas no coinciden");
       return;
     }
 
-    if (isEditing && formData.id) {
-      updateMutation.mutate({
-        id: formData.id,
-        data: formData,
-      });
-    } else {
-      createMutation.mutate(formData);
+    try {
+      if (isEditing && formData.id) {
+        const updateDto: UpdateUserTenantDto = {
+          rol: formData.rol,
+          usuario: {
+            username: formData.username,
+          },
+          infoPersonal: {
+            nombres: formData.nombres,
+            apellidos: formData.apellidos,
+            tipoDocumento: "CEDULA",
+            numeroDocumento: formData.numeroDocumento,
+            telefono: formData.telefono || "",
+            email: formData.email || "",
+            fechaNacimiento: formData.fechaNacimiento || "",
+            direccion: formData.direccion || "",
+            ciudadResidencia: formData.ciudadResidencia || "",
+            genero: formData.genero,
+            fotoPerfil: formData.fotoPerfil || "",
+            fechaContratacion: formData.fechaContratacion || "",
+            licenciaConducir: formData.licenciaConducir || "",
+            tipoLicencia: formData.tipoLicencia || "",
+            fechaExpiracionLicencia: formData.fechaExpiracionLicencia || "",
+          },
+        };
+
+        await managementUsersService.updateUser(formData.id, updateDto);
+      } else {
+        const createDto: CreateUserTenantDto = {
+          rol: formData.rol,
+          password: formData.password,
+          usuario: {
+            username: formData.username,
+          },
+          infoPersonal: {
+            nombres: formData.nombres,
+            apellidos: formData.apellidos,
+            tipoDocumento: "CEDULA",
+            numeroDocumento: formData.numeroDocumento,
+            telefono: formData.telefono || "",
+            email: formData.email || "",
+            fechaNacimiento: formData.fechaNacimiento || "",
+            direccion: formData.direccion || "",
+            ciudadResidencia: formData.ciudadResidencia || "",
+            genero: formData.genero,
+            fotoPerfil: formData.fotoPerfil || "",
+            fechaContratacion: formData.fechaContratacion || "",
+            licenciaConducir: formData.licenciaConducir || "",
+            tipoLicencia: formData.tipoLicencia || "",
+            fechaExpiracionLicencia: formData.fechaExpiracionLicencia || "",
+          },
+        };
+
+        await managementUsersService.createUser(createDto);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      resetForm();
+      setDialogOpen(false);
+    } catch (error) {
+      setError("Error al guardar el usuario");
+      console.error("Error:", error);
     }
   };
 
@@ -215,7 +274,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
       fechaNacimiento: user.infoPersonal?.fechaNacimiento || "",
       direccion: user.infoPersonal?.direccion || "",
       ciudadResidencia: user.infoPersonal?.ciudadResidencia || "",
-      genero: user.infoPersonal?.genero || "",
+      genero: user.infoPersonal?.genero,
       fotoPerfil: user.infoPersonal?.fotoPerfil || "",
       fechaContratacion: user.infoPersonal?.fechaContratacion || "",
       licenciaConducir: user.infoPersonal?.licenciaConducir || "",

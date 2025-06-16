@@ -19,7 +19,7 @@ export interface InfoPersonal {
   fechaNacimiento: string;
   direccion: string;
   ciudadResidencia: string;
-  genero: "Masculino" | "Femenino" | "Otro";
+  genero: "M" | "F" | "O";
   fotoPerfil: string | null;
   licenciaConducir: string | null;
   tipoLicencia: string | null;
@@ -56,7 +56,7 @@ export interface CreateUserTenantDto {
     fechaNacimiento: string;
     direccion: string;
     ciudadResidencia: string;
-    genero: string;
+    genero: "M" | "F" | "O" | undefined;
     fotoPerfil: string;
     fechaContratacion: string;
     licenciaConducir: string;
@@ -80,7 +80,7 @@ export interface UpdateUserTenantDto {
     fechaNacimiento: string;
     direccion: string;
     ciudadResidencia: string;
-    genero: string;
+    genero: "M" | "F" | "O" | undefined;
     fotoPerfil: string;
     fechaContratacion: string;
     licenciaConducir: string;
