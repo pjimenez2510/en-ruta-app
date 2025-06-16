@@ -80,7 +80,7 @@ export default function ParadasTab({ ruta }: { ruta: Ruta }) {
             });
         } catch (error) {
             toast.error("Error al eliminar la parada", {
-                description: "Intente nuevamente",
+                description: "Intente nuevamente" + (error instanceof Error ? `: ${error.message}` : ""),
             });
         }
     };

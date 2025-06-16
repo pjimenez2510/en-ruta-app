@@ -113,9 +113,20 @@ export function HorariosTab({ ruta }: { ruta: Ruta }) {
       setOpenDialog(false);
       setEditingHorario(null);
       fetchHorarios();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving horario:", error);
-      const errorMessage = error.response?.data?.error || error.message || "Error al guardar el horario";
+      let errorMessage = "Error al guardar el horario";
+      if (typeof error === "object" && error !== null) {
+        // Use type guards to avoid 'any'
+        if (
+          "response" in error &&
+          typeof (error as { response?: { data?: { error?: string } } }).response?.data?.error === "string"
+        ) {
+          errorMessage = (error as { response: { data: { error: string } } }).response.data.error;
+        } else if ("message" in error && typeof (error as { message?: string }).message === "string") {
+          errorMessage = (error as { message: string }).message;
+        }
+      }
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

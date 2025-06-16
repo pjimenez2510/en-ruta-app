@@ -32,6 +32,7 @@ const paradaFormSchema = z.object({
 type ParadaFormValues = z.infer<typeof paradaFormSchema>;
 
 import { useCiudades } from "@/features/auth/hooks/use-ciudades";
+import { ControllerRenderProps, FieldPath } from "react-hook-form";
 
 interface ParadaFormProps {
   rutaId: number;
@@ -88,7 +89,7 @@ export function ParadaForm({
   // Función para limpiar valor no numérico al perder foco
   const handleBlur = (
     e: React.FocusEvent<HTMLInputElement>,
-    field: any,
+    field: ControllerRenderProps<ParadaFormValues, FieldPath<ParadaFormValues>>,
     allowDecimals = false
   ) => {
     const value = e.target.value;

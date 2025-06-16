@@ -1,5 +1,4 @@
 import AxiosClient from "@/core/infrastructure/axios-client";
-import { API_ROUTES } from "@/core/constants/api-routes";
 
 export interface Parada {
   id?: number;
