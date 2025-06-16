@@ -13,12 +13,14 @@ declare module "next-auth" {
     accessToken?: string;
     sub?: string;
     tenantId?: number;
+    logoUrl?: string;
   }
   interface User {
     role?: string;
     token?: string;
     id?: string;
     tenantId?: number;
+    logoUrl?: string;
   }
   interface Session {
     user: {
@@ -26,6 +28,7 @@ declare module "next-auth" {
       accessToken?: string;
       id?: string;
       tenantId?: number;
+      logoUrl?: string;
     } & DefaultSession["user"];
   }
 }

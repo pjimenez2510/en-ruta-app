@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 import { ColorPicker } from "../ui/color-picker";
 import { LogoUploader } from "../ui/logo-uploader";
+import { useTenantColors } from "@/core/context/tenant-context";
 import {
   Colors,
   ColorPickerState,
@@ -31,6 +32,7 @@ export const AppearanceForm = ({
 }: AppearanceFormProps) => {
   const [colors, setColors] = useState<Colors>(initialColors);
   const [logoPreview, setLogoPreview] = useState<string | null>(initialLogoUrl);
+  const { setLogoUrl } = useTenantColors();
   const [showColorPicker, setShowColorPicker] = useState<ColorPickerState>({
     primario: false,
     secundario: false,
@@ -74,6 +76,7 @@ export const AppearanceForm = ({
   const handleReset = () => {
     setColors(initialColors);
     setLogoPreview(initialLogoUrl);
+    setLogoUrl(initialLogoUrl);
     onReset();
   };
 

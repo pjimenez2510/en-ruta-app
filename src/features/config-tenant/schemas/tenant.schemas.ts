@@ -22,15 +22,9 @@ export const socialFormSchema = z.object({
 });
 
 export const soporteFormSchema = z.object({
-  emailSoporte: z.string().email({
-    message: "Ingrese un correo electrónico válido.",
-  }),
-  telefonoSoporte: z.string().min(1, {
-    message: "El teléfono de soporte es requerido.",
-  }),
-  horarioAtencion: z.string().min(1, {
-    message: "El horario de atención es requerido.",
-  }),
+  emailSoporte: z.string().email("Email inválido").optional().or(z.literal("")),
+  telefonoSoporte: z.string().optional().or(z.literal("")),
+  horarioAtencion: z.string().optional().or(z.literal("")),
 });
 
 export type GeneralFormValues = z.infer<typeof generalFormSchema>;
