@@ -38,15 +38,15 @@ import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { useFindAllResolucionesAntQuery } from "../hooks/use-resolucion-ant-queries";
 import { useDeleteResolucionAntMutation } from "../hooks/use-resolucion-ant-mutations";
-import type { ResolucionAnt, ResolucionAntFilter } from "../interfaces/resolucion-ant.interface";
+import type { ResolucionAntFilter } from "../interfaces/resolucion-ant.interface";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export function ResolucionesAntTable() {
   const router = useRouter();
-  const [filter, setFilter] = useState<ResolucionAntFilter>({});
+  const [filter] = useState<ResolucionAntFilter>({});
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: resoluciones = [], isLoading, error } = useFindAllResolucionesAntQuery(filter);
+  const { data: resoluciones = [], isLoading } = useFindAllResolucionesAntQuery(filter);
   const deleteMutation = useDeleteResolucionAntMutation();
 
   // Filter resoluciones based on search term

@@ -6,8 +6,6 @@ import type {
   ResolucionAntCreate,
   ResolucionAntUpdate,
   ResolucionAntFilter,
-  ResolucionAntResponse,
-  ResolucionesAntResponse,
 } from "../interfaces/resolucion-ant.interface";
 
 export class ResolucionAntService {
@@ -41,7 +39,7 @@ export class ResolucionAntService {
         params.toString() ? `?${params.toString()}` : ''
       }`;
 
-      const response = await this.axiosClient.get<ResolucionAnt[]>(API_ROUTES.RESOLUCIONES_ANT.GET_ALL, {params});
+      const response = await this.axiosClient.get<ResolucionAnt[]>(url, {params});
       return response.data.data;
     } catch (error) {
       throw error;

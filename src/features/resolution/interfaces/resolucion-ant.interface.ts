@@ -13,9 +13,9 @@ export interface ResolucionAntBase {
     id: number;
   }
   
-  export interface ResolucionAntCreate extends ResolucionAntBase {}
+  export type ResolucionAntCreate = ResolucionAntBase;
   
-  export interface ResolucionAntUpdate extends ResolucionAntBase {}
+  export type ResolucionAntUpdate = ResolucionAntBase;
   
   export interface ResolucionAntFilter {
     numeroResolucion?: string;

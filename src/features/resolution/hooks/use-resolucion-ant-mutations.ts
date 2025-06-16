@@ -28,7 +28,7 @@ export const useUpdateResolucionAntMutation = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: ResolucionAntUpdate }) =>
       service.update(id, data),
-    onSuccess: (_, { id }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: RESOLUCION_ANT_QUERY_KEYS.key
       });
