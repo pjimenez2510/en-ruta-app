@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useBuses } from "../hooks/use-buses";
@@ -9,6 +9,7 @@ import { BusDetailsModal } from "../components/bus-details-modal";
 import { toast } from "sonner";
 import { Bus } from "../interfaces/bus.interface";
 import { useRouter } from "next/navigation";
+import { BusFilters } from "../components/bus-filters";
 
 export const BusesView = () => {
   const {
@@ -25,6 +26,19 @@ export const BusesView = () => {
   const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [filters, setFilters] = useState<BusFilters>({});
+
+  const filteredBuses = useMemo(() => {
+    return buses.filter(bus => {
+      const matchNumero = !filters.numero || bus.numero.toString().includes(filters.numero);
+      const matchPlaca = !filters.placa || bus.placa.toLowerCase().includes(filters.placa.toLowerCase());
+      const matchEstado = !filters.estado || filters.estado === "all" || bus.estado === filters.estado;
+      const matchModelo = !filters.modeloBusId || bus.modeloBusId === filters.modeloBusId;
+      const matchAnio = !filters.anioFabricacion || bus.anioFabricacion === filters.anioFabricacion;
+
+      return matchNumero && matchPlaca && matchEstado && matchModelo && matchAnio;
+    });
+  }, [buses, filters]);
 
   const handleSetMantenimiento = async (id: string) => {
     try {
@@ -101,15 +115,19 @@ export const BusesView = () => {
         </Button>
       </div>
 
-      <BusTable
-        buses={buses}
-        onEdit={handleEdit}
-        onSetMantenimiento={handleSetMantenimiento}
-        onSetActivo={handleSetActivo}
-        onSetRetirado={handleSetRetirado}
-        onViewDetails={handleViewDetails}
-        isLoadingDetails={isLoadingDetails}
-      />
+      <BusFilters onFiltersChange={setFilters} />
+
+      <div className="bg-white rounded-lg shadow">
+        <BusTable
+          buses={filteredBuses}
+          onEdit={handleEdit}
+          onSetMantenimiento={handleSetMantenimiento}
+          onSetActivo={handleSetActivo}
+          onSetRetirado={handleSetRetirado}
+          onViewDetails={handleViewDetails}
+          isLoadingDetails={isLoadingDetails}
+        />
+      </div>
 
       <BusDetailsModal
         bus={selectedBus}
