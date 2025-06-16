@@ -1,12 +1,24 @@
 import { createAuthApi } from '@/core/infrastructure/auth-axios';
-import { Trip, CreateTripDTO } from '../interfaces/trips.interface';
+import { Trip, CreateTripDTO, TripFilters } from '../interfaces/trips.interface';
 
 const BASE_URL = '/viajes';
 
-export const TripsService = {
-  getAll: async (): Promise<Trip[]> => {
+export const TripsService = {  getAll: async (filters?: TripFilters): Promise<Trip[]> => {
     const api = await createAuthApi();
-    const response = await api.get(BASE_URL);
+    const queryParams = new URLSearchParams();
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${BASE_URL}?${queryString}` : BASE_URL;
+    
+    const response = await api.get(url);
     return response.data.data;
   },
 

@@ -34,10 +34,16 @@ export interface Trip {
 }
 
 export interface TripFilters {
-  fecha?: Date;
-  estado?: Trip['estado'];
   rutaId?: number;
+  horarioRutaId?: number;
   busId?: number;
+  conductorId?: number;
+  ayudanteId?: number;
+  fecha?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  estado?: Trip['estado'];
+  generacion?: 'AUTOMATICA' | 'MANUAL';
 }
 
 export interface CreateTripDTO {

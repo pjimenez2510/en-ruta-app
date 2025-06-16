@@ -23,7 +23,7 @@ import { MoreVertical, Edit, Trash2, Eye } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export const TripsTable = () => {
-  const { trips, isLoading, createTrip, updateTrip, deleteTrip } = useTrips();
+  const { trips, isLoading, isFetching, createTrip, updateTrip, deleteTrip } = useTrips();
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
@@ -50,15 +50,22 @@ export const TripsTable = () => {
       setTripToDelete(null);
     }
   };
-
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
-  return (
-    <div className="space-y-4">
+  return (    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Hoja de Ruta</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold">Hoja de Ruta</h2>
+          {isFetching && !isLoading && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+          )}
+        </div>
         <Dialog>
           <DialogTrigger asChild>
             <Button>Crear Viaje</Button>
