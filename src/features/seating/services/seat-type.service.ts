@@ -1,5 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
-import type { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { SeatType } from '../interfaces/seat-type.interface';
 
 interface ApiResponse<T> {
@@ -11,19 +10,24 @@ interface ApiResponse<T> {
 const api: AxiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL,
     headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     },
 });
 
-export const getAll = async (token: string | null = null): Promise<SeatType[]> => {
+const BASE_URL = "/tipo-asientos";
+
+export const getAll = async (token: string): Promise<SeatType[]> => {
     try {
-        const response = await api.get('/tipo-asientos', {
-            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        const response = await api.get(BASE_URL, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
         });
         return response.data.data;
     } catch (error) {
-        handleError(error);
-        return [];
+        console.error('Error fetching seat types:', error);
+        throw new Error('Error al obtener los tipos de asientos');
     }
 };
 

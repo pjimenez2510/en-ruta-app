@@ -10,15 +10,27 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { SeatType } from "../interfaces/seat-type.interface";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 interface SeatTypeTableProps {
   seatTypes: SeatType[];
-  onEdit: (seatType: SeatType) => void;
-  onDelete: (id: number) => void;
+  onEdit: (seatType: SeatType) => Promise<void>;
+  onDelete: (id: number) => Promise<void>;
 }
 
 export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProps) => {
+  const [loadingStates, setLoadingStates] = useState<{[key: number]: boolean}>({});
+
+  const handleAction = async (action: () => Promise<void>, seatTypeId: number) => {
+    try {
+      setLoadingStates(prev => ({ ...prev, [seatTypeId]: true }));
+      await action();
+    } finally {
+      setLoadingStates(prev => ({ ...prev, [seatTypeId]: false }));
+    }
+  };
+
   return (
     <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
       <Table>
@@ -26,7 +38,7 @@ export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProp
           <TableRow>
             <TableHead className="px-4 py-3">Nombre</TableHead>
             <TableHead className="px-4 py-3">Descripción</TableHead>
-            <TableHead className="px-4 py-3">Precio Adicional</TableHead>
+            <TableHead className="px-4 py-3">Factor Precio</TableHead>
             <TableHead className="px-4 py-3">Color</TableHead>
             <TableHead className="px-4 py-3">Icono</TableHead>
             <TableHead className="px-4 py-3">Estado</TableHead>
@@ -64,18 +76,28 @@ export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProp
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onEdit(seatType)}
+                  onClick={() => handleAction(async () => onEdit(seatType), seatType.id)}
+                  disabled={loadingStates[seatType.id]}
                 >
-                  <Pencil className="w-4 h-4 mr-1" />
+                  {loadingStates[seatType.id] ? (
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  ) : (
+                    <Pencil className="w-4 h-4 mr-1" />
+                  )}
                   Editar
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-red-600 hover:bg-red-50"
-                  onClick={() => onDelete(seatType.id)}
+                  onClick={() => handleAction(async () => onDelete(seatType.id), seatType.id)}
+                  disabled={loadingStates[seatType.id]}
                 >
-                  <Trash2 className="w-4 h-4 mr-1" />
+                  {loadingStates[seatType.id] ? (
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4 mr-1" />
+                  )}
                   Eliminar
                 </Button>
               </TableCell>
