@@ -25,11 +25,18 @@ export const API_ROUTES = {
     DELETE: "/tenants/:id",
   },
   CONFIG_TENANT: {
-    GET_ALL:"/configuraciones-tenant",
-    POST:"/configuraciones-tenant",
-    GET_BY_ID:"/configuraciones-tenant/:id",
-    UPDATE:"/configuraciones-tenant/:id",
-    DELETE:"/configuraciones-tenant/:id",
+    GET_ALL: "/configuraciones-tenant",
+    POST: "/configuraciones-tenant",
+    GET_BY_ID: "/configuraciones-tenant/:id",
+    UPDATE: "/configuraciones-tenant/:id",
+    DELETE: "/configuraciones-tenant/:id",
+  },
+  RESOLUCIONES_ANT: {
+    GET_ALL: "/resoluciones-ant",
+    POST: "/resoluciones-ant",
+    GET_BY_ID: "/resoluciones-ant/:id",
+    UPDATE: "/resoluciones-ant/:id",
+    DELETE: "/resoluciones-ant/:id",
   },
   RUTAS: {
     GET_ALL: "/rutas",

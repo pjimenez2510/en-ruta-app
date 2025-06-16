@@ -54,8 +54,9 @@ export class ApiErrorHandler {
 
   static handle(error: AxiosError<ErrorResponseData>): ResponseErrorAPI {
     const apiError: ResponseErrorAPI = {
+      statusCode: 500,
       message: 'Un error inesperado ocurrió',
-      errors: [],
+      error: [],
     }
 
     if (error.response) {
@@ -65,12 +66,12 @@ export class ApiErrorHandler {
       handler.handle?.()
 
       apiError.message = error.response.data?.message || handler.message
-      apiError.errors = error.response.data?.errors
+      apiError.error = error.response.data?.errors
     } else if (error.request) {
       apiError.message = this.handleRequestError(error)
     }
 
-    this.logError(error, apiError)
+
 
     return apiError
   }

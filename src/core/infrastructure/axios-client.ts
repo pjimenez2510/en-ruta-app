@@ -96,21 +96,9 @@ class AxiosClient {
 
     this.axiosInstance.interceptors.response.use(
       (response) => {
-        console.log("=== Axios Response ===");
-        console.log("Status:", response.status);
-        console.log("Headers:", response.headers);
-        console.log("Data:", response.data);
         return response;
       },
       (error) => {
-        console.error("=== Axios Response Error ===");
-        console.error("Status:", error.response?.status);
-        console.error("Data:", error.response?.data);
-        console.error("Config:", {
-          url: error.config?.url,
-          method: error.config?.method,
-          baseURL: error.config?.baseURL,
-        });
         return Promise.reject(error);
       }
     );
