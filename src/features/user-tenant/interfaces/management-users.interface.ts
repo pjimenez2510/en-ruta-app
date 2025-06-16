@@ -97,5 +97,7 @@ export interface UserTenantResponse {
 }
 
 export interface SRIResponse {
-  nombreCompleto: string;
+  contribuyente?: {
+    nombreComercial: string;
+  };
 }
