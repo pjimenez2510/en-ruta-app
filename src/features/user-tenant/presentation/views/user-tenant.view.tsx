@@ -23,6 +23,7 @@ const ManagementUsersView = () => {
     isEditing,
     dialogOpen,
     error,
+    isLoading,
     setFormData,
     setConfirmPassword,
     setShowPassword,
@@ -64,40 +65,72 @@ const ManagementUsersView = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Cédula</TableHead>
+                <TableHead>Documento</TableHead>
                 <TableHead>Nombre Completo</TableHead>
                 <TableHead>Rol</TableHead>
+                <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.cedula}>
-                  <TableCell>{user.cedula}</TableCell>
-                  <TableCell>{user.nombreCompleto}</TableCell>
-                  <TableCell>
-                    {user.rol === "chofer" ? "Chofer" : "Vendedor de Boletos"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(user)}
-                      className="mr-2"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(user.cedula)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">
+                    Cargando...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      {user.infoPersonal?.numeroDocumento || "No asignado"}
+                    </TableCell>
+                    <TableCell>
+                      {user.infoPersonal
+                        ? `${user.infoPersonal.nombres} ${user.infoPersonal.apellidos}`
+                        : user.usuario.username}
+                    </TableCell>
+                    <TableCell>
+                      {user.rol === "CONDUCTOR"
+                        ? "Conductor"
+                        : user.rol === "AYUDANTE"
+                        ? "Ayudante"
+                        : user.rol === "OFICINISTA"
+                        ? "Oficinista"
+                        : "Administrador"}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          user.activo
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {user.activo ? "Activo" : "Inactivo"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(user)}
+                        className="mr-2"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(user.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

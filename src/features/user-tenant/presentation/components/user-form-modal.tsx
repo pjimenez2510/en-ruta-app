@@ -18,20 +18,26 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, EyeOff, Search } from "lucide-react";
 
+interface FormData {
+  id?: number;
+  numeroDocumento: string;
+  nombres: string;
+  apellidos: string;
+  password: string;
+  rol: "CONDUCTOR" | "AYUDANTE" | "OFICINISTA" | "ADMIN_COOPERATIVA";
+  email?: string;
+  telefono?: string;
+}
+
 interface UserFormModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   isEditing: boolean;
-  formData: {
-    cedula: string;
-    nombreCompleto: string;
-    rol: "chofer" | "vendedor";
-    password: string;
-  };
+  formData: FormData;
   confirmPassword: string;
   showPassword: boolean;
   error: string | null;
-  onFormDataChange: (data: any) => void;
+  onFormDataChange: (data: FormData) => void;
   onConfirmPasswordChange: (value: string) => void;
   onShowPasswordChange: (value: boolean) => void;
   onCedulaSearch: () => void;
@@ -67,15 +73,15 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="cedula">Cédula</Label>
+            <Label htmlFor="numeroDocumento">Número de Documento</Label>
             <div className="flex gap-2">
               <Input
-                id="cedula"
-                value={formData.cedula}
+                id="numeroDocumento"
+                value={formData.numeroDocumento}
                 onChange={(e) => {
                   const value = e.target.value.replace(/\D/g, "");
                   if (value.length <= 13) {
-                    onFormDataChange({ ...formData, cedula: value });
+                    onFormDataChange({ ...formData, numeroDocumento: value });
                   }
                 }}
                 disabled={isEditing}
@@ -86,7 +92,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 size="icon"
                 onClick={onCedulaSearch}
                 disabled={
-                  formData.cedula.length !== 10 && formData.cedula.length !== 13
+                  formData.numeroDocumento.length !== 10 &&
+                  formData.numeroDocumento.length !== 13
                 }
               >
                 <Search className="h-4 w-4" />
@@ -95,14 +102,30 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nombreCompleto">Nombre Completo</Label>
+            <Label htmlFor="nombres">Nombres</Label>
             <Input
-              id="nombreCompleto"
-              value={formData.nombreCompleto}
+              id="nombres"
+              value={formData.nombres}
               onChange={(e) =>
                 onFormDataChange({
                   ...formData,
-                  nombreCompleto: e.target.value,
+                  nombres: e.target.value,
+                })
+              }
+              disabled
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="apellidos">Apellidos</Label>
+            <Input
+              id="apellidos"
+              value={formData.apellidos}
+              onChange={(e) =>
+                onFormDataChange({
+                  ...formData,
+                  apellidos: e.target.value,
                 })
               }
               disabled
@@ -114,7 +137,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             <Label htmlFor="rol">Rol</Label>
             <Select
               value={formData.rol}
-              onValueChange={(value: "chofer" | "vendedor") =>
+              onValueChange={(value: FormData["rol"]) =>
                 onFormDataChange({ ...formData, rol: value })
               }
             >
@@ -122,10 +145,41 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 <SelectValue placeholder="Selecciona un rol" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="chofer">Chofer</SelectItem>
-                <SelectItem value="vendedor">Vendedor de Boletos</SelectItem>
+                <SelectItem value="CONDUCTOR">Conductor</SelectItem>
+                <SelectItem value="AYUDANTE">Ayudante</SelectItem>
+                <SelectItem value="OFICINISTA">Oficinista</SelectItem>
+                <SelectItem value="ADMIN_COOPERATIVA">Administrador</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Correo Electrónico</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email || ""}
+              onChange={(e) =>
+                onFormDataChange({
+                  ...formData,
+                  email: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="telefono">Teléfono</Label>
+            <Input
+              id="telefono"
+              value={formData.telefono || ""}
+              onChange={(e) =>
+                onFormDataChange({
+                  ...formData,
+                  telefono: e.target.value,
+                })
+              }
+            />
           </div>
 
           <div className="space-y-2">

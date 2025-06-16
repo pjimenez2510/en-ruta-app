@@ -1,7 +1,10 @@
 import { createAuthApi } from "@/core/infrastructure/auth-axios";
 import { API_ROUTES } from "@/core/constants/api-routes";
 import type {
-  User,
+  UserTenant,
+  UserTenantResponse,
+  CreateUserTenantDto,
+  UpdateUserTenantDto,
   SRIResponse,
 } from "@/core/interfaces/management-users.interface";
 
@@ -22,10 +25,12 @@ const buildUrl = (
 
 export const managementUsersService = {
   // Obtener todos los usuarios
-  getAllUsers: async (): Promise<User[]> => {
+  getAllUsers: async (): Promise<UserTenant[]> => {
     try {
       const api = await createAuthApi();
-      const { data } = await api.get(API_ROUTES.USER_TENANT.GET_ALL);
+      const { data } = await api.get<UserTenantResponse>(
+        API_ROUTES.USER_TENANT.GET_ALL
+      );
       return data.data;
     } catch (error) {
       console.error("Error en managementUsersService.getAllUsers:", error);
@@ -34,10 +39,13 @@ export const managementUsersService = {
   },
 
   // Crear un nuevo usuario
-  createUser: async (userData: Omit<User, "id">): Promise<User> => {
+  createUser: async (userData: CreateUserTenantDto): Promise<UserTenant> => {
     try {
       const api = await createAuthApi();
-      const { data } = await api.post(API_ROUTES.USER_TENANT.POST, userData);
+      const { data } = await api.post<UserTenantResponse>(
+        API_ROUTES.USER_TENANT.POST,
+        userData
+      );
       return data.data[0];
     } catch (error) {
       console.error("Error en managementUsersService.createUser:", error);
@@ -46,11 +54,11 @@ export const managementUsersService = {
   },
 
   // Obtener un usuario por ID
-  getUserById: async (id: number): Promise<User> => {
+  getUserById: async (id: number): Promise<UserTenant> => {
     try {
       const api = await createAuthApi();
       const url = buildUrl(API_ROUTES.USER_TENANT.GET_BY_ID, { id });
-      const { data } = await api.get(url);
+      const { data } = await api.get<UserTenantResponse>(url);
       return data.data[0];
     } catch (error) {
       console.error("Error en managementUsersService.getUserById:", error);
@@ -59,11 +67,14 @@ export const managementUsersService = {
   },
 
   // Actualizar un usuario
-  updateUser: async (id: number, userData: Partial<User>): Promise<User> => {
+  updateUser: async (
+    id: number,
+    userData: UpdateUserTenantDto
+  ): Promise<UserTenant> => {
     try {
       const api = await createAuthApi();
       const url = buildUrl(API_ROUTES.USER_TENANT.UPDATE, { id });
-      const { data } = await api.put(url, userData);
+      const { data } = await api.put<UserTenantResponse>(url, userData);
       return data.data[0];
     } catch (error) {
       console.error("Error en managementUsersService.updateUser:", error);
@@ -84,7 +95,10 @@ export const managementUsersService = {
   },
 
   // Asignar información personal a un usuario
-  assignPersonalInfo: async (id: number, personalInfo: any): Promise<User> => {
+  assignPersonalInfo: async (
+    id: number,
+    personalInfo: any
+  ): Promise<UserTenant> => {
     try {
       const api = await createAuthApi();
       const url = buildUrl(API_ROUTES.USER_TENANT.POST_PERSONAL_INFO, { id });

@@ -1,67 +1,142 @@
 "use client";
-import { useState, useEffect } from "react";
-import { User } from "@/core/interfaces/management-users.interface";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getUsersFromStorage,
-  saveUsersToStorage,
-  fetchSRIData,
-} from "../services/management-users.service";
+  UserTenant,
+  SRIResponse,
+} from "@/core/interfaces/management-users.interface";
+import { managementUsersService } from "../services/management-users.service";
+
+interface FormData {
+  id?: number;
+  numeroDocumento: string;
+  nombres: string;
+  apellidos: string;
+  password: string;
+  rol: "CONDUCTOR" | "AYUDANTE" | "OFICINISTA" | "ADMIN_COOPERATIVA";
+  email?: string;
+  telefono?: string;
+}
 
 interface UseManagementUsersReturn {
-  users: User[];
-  formData: User;
+  users: UserTenant[];
+  formData: FormData;
   confirmPassword: string;
   showPassword: boolean;
   isEditing: boolean;
   dialogOpen: boolean;
   error: string | null;
-  setFormData: (data: User) => void;
+  isLoading: boolean;
+  setFormData: (data: FormData) => void;
   setConfirmPassword: (password: string) => void;
   setShowPassword: (show: boolean) => void;
   setDialogOpen: (open: boolean) => void;
   handleCedulaSearch: () => Promise<void>;
   handleSubmit: (e: React.FormEvent) => void;
-  handleEdit: (user: User) => void;
-  handleDelete: (cedula: string) => void;
+  handleEdit: (user: UserTenant) => void;
+  handleDelete: (id: number) => void;
   resetForm: () => void;
 }
 
-const defaultFormData: User = {
-  cedula: "",
-  nombreCompleto: "",
+const defaultFormData: FormData = {
+  numeroDocumento: "",
+  nombres: "",
+  apellidos: "",
   password: "",
-  rol: "vendedor",
+  rol: "CONDUCTOR",
 };
 
 export function useManagementUsers(): UseManagementUsersReturn {
-  const [users, setUsers] = useState<User[]>([]);
-  const [formData, setFormData] = useState<User>(defaultFormData);
+  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState<FormData>(defaultFormData);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true);
-    const savedUsers = getUsersFromStorage();
-    setUsers(savedUsers);
-  }, []);
+  // Query para obtener usuarios
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: managementUsersService.getAllUsers,
+  });
 
-  useEffect(() => {
-    if (isClient) {
-      saveUsersToStorage(users);
-    }
-  }, [users, isClient]);
+  // Mutación para crear usuario
+  const createMutation = useMutation({
+    mutationFn: (data: FormData) => {
+      const userData = {
+        rol: data.rol,
+        infoPersonal: {
+          nombres: data.nombres,
+          apellidos: data.apellidos,
+          tipoDocumento: "CEDULA",
+          numeroDocumento: data.numeroDocumento,
+          telefono: data.telefono || "",
+          email: data.email || "",
+        },
+        password: data.password,
+      };
+      return managementUsersService.createUser(userData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      resetForm();
+    },
+    onError: (error: Error) => {
+      setError(error.message);
+    },
+  });
+
+  // Mutación para actualizar usuario
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: FormData }) => {
+      const userData = {
+        rol: data.rol,
+        infoPersonal: {
+          nombres: data.nombres,
+          apellidos: data.apellidos,
+          tipoDocumento: "CEDULA",
+          numeroDocumento: data.numeroDocumento,
+          telefono: data.telefono || "",
+          email: data.email || "",
+        },
+      };
+      return managementUsersService.updateUser(id, userData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      resetForm();
+    },
+    onError: (error: Error) => {
+      setError(error.message);
+    },
+  });
+
+  // Mutación para eliminar usuario
+  const deleteMutation = useMutation({
+    mutationFn: managementUsersService.deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error: Error) => {
+      setError(error.message);
+    },
+  });
 
   const handleCedulaSearch = async () => {
-    if (formData.cedula.length === 10 || formData.cedula.length === 13) {
+    if (
+      formData.numeroDocumento.length === 10 ||
+      formData.numeroDocumento.length === 13
+    ) {
       try {
-        const nombreCompleto = await fetchSRIData(formData.cedula);
+        const nombreCompleto = await managementUsersService.fetchSRIData(
+          formData.numeroDocumento
+        );
+        const [nombres, ...apellidos] = nombreCompleto.split(" ");
         setFormData((prev) => ({
           ...prev,
-          nombreCompleto,
+          nombres: nombres,
+          apellidos: apellidos.join(" "),
         }));
         setError(null);
       } catch (error) {
@@ -79,30 +154,36 @@ export function useManagementUsers(): UseManagementUsersReturn {
       return;
     }
 
-    if (isEditing) {
-      setUsers(
-        users.map((user) => (user.cedula === formData.cedula ? formData : user))
-      );
+    if (isEditing && formData.id) {
+      updateMutation.mutate({
+        id: formData.id,
+        data: formData,
+      });
     } else {
-      if (users.some((user) => user.cedula === formData.cedula)) {
-        setError("Ya existe un usuario con esta cédula");
-        return;
-      }
-      setUsers([...users, formData]);
+      createMutation.mutate(formData);
     }
-
-    resetForm();
   };
 
-  const handleEdit = (user: User) => {
-    setFormData(user);
-    setConfirmPassword(user.password);
+  const handleEdit = (user: UserTenant) => {
+    setFormData({
+      id: user.id,
+      numeroDocumento: user.infoPersonal?.numeroDocumento || "",
+      nombres: user.infoPersonal?.nombres || "",
+      apellidos: user.infoPersonal?.apellidos || "",
+      password: "",
+      rol: user.rol as FormData["rol"],
+      email: user.infoPersonal?.email,
+      telefono: user.infoPersonal?.telefono,
+    });
+    setConfirmPassword("");
     setIsEditing(true);
     setDialogOpen(true);
   };
 
-  const handleDelete = (cedula: string) => {
-    setUsers(users.filter((user) => user.cedula !== cedula));
+  const handleDelete = (id: number) => {
+    if (window.confirm("¿Está seguro de eliminar este usuario?")) {
+      deleteMutation.mutate(id);
+    }
   };
 
   const resetForm = () => {
@@ -121,6 +202,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
     isEditing,
     dialogOpen,
     error,
+    isLoading,
     setFormData,
     setConfirmPassword,
     setShowPassword,
