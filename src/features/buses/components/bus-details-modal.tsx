@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,50 +8,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Bus } from "../interfaces/bus.interface";
-import { BadgeCheck, AlertTriangle, Ban, BusFront } from "lucide-react";
+import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
+import { getAll as getAllSeatTypes } from "@/features/seating/services/seat-type.service";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { useSeatGridRenderer } from "../hooks/use-seat-grid-renderer";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { BusFront } from "lucide-react";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { getAll as getAllSeatTypes } from "@/features/seating/services/seat-type.service";
-import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
-import { useSession } from "next-auth/react";
-import { toast } from "react-hot-toast";
-import { useSeatGridRenderer } from "../hooks/use-seat-grid-renderer";
+import { getStatusColor, getStatusIcon } from "../utils/status-utils";
+import { SeatTypeLegend } from "./seat-type-legend";
 
 interface BusDetailsModalProps {
   bus: Bus | null;
   isOpen: boolean;
   onClose: () => void;
 }
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "ACTIVO":
-      return "bg-green-100 text-green-700";
-    case "MANTENIMIENTO":
-      return "bg-yellow-100 text-yellow-700";
-    case "RETIRADO":
-      return "bg-red-100 text-red-700";
-    default:
-      return "bg-gray-100 text-gray-700";
-  }
-};
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "ACTIVO":
-      return <BadgeCheck className="h-4 w-4" />;
-    case "MANTENIMIENTO":
-      return <AlertTriangle className="h-4 w-4" />;
-    case "RETIRADO":
-      return <Ban className="h-4 w-4" />;
-    default:
-      return null;
-  }
-};
 
 export const BusDetailsModal = ({ bus, isOpen, onClose }: BusDetailsModalProps) => {
   const { data: session } = useSession();
@@ -60,7 +36,7 @@ export const BusDetailsModal = ({ bus, isOpen, onClose }: BusDetailsModalProps) 
   useEffect(() => {
     const loadSeatTypes = async () => {
       try {
-        const types = await getAllSeatTypes(session?.user?.accessToken || null);
+        const types = await getAllSeatTypes(session?.user?.accessToken || "");
         setSeatTypes(types);
       } catch {
         toast.error('Error al cargar los tipos de asiento');
@@ -78,7 +54,7 @@ export const BusDetailsModal = ({ bus, isOpen, onClose }: BusDetailsModalProps) 
           <DialogTitle>Detalles del Bus</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="info" className="w-full">
+        <Tabs defaultValue="info">
           <TabsList className="mb-4">
             <TabsTrigger value="info">Información General</TabsTrigger>
             <TabsTrigger value="seats">Distribución de Asientos</TabsTrigger>
@@ -117,46 +93,49 @@ export const BusDetailsModal = ({ bus, isOpen, onClose }: BusDetailsModalProps) 
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <Card className="p-6">
-                  <h3 className="font-medium mb-4">Información Básica</h3>
-                  <dl className="space-y-4">
-                    <div className="grid grid-cols-2">
-                      <dt className="text-gray-500">Número</dt>
-                      <dd className="font-medium">{bus.numero}</dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-gray-500">Placa</dt>
-                      <dd className="font-medium">{bus.placa}</dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-gray-500">Marca</dt>
-                      <dd className="font-medium">{bus.modeloBus.marca}</dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-gray-500">Modelo</dt>
-                      <dd className="font-medium">{bus.modeloBus.modelo}</dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-gray-500">Año</dt>
-                      <dd className="font-medium">{bus.anioFabricacion}</dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-gray-500">Total Asientos</dt>
-                      <dd className="font-medium">{bus.totalAsientos}</dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-gray-500">Combustible</dt>
-                      <dd className="font-medium">{bus.tipoCombustible}</dd>
-                    </div>
-                  </dl>
-                </Card>
-              </div>
+              <Card className="p-6">
+                <h3 className="font-medium mb-4">Información Básica</h3>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-gray-500">Número</dt>
+                    <dd className="font-medium">{bus.numero}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-gray-500">Placa</dt>
+                    <dd className="font-medium">{bus.placa}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-gray-500">Marca</dt>
+                    <dd className="font-medium">{bus.modeloBus.marca}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-gray-500">Modelo</dt>
+                    <dd className="font-medium">{bus.modeloBus.modelo}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-gray-500">Año</dt>
+                    <dd className="font-medium">{bus.anioFabricacion}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-gray-500">Total Asientos</dt>
+                    <dd className="font-medium">{bus.totalAsientos}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-gray-500">Combustible</dt>
+                    <dd className="font-medium">{bus.tipoCombustible}</dd>
+                  </div>
+                </dl>
+              </Card>
             </div>
           </TabsContent>
 
           <TabsContent value="seats">
             <div className="space-y-8">
+              <div className="flex justify-end">
+                <div className="w-64">
+                  <SeatTypeLegend seatTypes={seatTypes} />
+                </div>
+              </div>
               {bus.pisos?.map((piso) => (
                 <Card key={piso.id} className="p-6">
                   <h3 className="font-medium mb-6">Piso {piso.numeroPiso}</h3>
