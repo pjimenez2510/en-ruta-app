@@ -9,7 +9,10 @@ import {
   Plus,
   List,
   ChevronDown,
-  Angry,
+  ChartLine,
+  FileText,
+  Map,
+  BaggageClaim,
 
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
@@ -39,7 +42,7 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { title: "Dashboard", path: "/main/dashboard", icon: Bus },
+  { title: "Dashboard", path: "/main/dashboard", icon: ChartLine },
   { title: "Usuarios", path: "/main/users", icon: Users },
   {
     title: "Unidades",
@@ -64,9 +67,9 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
-  { title: "Resoluciones", path: "/main/resolution", icon: Angry },
-  { title: "Rutas", path: "/main/routes", icon: Bus },
-	{ title: "Viajes", path: "/main/frequencies", icon: Bus },
+  { title: "Resoluciones", path: "/main/resolution", icon: FileText },
+  { title: "Rutas", path: "/main/routes", icon: Map},
+	{ title: "Viajes", path: "/main/frequencies", icon: BaggageClaim },
   { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
 ];

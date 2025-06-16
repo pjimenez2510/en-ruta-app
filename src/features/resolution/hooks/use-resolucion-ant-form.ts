@@ -1,5 +1,7 @@
 // features/resoluciones-ant/hooks/use-resolucion-ant-form.ts
-import { useForm, SubmitHandler } from "react-hook-form";
+"use client";
+
+import { useForm, SubmitHandler, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -12,6 +14,13 @@ import {
   useUpdateResolucionAntMutation,
 } from "./use-resolucion-ant-mutations";
 import type { ResolucionAnt } from "../interfaces/resolucion-ant.interface";
+
+interface UseResolucionAntFormReturn {
+  form: UseFormReturn<ResolucionAntSchema>;
+  onSubmit: SubmitHandler<ResolucionAntSchema>;
+  isSubmitting: boolean;
+  isEditing: boolean;
+}
 
 // Mapper functions
 const mapResolucionAntToSchema = (resolucion?: ResolucionAnt): ResolucionAntSchema => {
@@ -54,7 +63,7 @@ const mapSchemaToUpdatePayload = (data: ResolucionAntSchema) => ({
   activo: data.activo,
 });
 
-export const useResolucionAntForm = (resolucion?: ResolucionAnt) => {
+export const useResolucionAntForm = (resolucion?: ResolucionAnt): UseResolucionAntFormReturn => {
   const isEditing = !!resolucion;
   const router = useRouter();
 
@@ -70,7 +79,7 @@ export const useResolucionAntForm = (resolucion?: ResolucionAnt) => {
     try {
       if (isEditing) {
         await updateMutation.mutateAsync({
-          id: resolucion.id,
+          id: resolucion!.id,
           data: mapSchemaToUpdatePayload(data),
         });
         toast.success("Resolución ANT actualizada exitosamente");
@@ -89,10 +98,12 @@ export const useResolucionAntForm = (resolucion?: ResolucionAnt) => {
     }
   };
 
+  const isSubmitting = form.formState.isSubmitting || createMutation.isPending || updateMutation.isPending;
+
   return {
     form,
     onSubmit,
-    isSubmitting: form.formState.isSubmitting,
+    isSubmitting,
     isEditing,
   };
 };

@@ -19,11 +19,9 @@ export class ApiErrorHandler {
     },
     401: {
       message: 'No autorizado',
-      handle: () => useAuthStore.getState().logout(),
     },
     403: {
       message: 'No tiene permisos para realizar esta acción',
-      handle: () => useAuthStore.getState().logout(),
     },
     404: {
       message: 'Recurso no encontrado',
