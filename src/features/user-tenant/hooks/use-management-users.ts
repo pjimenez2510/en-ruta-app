@@ -9,6 +9,7 @@ import { managementUsersService } from "../services/management-users.service";
 
 interface FormData {
   id?: number;
+  username: string;
   numeroDocumento: string;
   nombres: string;
   apellidos: string;
@@ -16,6 +17,15 @@ interface FormData {
   rol: "CONDUCTOR" | "AYUDANTE" | "OFICINISTA" | "ADMIN_COOPERATIVA";
   email?: string;
   telefono?: string;
+  fechaNacimiento?: string;
+  direccion?: string;
+  ciudadResidencia?: string;
+  genero?: string;
+  fotoPerfil?: string;
+  fechaContratacion?: string;
+  licenciaConducir?: string;
+  tipoLicencia?: string;
+  fechaExpiracionLicencia?: string;
 }
 
 interface UseManagementUsersReturn {
@@ -39,6 +49,7 @@ interface UseManagementUsersReturn {
 }
 
 const defaultFormData: FormData = {
+  username: "",
   numeroDocumento: "",
   nombres: "",
   apellidos: "",
@@ -66,6 +77,10 @@ export function useManagementUsers(): UseManagementUsersReturn {
     mutationFn: (data: FormData) => {
       const userData = {
         rol: data.rol,
+        password: data.password,
+        usuario: {
+          username: data.username,
+        },
         infoPersonal: {
           nombres: data.nombres,
           apellidos: data.apellidos,
@@ -73,8 +88,16 @@ export function useManagementUsers(): UseManagementUsersReturn {
           numeroDocumento: data.numeroDocumento,
           telefono: data.telefono || "",
           email: data.email || "",
+          fechaNacimiento: data.fechaNacimiento || "",
+          direccion: data.direccion || "",
+          ciudadResidencia: data.ciudadResidencia || "",
+          genero: data.genero || "",
+          fotoPerfil: data.fotoPerfil || "",
+          fechaContratacion: data.fechaContratacion || "",
+          licenciaConducir: data.licenciaConducir || "",
+          tipoLicencia: data.tipoLicencia || "",
+          fechaExpiracionLicencia: data.fechaExpiracionLicencia || "",
         },
-        password: data.password,
       };
       return managementUsersService.createUser(userData);
     },
@@ -92,6 +115,9 @@ export function useManagementUsers(): UseManagementUsersReturn {
     mutationFn: ({ id, data }: { id: number; data: FormData }) => {
       const userData = {
         rol: data.rol,
+        usuario: {
+          username: data.username,
+        },
         infoPersonal: {
           nombres: data.nombres,
           apellidos: data.apellidos,
@@ -99,6 +125,15 @@ export function useManagementUsers(): UseManagementUsersReturn {
           numeroDocumento: data.numeroDocumento,
           telefono: data.telefono || "",
           email: data.email || "",
+          fechaNacimiento: data.fechaNacimiento || "",
+          direccion: data.direccion || "",
+          ciudadResidencia: data.ciudadResidencia || "",
+          genero: data.genero || "",
+          fotoPerfil: data.fotoPerfil || "",
+          fechaContratacion: data.fechaContratacion || "",
+          licenciaConducir: data.licenciaConducir || "",
+          tipoLicencia: data.tipoLicencia || "",
+          fechaExpiracionLicencia: data.fechaExpiracionLicencia || "",
         },
       };
       return managementUsersService.updateUser(id, userData);
@@ -167,13 +202,23 @@ export function useManagementUsers(): UseManagementUsersReturn {
   const handleEdit = (user: UserTenant) => {
     setFormData({
       id: user.id,
+      username: user.usuario?.username || "",
       numeroDocumento: user.infoPersonal?.numeroDocumento || "",
       nombres: user.infoPersonal?.nombres || "",
       apellidos: user.infoPersonal?.apellidos || "",
       password: "",
       rol: user.rol as FormData["rol"],
-      email: user.infoPersonal?.email,
-      telefono: user.infoPersonal?.telefono,
+      email: user.infoPersonal?.email || "",
+      telefono: user.infoPersonal?.telefono || "",
+      fechaNacimiento: user.infoPersonal?.fechaNacimiento || "",
+      direccion: user.infoPersonal?.direccion || "",
+      ciudadResidencia: user.infoPersonal?.ciudadResidencia || "",
+      genero: user.infoPersonal?.genero || "",
+      fotoPerfil: user.infoPersonal?.fotoPerfil || "",
+      fechaContratacion: user.infoPersonal?.fechaContratacion || "",
+      licenciaConducir: user.infoPersonal?.licenciaConducir || "",
+      tipoLicencia: user.infoPersonal?.tipoLicencia || "",
+      fechaExpiracionLicencia: user.infoPersonal?.fechaExpiracionLicencia || "",
     });
     setConfirmPassword("");
     setIsEditing(true);

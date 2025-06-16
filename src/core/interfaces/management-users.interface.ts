@@ -32,16 +32,10 @@ export interface InfoPersonal {
 
 export interface UserTenant {
   id: number;
-  fechaAsignacion: string;
-  tenantId: number;
   rol: string;
-  activo: boolean;
-  infoPersonal: InfoPersonal | null;
-  usuario: Usuario;
-}
-
-export interface CreateUserTenantDto {
-  rol: string;
+  usuario: {
+    username: string;
+  };
   infoPersonal: {
     nombres: string;
     apellidos: string;
@@ -49,19 +43,64 @@ export interface CreateUserTenantDto {
     numeroDocumento: string;
     telefono: string;
     email: string;
+    fechaNacimiento: string;
+    direccion: string;
+    ciudadResidencia: string;
+    genero: string;
+    fotoPerfil: string;
+    fechaContratacion: string;
+    licenciaConducir: string;
+    tipoLicencia: string;
+    fechaExpiracionLicencia: string;
   };
+}
+
+export interface CreateUserTenantDto {
+  rol: string;
   password: string;
+  usuario: {
+    username: string;
+  };
+  infoPersonal: {
+    nombres: string;
+    apellidos: string;
+    tipoDocumento: string;
+    numeroDocumento: string;
+    telefono: string;
+    email: string;
+    fechaNacimiento: string;
+    direccion: string;
+    ciudadResidencia: string;
+    genero: string;
+    fotoPerfil: string;
+    fechaContratacion: string;
+    licenciaConducir: string;
+    tipoLicencia: string;
+    fechaExpiracionLicencia: string;
+  };
 }
 
 export interface UpdateUserTenantDto {
-  rol?: string;
-  infoPersonal?: {
-    nombres?: string;
-    apellidos?: string;
-    tipoDocumento?: string;
-    numeroDocumento?: string;
-    telefono?: string;
-    email?: string;
+  rol: string;
+  usuario: {
+    username: string;
+  };
+  infoPersonal: {
+    nombres: string;
+    apellidos: string;
+    tipoDocumento: string;
+    numeroDocumento: string;
+    telefono: string;
+    email: string;
+    fechaNacimiento: string;
+    direccion: string;
+    ciudadResidencia: string;
+    genero: string;
+    fotoPerfil: string;
+    fechaContratacion: string;
+    licenciaConducir: string;
+    tipoLicencia: string;
+    fechaExpiracionLicencia: string;
   };
 }
 
@@ -73,7 +112,5 @@ export interface UserTenantResponse {
 }
 
 export interface SRIResponse {
-  contribuyente?: {
-    nombreComercial: string;
-  };
+  nombreCompleto: string;
 }
