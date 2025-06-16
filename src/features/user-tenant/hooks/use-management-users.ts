@@ -167,11 +167,13 @@ export function useManagementUsers(): UseManagementUsersReturn {
         const nombreCompleto = await managementUsersService.fetchSRIData(
           formData.numeroDocumento
         );
-        const [nombres, ...apellidos] = nombreCompleto.split(" ");
+        const partes = nombreCompleto.split(" ");
+        const nombres = partes.slice(0, 2).join(" ");
+        const apellidos = partes.slice(2).join(" ");
         setFormData((prev) => ({
           ...prev,
-          nombres: nombres,
-          apellidos: apellidos.join(" "),
+          nombres,
+          apellidos,
         }));
         setError(null);
       } catch (error) {
