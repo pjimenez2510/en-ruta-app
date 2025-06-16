@@ -42,26 +42,26 @@ export interface UserTenant {
 
 export interface CreateUserTenantDto {
   rol: string;
-  password: string;
   usuario: {
     username: string;
+    password: string;
   };
   infoPersonal: {
     nombres: string;
     apellidos: string;
     tipoDocumento: string;
     numeroDocumento: string;
-    telefono: string;
-    email: string;
-    fechaNacimiento: string;
-    direccion: string;
-    ciudadResidencia: string;
-    genero: "M" | "F" | "O" | undefined;
-    fotoPerfil: string;
-    fechaContratacion: string;
-    licenciaConducir: string;
-    tipoLicencia: string;
-    fechaExpiracionLicencia: string;
+    telefono?: string;
+    email?: string;
+    fechaNacimiento?: string;
+    direccion?: string;
+    ciudadResidencia?: string;
+    genero?: "M" | "F" | "O";
+    fotoPerfil?: string;
+    fechaContratacion?: string;
+    licenciaConducir?: string;
+    tipoLicencia?: string;
+    fechaExpiracionLicencia?: string;
   };
 }
 

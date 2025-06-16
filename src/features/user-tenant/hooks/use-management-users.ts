@@ -79,9 +79,9 @@ export function useManagementUsers(): UseManagementUsersReturn {
     mutationFn: (data: FormData) => {
       const userData = {
         rol: data.rol,
-        password: data.password,
         usuario: {
           username: data.username,
+          password: data.password,
         },
         infoPersonal: {
           nombres: data.nombres,
@@ -93,7 +93,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
           fechaNacimiento: data.fechaNacimiento || "",
           direccion: data.direccion || "",
           ciudadResidencia: data.ciudadResidencia || "",
-          genero: data.genero || undefined,
+          genero: data.genero || "M",
           fotoPerfil: data.fotoPerfil || "",
           fechaContratacion: data.fechaContratacion || "",
           licenciaConducir: data.licenciaConducir || "",
@@ -212,7 +212,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
             fechaNacimiento: formData.fechaNacimiento || "",
             direccion: formData.direccion || "",
             ciudadResidencia: formData.ciudadResidencia || "",
-            genero: formData.genero,
+            genero: formData.genero || "M",
             fotoPerfil: formData.fotoPerfil || "",
             fechaContratacion: formData.fechaContratacion || "",
             licenciaConducir: formData.licenciaConducir || "",
@@ -225,9 +225,9 @@ export function useManagementUsers(): UseManagementUsersReturn {
       } else {
         const createDto: CreateUserTenantDto = {
           rol: formData.rol,
-          password: formData.password,
           usuario: {
             username: formData.username,
+            password: formData.password,
           },
           infoPersonal: {
             nombres: formData.nombres,
@@ -239,7 +239,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
             fechaNacimiento: formData.fechaNacimiento || "",
             direccion: formData.direccion || "",
             ciudadResidencia: formData.ciudadResidencia || "",
-            genero: formData.genero,
+            genero: formData.genero || "M",
             fotoPerfil: formData.fotoPerfil || "",
             fechaContratacion: formData.fechaContratacion || "",
             licenciaConducir: formData.licenciaConducir || "",
