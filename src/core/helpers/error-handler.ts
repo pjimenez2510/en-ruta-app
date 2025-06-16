@@ -1,6 +1,5 @@
 import type { AxiosError } from 'axios'
 import { ResponseErrorAPI } from '../interfaces/api.interface'
-import { useAuthStore } from '@/features/auth/presentation/context/auth.store'
 
 interface ErrorResponseData {
   message?: string
