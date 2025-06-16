@@ -42,7 +42,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { title: "Dashboard", path: "/main/dashboard", icon: Bus },
-  { title: "Usuarios", path: "/main/users", icon: Users },
+  { title: "Usuarios", path: "/main/user-tenant", icon: Users },
   {
     title: "Unidades",
     icon: Bus,

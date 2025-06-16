@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Pencil, Trash2 } from "lucide-react";
 import { useManagementUsers } from "@/features/user-tenant/hooks/use-management-users";
-import { UserFormModal } from "./components/user-form-modal";
+import { UserFormModal } from "../components/user-form-modal";
 
 const ManagementUsersView = () => {
   const {

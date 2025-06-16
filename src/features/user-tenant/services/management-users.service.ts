@@ -1,36 +1,117 @@
+import { createAuthApi } from "@/core/infrastructure/auth-axios";
+import { API_ROUTES } from "@/core/constants/api-routes";
+import type {
+  User,
+  SRIResponse,
+} from "@/core/interfaces/management-users.interface";
 
-import { User, SRIResponse } from "@/core/interfaces/management-users.interface";
+const SRI_API_URL =
+  "https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion";
 
-const SRI_API_URL = "https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion";
-
-export const getUsersFromStorage = (): User[] => {
-  try {
-    const savedUsers = localStorage.getItem('users');
-    return savedUsers ? JSON.parse(savedUsers) : [];
-  } catch {
-    return [];
-  }
+// Función auxiliar para reemplazar parámetros en la URL
+const buildUrl = (
+  path: string,
+  params: Record<string, string | number> = {}
+): string => {
+  let url = path;
+  Object.entries(params).forEach(([key, value]) => {
+    url = url.replace(`:${key}`, String(value));
+  });
+  return url;
 };
 
-export const saveUsersToStorage = (users: User[]): void => {
-  try {
-    localStorage.setItem('users', JSON.stringify(users));
-  } catch (error) {
-    console.error('Error saving users to localStorage:', error);
-  }
-};
-
-export const fetchSRIData = async (cedula: string): Promise<string> => {
-  try {
-    const response = await fetch(`${SRI_API_URL}/${cedula}`);
-    const data: SRIResponse = await response.json();
-    
-    if (!data.contribuyente?.nombreComercial) {
-      throw new Error("No se encontró información para esta cédula");
+export const managementUsersService = {
+  // Obtener todos los usuarios
+  getAllUsers: async (): Promise<User[]> => {
+    try {
+      const api = await createAuthApi();
+      const { data } = await api.get(API_ROUTES.USER_TENANT.GET_ALL);
+      return data.data;
+    } catch (error) {
+      console.error("Error en managementUsersService.getAllUsers:", error);
+      throw error;
     }
-    
-    return data.contribuyente.nombreComercial;
-  } catch (error) {
-    throw new Error("Error al buscar la información" + error);
-  }
-}; 
+  },
+
+  // Crear un nuevo usuario
+  createUser: async (userData: Omit<User, "id">): Promise<User> => {
+    try {
+      const api = await createAuthApi();
+      const { data } = await api.post(API_ROUTES.USER_TENANT.POST, userData);
+      return data.data[0];
+    } catch (error) {
+      console.error("Error en managementUsersService.createUser:", error);
+      throw error;
+    }
+  },
+
+  // Obtener un usuario por ID
+  getUserById: async (id: number): Promise<User> => {
+    try {
+      const api = await createAuthApi();
+      const url = buildUrl(API_ROUTES.USER_TENANT.GET_BY_ID, { id });
+      const { data } = await api.get(url);
+      return data.data[0];
+    } catch (error) {
+      console.error("Error en managementUsersService.getUserById:", error);
+      throw error;
+    }
+  },
+
+  // Actualizar un usuario
+  updateUser: async (id: number, userData: Partial<User>): Promise<User> => {
+    try {
+      const api = await createAuthApi();
+      const url = buildUrl(API_ROUTES.USER_TENANT.UPDATE, { id });
+      const { data } = await api.put(url, userData);
+      return data.data[0];
+    } catch (error) {
+      console.error("Error en managementUsersService.updateUser:", error);
+      throw error;
+    }
+  },
+
+  // Eliminar un usuario
+  deleteUser: async (id: number): Promise<void> => {
+    try {
+      const api = await createAuthApi();
+      const url = buildUrl(API_ROUTES.USER_TENANT.DELETE, { id });
+      await api.delete(url);
+    } catch (error) {
+      console.error("Error en managementUsersService.deleteUser:", error);
+      throw error;
+    }
+  },
+
+  // Asignar información personal a un usuario
+  assignPersonalInfo: async (id: number, personalInfo: any): Promise<User> => {
+    try {
+      const api = await createAuthApi();
+      const url = buildUrl(API_ROUTES.USER_TENANT.POST_PERSONAL_INFO, { id });
+      const { data } = await api.post(url, personalInfo);
+      return data.data[0];
+    } catch (error) {
+      console.error(
+        "Error en managementUsersService.assignPersonalInfo:",
+        error
+      );
+      throw error;
+    }
+  },
+
+  // Obtener información del SRI
+  fetchSRIData: async (cedula: string): Promise<string> => {
+    try {
+      const response = await fetch(`${SRI_API_URL}/${cedula}`);
+      const data: SRIResponse = await response.json();
+
+      if (!data.contribuyente?.nombreComercial) {
+        throw new Error("No se encontró información para esta cédula");
+      }
+
+      return data.contribuyente.nombreComercial;
+    } catch (error) {
+      throw new Error("Error al buscar la información: " + error);
+    }
+  },
+};
