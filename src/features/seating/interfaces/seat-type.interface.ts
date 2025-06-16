@@ -1,3 +1,5 @@
+import { IconName } from '../constants/available-icons';
+
 export interface SeatType {
     id: number;
     nombre: string;
@@ -5,6 +7,6 @@ export interface SeatType {
     factorPrecio: number;
     activo: boolean;
     color: string;
-    icono: string;
+    icono: IconName;
     tenantId: string;
 }
