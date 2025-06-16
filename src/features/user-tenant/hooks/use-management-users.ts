@@ -1,7 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import { User } from "@/core/interfaces/management-users.interface";
-import { getUsersFromStorage, saveUsersToStorage, fetchSRIData } from "../services/management-users.service";
+import {
+  getUsersFromStorage,
+  saveUsersToStorage,
+  fetchSRIData,
+} from "../services/management-users.service";
 
 interface UseManagementUsersReturn {
   users: User[];
@@ -26,7 +30,7 @@ const defaultFormData: User = {
   cedula: "",
   nombreCompleto: "",
   password: "",
-  rol: "vendedor"
+  rol: "vendedor",
 };
 
 export function useManagementUsers(): UseManagementUsersReturn {
@@ -55,9 +59,9 @@ export function useManagementUsers(): UseManagementUsersReturn {
     if (formData.cedula.length === 10 || formData.cedula.length === 13) {
       try {
         const nombreCompleto = await fetchSRIData(formData.cedula);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          nombreCompleto
+          nombreCompleto,
         }));
         setError(null);
       } catch (error) {
@@ -76,11 +80,11 @@ export function useManagementUsers(): UseManagementUsersReturn {
     }
 
     if (isEditing) {
-      setUsers(users.map(user => 
-        user.cedula === formData.cedula ? formData : user
-      ));
+      setUsers(
+        users.map((user) => (user.cedula === formData.cedula ? formData : user))
+      );
     } else {
-      if (users.some(user => user.cedula === formData.cedula)) {
+      if (users.some((user) => user.cedula === formData.cedula)) {
         setError("Ya existe un usuario con esta cédula");
         return;
       }
@@ -98,7 +102,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
   };
 
   const handleDelete = (cedula: string) => {
-    setUsers(users.filter(user => user.cedula !== cedula));
+    setUsers(users.filter((user) => user.cedula !== cedula));
   };
 
   const resetForm = () => {
@@ -125,6 +129,6 @@ export function useManagementUsers(): UseManagementUsersReturn {
     handleSubmit,
     handleEdit,
     handleDelete,
-    resetForm
+    resetForm,
   };
-} 
+}
