@@ -41,7 +41,6 @@ interface HorarioFormProps {
 }
 
 export function HorarioForm({
-  rutaId,
   onSubmit,
   defaultValues,
   isEditing = false,

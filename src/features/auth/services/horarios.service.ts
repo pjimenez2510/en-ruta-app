@@ -1,6 +1,4 @@
 import AxiosClient from "@/core/infrastructure/axios-client";
-import { ResponseAPI } from "@/core/interfaces/api.interface";
-import { AxiosResponse } from "axios";
 
 export interface CreateHorarioDto {
   rutaId: number;

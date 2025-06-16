@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ciudadesService, Ciudad } from '../services/ciudades.service';
+import { ciudadesService } from '../services/ciudades.service';
 
 export function useCiudades() {
   const { 

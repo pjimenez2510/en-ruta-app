@@ -32,13 +32,7 @@ export function HorariosTab({ ruta }: { ruta: Ruta }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (ruta.id) {
-      fetchHorarios();
-    }
-  }, [ruta.id]);
-
-  const fetchHorarios = async () => {
+  const fetchHorarios = React.useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await horarioService.getHorarios(ruta.id);
@@ -49,7 +43,13 @@ export function HorariosTab({ ruta }: { ruta: Ruta }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [ruta.id]);
+
+  useEffect(() => {
+    if (ruta.id) {
+      fetchHorarios();
+    }
+  }, [ruta.id, fetchHorarios]);
 
   const formatDiasSemana = (diasBinario: string) => {
     return DIAS.filter((_, index) => diasBinario[index] === "1")
@@ -65,7 +65,13 @@ export function HorariosTab({ ruta }: { ruta: Ruta }) {
     return boolArray.map(bool => bool ? "1" : "0").join("");
   };
 
-  const handleSubmit = async (data: any) => {
+  interface HorarioFormData {
+    horaSalida: string;
+    diasSemana: boolean[];
+    activo: boolean;
+  }
+
+  const handleSubmit = async (data: HorarioFormData) => {
     const horarioData = {
       rutaId: ruta.id,
       horaSalida: data.horaSalida,

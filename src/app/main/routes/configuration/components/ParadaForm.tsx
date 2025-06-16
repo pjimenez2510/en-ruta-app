@@ -40,7 +40,6 @@ interface ParadaFormProps {
 }
 
 export function ParadaForm({
-  rutaId,
   onSubmit,
   defaultValues,
   isEditing = false,

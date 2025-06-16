@@ -6,11 +6,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ParadaForm } from "./ParadaForm";
 
-interface Ciudad {
-  id: number;
-  nombre: string;
-}
-
 interface Parada {
   rutaId: number;
   ciudadId: number;
@@ -29,16 +24,12 @@ interface Ruta {
   paradas?: Parada[];
 }
 
-// Temporary mock data for cities - Replace with API call
-const mockCiudades: Ciudad[] = [
-  { id: 1, nombre: "Quito" },
-  { id: 2, nombre: "Guayaquil" },
-  { id: 3, nombre: "Cuenca" },
-];
+import { useCiudades } from "@/features/auth/hooks/use-ciudades";
 
 export default function ParadasTab({ ruta }: { ruta: Ruta }) {
     const [openDialog, setOpenDialog] = useState(false);
     const [editingParada, setEditingParada] = useState<Parada | null>(null);
+    const { ciudadesOptions } = useCiudades();
 
     const handleSubmit = async (data: Omit<Parada, 'rutaId'>) => {
         const paradaData: Parada = {
@@ -93,13 +84,11 @@ export default function ParadasTab({ ruta }: { ruta: Ruta }) {
                             <DialogDescription>
                                 {editingParada ? "Modifique" : "Agregue"} una parada a la ruta {ruta.nombre}
                             </DialogDescription>
-                        </DialogHeader>
-                        <ParadaForm
+                        </DialogHeader>                        <ParadaForm
                             rutaId={ruta.id}
                             onSubmit={handleSubmit}
                             defaultValues={editingParada || undefined}
                             isEditing={!!editingParada}
-                            ciudades={mockCiudades}
                         />
                     </DialogContent>
                 </Dialog>
@@ -121,9 +110,8 @@ export default function ParadasTab({ ruta }: { ruta: Ruta }) {
                         {ruta.paradas && ruta.paradas.length > 0 ? (
                             ruta.paradas.map((parada) => (
                                 <TableRow key={`${parada.rutaId}-${parada.orden}`}>
-                                    <TableCell>{parada.orden === 0 ? 'Origen' : parada.orden}</TableCell>
-                                    <TableCell>
-                                        {mockCiudades.find(c => c.id === parada.ciudadId)?.nombre || `Ciudad ${parada.ciudadId}`}
+                                    <TableCell>{parada.orden === 0 ? 'Origen' : parada.orden}</TableCell>                                    <TableCell>
+                                        {ciudadesOptions.find(opt => Number(opt.value) === parada.ciudadId)?.label || `Ciudad ${parada.ciudadId}`}
                                     </TableCell>
                                     <TableCell>{parada.distanciaAcumulada} km</TableCell>
                                     <TableCell>{parada.tiempoAcumulado} min</TableCell>
