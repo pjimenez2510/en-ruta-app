@@ -1,23 +1,25 @@
-import { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
+import { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
 
 export interface ResponseAPI<T> {
-  message: string
-  data: T
-  errors?: string[] | string
+  data: T;
+  message: string | null;
+  statusCode: number;
+  error?: string[] | string;
 }
 
 export interface ResponseErrorAPI {
-  message: string
-  errors?: string[] | string
+  message: string;
+  error?: string[] | string;
+  statusCode: number;
 }
 
 export interface RequestConfig<D = unknown> extends AxiosRequestConfig<D> {
-  skipAuth?: boolean
+  skipAuth?: boolean;
 }
 
 export interface CustomInternalAxiosRequestConfig
   extends InternalAxiosRequestConfig {
-  skipAuth?: boolean
+  skipAuth?: boolean;
 }
 
-export type ExtractData<T> = T extends ResponseAPI<infer D> ? D : never
+export type ExtractData<T> = T extends ResponseAPI<infer D> ? D : never;

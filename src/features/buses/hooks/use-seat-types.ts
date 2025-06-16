@@ -16,7 +16,7 @@ export const useSeatTypes = () => {
         const loadSeatTypes = async () => {
             try {
                 const token = session?.user?.accessToken || null;
-                const types = await getAllSeatTypes(token);
+                const types = await getAllSeatTypes(token!);
                 setSeatTypes(types);
                 if (types.length > 0) {
                     setSelectedSeatType(types[0].id);

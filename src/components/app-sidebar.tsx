@@ -8,7 +8,9 @@ import {
   Settings,
   List,
   ChevronDown,
-  Plus
+  Plus,
+  Angry,
+
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect, useState } from "react";
@@ -62,6 +64,9 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
+  { title: "Resoluciones", path: "/main/resolution", icon: Angry },
+  { title: "Rutas", path: "/main/routes", icon: Bus },
+	{ title: "Viajes", path: "/main/frequencies", icon: Bus },
   { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
 ];

@@ -20,7 +20,7 @@ interface UseSeatDragDropProps {
 export const useSeatDragDrop = ({ floorConfigs, setFloorConfigs, reorderSeatNumbers }: UseSeatDragDropProps) => {
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
-    
+
     // Si no hay destino, el usuario soltó fuera de un área válida
     if (!destination) return;
 
