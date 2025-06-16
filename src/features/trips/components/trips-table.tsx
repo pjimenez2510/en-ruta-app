@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { useTrips } from "../hooks/use-trips";
-import { Trip } from "../interfaces/trips.interface";
+import { Trip, CreateTripDTO } from "../interfaces/trips.interface";
 import { TripFilters } from "../components/trip-filters";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -27,12 +27,11 @@ export const TripsTable = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
-
-  const handleCreate = async (data: Partial<Trip>) => {
+  const handleCreate = async (data: CreateTripDTO) => {
     await createTrip.mutateAsync(data);
   };
 
-  const handleUpdate = async (data: Partial<Trip>) => {
+  const handleUpdate = async (data: CreateTripDTO) => {
     if (selectedTrip) {
       await updateTrip.mutateAsync({ id: selectedTrip.id, trip: data });
       setSelectedTrip(null);

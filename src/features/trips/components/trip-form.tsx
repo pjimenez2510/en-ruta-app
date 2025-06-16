@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Trip } from "../interfaces/trips.interface";
+import { Trip, CreateTripDTO } from "../interfaces/trips.interface";
 import { useEffect } from "react";
 
 const tripSchema = z.object({
@@ -26,7 +26,7 @@ type TripFormValues = z.infer<typeof tripSchema>;
 
 interface TripFormProps {
   trip?: Trip;
-  onSubmit: (data: Partial<Trip>) => Promise<void>;
+  onSubmit: (data: CreateTripDTO) => Promise<void>;
 }
 
 export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
@@ -58,14 +58,13 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
       });
     }
   }, [trip, form]);
-
   const handleSubmit = async (values: TripFormValues) => {
     await onSubmit({
       fecha: values.fecha,
       horaSalidaReal: values.horaSalidaReal || null,
       estado: values.estado as Trip["estado"],
       observaciones: values.observaciones || null,
-      horarioRuta: { id: Number(values.horarioRutaId) },
+      horarioRutaId: Number(values.horarioRutaId),
       busId: Number(values.busId),
       conductorId: values.conductorId ? Number(values.conductorId) : null,
       ayudanteId: values.ayudanteId ? Number(values.ayudanteId) : null

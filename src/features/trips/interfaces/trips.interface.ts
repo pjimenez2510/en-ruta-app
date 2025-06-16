@@ -39,3 +39,14 @@ export interface TripFilters {
   rutaId?: number;
   busId?: number;
 }
+
+export interface CreateTripDTO {
+  fecha: string;
+  horaSalidaReal?: string | null;
+  estado: Trip['estado'];
+  observaciones?: string | null;
+  horarioRutaId: number;
+  busId: number;
+  conductorId?: number | null;
+  ayudanteId?: number | null;
+}
