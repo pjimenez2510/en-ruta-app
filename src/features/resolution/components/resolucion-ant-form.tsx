@@ -110,13 +110,14 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
                       onSelect={(date) => {
                         field.onChange(date ? format(date, "yyyy-MM-dd") : "");
                       }}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
+                <FormDescription>
+                  Fecha en la que se emitió la resolución
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -159,6 +160,9 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
                     />
                   </PopoverContent>
                 </Popover>
+                <FormDescription>
+                  Fecha hasta la cual la resolución es válida
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -173,13 +177,14 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
               <FormLabel>Descripción</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describe el contenido y alcance de esta resolución..."
-                  className="min-h-[100px]"
+                  placeholder="Descripción de la resolución ANT..."
+                  className="resize-none"
+                  rows={4}
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                Máximo 500 caracteres
+                Descripción detallada de la resolución (máximo 500 caracteres)
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -190,7 +195,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
           control={form.control}
           name="activo"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
               <FormControl>
                 <Checkbox
                   checked={field.value}
@@ -198,27 +203,28 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>Resolución activa</FormLabel>
+                <FormLabel>
+                  Resolución Activa
+                </FormLabel>
                 <FormDescription>
-                  Marca esta opción si la resolución está vigente y activa.
+                  Marque esta opción si la resolución está actualmente vigente
                 </FormDescription>
               </div>
             </FormItem>
           )}
         />
 
-        <div className="flex gap-4">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEditing ? "Actualizar" : "Crear"} Resolución
-          </Button>
-          
+        <div className="flex justify-end space-x-4">
           <Button 
             type="button" 
             variant="outline"
             onClick={() => window.history.back()}
           >
             Cancelar
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isEditing ? "Actualizar Resolución" : "Crear Resolución"}
           </Button>
         </div>
       </form>
