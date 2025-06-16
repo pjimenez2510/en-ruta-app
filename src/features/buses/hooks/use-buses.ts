@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { BusService, SeatUpdate } from '../services/bus.service';
+import { BusService } from '../services/bus.service';
 import { useSession } from 'next-auth/react';
 import { Bus } from '../interfaces/bus.interface';
 import { BusCreationData } from '../interfaces/seat-config';
 import { toast } from 'sonner';
+import { SeatUpdate } from '../interfaces/seat.interface';
 
 export const useBuses = () => {
     const { data: session } = useSession();
@@ -151,7 +152,7 @@ export const useBuses = () => {
         }
     };
 
-    const updateSingleSeat = async (seatId: string, seatData: SeatUpdate) => {
+    const updateSingleSeat = async (seatId: number, seatData: SeatUpdate) => {
         if (!token) {
             throw new Error('No hay una sesión activa');
         }
