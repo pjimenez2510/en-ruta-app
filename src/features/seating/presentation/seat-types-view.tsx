@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { SeatType } from "../interfaces/seat-type.interface";
+import { SeatTypeFormValues } from "../interfaces/form-schema";
 
 export const SeatTypesView = () => {
   const {
@@ -30,7 +31,7 @@ export const SeatTypesView = () => {
     SeatType | undefined
   >();
 
-  const handleCreate = async (data: Partial<SeatType>) => {
+  const handleCreate = async (data: SeatTypeFormValues) => {
     try {
       await createSeatType(data);
       setIsDialogOpen(false);
@@ -40,7 +41,7 @@ export const SeatTypesView = () => {
     }
   };
 
-  const handleEdit = async (data: Partial<SeatType>, id: number) => {
+  const handleEdit = async (data: SeatTypeFormValues, id: number) => {
     if (!selectedSeatType) return;
     try {
       await updateSeatType(data, id);
@@ -66,7 +67,7 @@ export const SeatTypesView = () => {
     setIsDialogOpen(true);
   };
 
-  const openEditDialog = (seatType: SeatType) => {
+  const openEditDialog = async (seatType: SeatType) => {
     setSelectedSeatType(seatType);
     setIsDialogOpen(true);
   };
@@ -110,11 +111,11 @@ export const SeatTypesView = () => {
           </DialogHeader>
           <SeatTypeForm
             initialData={selectedSeatType}
-            onSubmit={(data) => {
+            onSubmit={async (data: SeatTypeFormValues) => {
               if (selectedSeatType) {
-                handleEdit(data, selectedSeatType.id);
+                await handleEdit(data, selectedSeatType.id);
               } else {
-                handleCreate(data);
+                await handleCreate(data);
               }
             }}
             onCancel={() => {

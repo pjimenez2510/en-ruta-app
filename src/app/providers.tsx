@@ -5,6 +5,7 @@ import { AuthSessionProvider } from "@/features/auth/presentation/providers/sess
 import { AuthProvider } from "@/features/auth/presentation/context/auth.provider";
 import { TenantProvider } from "@/core/context/tenant-context";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthSessionProvider>
         <AuthProvider>
           <TenantProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              {children}
+              <Toaster richColors closeButton position="top-right" />
+            </ThemeProvider>
           </TenantProvider>
         </AuthProvider>
       </AuthSessionProvider>

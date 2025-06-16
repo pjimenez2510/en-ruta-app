@@ -6,6 +6,7 @@ import { CldUploadWidget } from "next-cloudinary";
 interface ImageUploaderProps {
   imageUrl: string | null;
   onImageUpload: (url: string) => void;
+  onCancel?: () => void;
   aspectRatio?: number;
   width?: number;
   height?: number;
@@ -26,6 +27,7 @@ interface CloudinaryUploadResult {
 export const ImageUploader = ({
   imageUrl,
   onImageUpload,
+  onCancel,
   aspectRatio = 1,
   width = 200,
   height = 200,
@@ -47,6 +49,11 @@ export const ImageUploader = ({
     setIsUploading(false);
   };
 
+  const handleCancel = () => {
+    setIsUploading(false);
+    onCancel?.();
+  };
+
   return (
     <div className={className}>
       <div className="flex items-center gap-4">
@@ -64,44 +71,49 @@ export const ImageUploader = ({
             <Upload className="h-8 w-8 text-gray-400" />
           )}
         </div>
-        <div className="relative">
-          <CldUploadWidget
-            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-            options={{
-              maxFiles: 1,
-              resourceType: "image",
-              folder: folder,
-              cropping: false,
-              showSkipCropButton: false,
-              croppingAspectRatio: aspectRatio,
-              clientAllowedFormats: ["image/jpeg", "image/png", "image/webp"],
-            }}
-            onSuccess={(result) => {
-              console.log("Upload success:", result);
-              handleUpload(result);
-            }}
-            onError={(error) => {
-              console.error("Upload error:", error);
-              setIsUploading(false);
-            }}
-          >
-            {({ open }) => (
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                onClick={() => {
-                  setIsUploading(true);
-                  open();
-                }}
-                disabled={isUploading}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                {isUploading ? "Subiendo..." : buttonText}
-              </Button>
-            )}
-          </CldUploadWidget>
-        </div>
+
+        <CldUploadWidget
+          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+          options={{
+            maxFiles: 1,
+            resourceType: "image",
+            folder: folder,
+            cropping: false,
+            showSkipCropButton: false,
+            croppingAspectRatio: aspectRatio,
+            clientAllowedFormats: ["image/jpeg", "image/png", "image/webp"],
+          }}
+          onSuccess={(result) => {
+            console.log("Upload success:", result);
+            handleUpload(result);
+          }}
+          onError={(error) => {
+            console.error("Upload error:", error);
+            handleCancel();
+          }}
+          onClose={() => {
+            console.log("Upload widget closed");
+            setIsUploading(false);
+          }}
+        >
+           {({ open }) => (
+    <div onClick={(e) => e.stopPropagation()}>
+      <Button
+        variant="outline"
+        size="sm"
+        type="button"
+        onClick={() => {
+          setIsUploading(true);
+          open();
+        }}
+        disabled={isUploading}
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {isUploading ? "Subiendo..." : buttonText}
+      </Button>
+    </div>
+  )}
+        </CldUploadWidget>
       </div>
     </div>
   );
