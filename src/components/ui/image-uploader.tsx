@@ -6,6 +6,7 @@ import { CldUploadWidget } from "next-cloudinary";
 interface ImageUploaderProps {
   imageUrl: string | null;
   onImageUpload: (url: string) => void;
+  onCancel?: () => void;
   aspectRatio?: number;
   width?: number;
   height?: number;
@@ -26,6 +27,7 @@ interface CloudinaryUploadResult {
 export const ImageUploader = ({
   imageUrl,
   onImageUpload,
+  onCancel,
   aspectRatio = 1,
   width = 200,
   height = 200,
@@ -45,6 +47,11 @@ export const ImageUploader = ({
       onImageUpload(result.info.secure_url);
     }
     setIsUploading(false);
+  };
+
+  const handleCancel = () => {
+    setIsUploading(false);
+    onCancel?.();
   };
 
   return (
@@ -82,7 +89,7 @@ export const ImageUploader = ({
             }}
             onError={(error) => {
               console.error("Upload error:", error);
-              setIsUploading(false);
+              handleCancel();
             }}
           >
             {({ open }) => (
