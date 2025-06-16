@@ -30,6 +30,13 @@ export const API_ROUTES = {
     UPDATE: "/configuraciones-tenant/:id",
     DELETE: "/configuraciones-tenant/:id",
   },
+  RESOLUCIONES_ANT: {
+    GET_ALL: "/resoluciones-ant",
+    POST: "/resoluciones-ant",
+    GET_BY_ID: "/resoluciones-ant/:id",
+    UPDATE: "/resoluciones-ant/:id",
+    DELETE: "/resoluciones-ant/:id",
+  },
   RUTAS: {
     GET_ALL: "/rutas",
     CREATE: "/rutas",
