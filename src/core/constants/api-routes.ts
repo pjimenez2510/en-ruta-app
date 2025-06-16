@@ -45,12 +45,12 @@ export const API_ROUTES = {
     DELETE: "/rutas/:id",
     GET_BY_TENANT: "/rutas/tenant/:tenantId",
   },  HORARIOS: {
-    GET_ALL: "/horariosRuta",
-    CREATE: "/horariosRuta",
-    GET_BY_ID: "/horariosRuta/:id",
-    UPDATE: "/horariosRuta/:id",
-    DELETE: "/horariosRuta/:id",
-    GET_BY_RUTA: "/horariosRuta/ruta/:rutaId",
+    GET_ALL: "/horarios-ruta",
+    CREATE: "/horarios-ruta",
+    GET_BY_ID: "/horarios-ruta/:id",
+    UPDATE: "/horarios-ruta/:id",
+    DELETE: "/horarios-ruta/:id",
+    GET_BY_RUTA: "/horarios-ruta?rutaId=:rutaId",
   },
   PARADAS: {
     GET_ALL: "/paradas-ruta",

@@ -9,17 +9,7 @@ import { useCiudades } from "@/features/auth/hooks/use-ciudades";
 import { useParadas } from "@/features/auth/hooks/use-paradas";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from 'sonner';
-
-interface Parada {
-  id?: number;
-  rutaId: number;
-  ciudadId: number;
-  orden: number;
-  distanciaAcumulada: number;
-  tiempoAcumulado: number;
-  precioAcumulado: number;
-  activo?: boolean;
-}
+import { Parada, Ciudad } from "@/features/auth/services/paradas.service";
 
 interface Ruta {
   id: number;
@@ -104,11 +94,18 @@ export default function ParadasTab({ ruta }: { ruta: Ruta }) {
                                 <DialogDescription>
                                     {editingParada ? "Modifique" : "Agregue"} una parada a la ruta {ruta.nombre}
                                 </DialogDescription>
-                            </DialogHeader>
-                            <ParadaForm
+                            </DialogHeader>                            <ParadaForm
                                 rutaId={ruta.id}
                                 onSubmit={handleSubmit}
-                                defaultValues={editingParada || undefined}
+                                defaultValues={editingParada ? {
+                                    ...editingParada,
+                                    distanciaAcumulada: typeof editingParada.distanciaAcumulada === 'string' 
+                                        ? parseFloat(editingParada.distanciaAcumulada) 
+                                        : editingParada.distanciaAcumulada,
+                                    precioAcumulado: typeof editingParada.precioAcumulado === 'string' 
+                                        ? parseFloat(editingParada.precioAcumulado) 
+                                        : editingParada.precioAcumulado
+                                } : undefined}
                                 isEditing={!!editingParada}
                             />
                         </DialogContent>
@@ -137,9 +134,8 @@ export default function ParadasTab({ ruta }: { ruta: Ruta }) {
                             ) : paradas && paradas.length > 0 ? (
                                 paradas.map((parada) => (
                                     <TableRow key={`${parada.rutaId}-${parada.orden}`}>
-                                        <TableCell>{parada.orden === 0 ? 'Origen' : parada.orden}</TableCell>
-                                        <TableCell>
-                                            {ciudadesOptions.find(opt => Number(opt.value) === parada.ciudadId)?.label || `Ciudad ${parada.ciudadId}`}
+                                        <TableCell>{parada.orden === 0 ? 'Origen' : parada.orden}</TableCell>                                        <TableCell>
+                                            {parada.ciudad?.nombre || ciudadesOptions.find(opt => Number(opt.value) === parada.ciudadId)?.label || `Ciudad ${parada.ciudadId}`}
                                         </TableCell>
                                         <TableCell>{parada.distanciaAcumulada} km</TableCell>
                                         <TableCell>{parada.tiempoAcumulado} min</TableCell>
