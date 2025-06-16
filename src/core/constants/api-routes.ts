@@ -31,4 +31,28 @@ export const API_ROUTES = {
     UPDATE:"/configuraciones-tenant/:id",
     DELETE:"/configuraciones-tenant/:id",
   },
+  RUTAS: {
+    GET_ALL: "/rutas",
+    CREATE: "/rutas",
+    GET_BY_ID: "/rutas/:id",
+    UPDATE: "/rutas/:id",
+    DELETE: "/rutas/:id",
+    GET_BY_TENANT: "/rutas/tenant/:tenantId",
+  },
+  HORARIOS: {
+    GET_ALL: "/horarios-ruta",
+    CREATE: "/horarios-ruta",
+    GET_BY_ID: "/horarios-ruta/:id",
+    UPDATE: "/horarios-ruta/:id",
+    DELETE: "/horarios-ruta/:id",
+    GET_BY_RUTA: "/horarios-ruta/ruta/:rutaId",
+  },
+  PARADAS: {
+    GET_ALL: "/paradas",
+    CREATE: "/paradas",
+    GET_BY_ID: "/paradas/:id",
+    UPDATE: "/paradas/:id",
+    DELETE: "/paradas/:id",
+    GET_BY_RUTA: "/paradas/ruta/:rutaId",
+  },
 };
