@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { BusService } from '../services/bus.service';
+import { BusService, SeatUpdate } from '../services/bus.service';
 import { useSession } from 'next-auth/react';
 import { Bus } from '../interfaces/bus.interface';
 import { BusCreationData } from '../interfaces/seat-config';
@@ -35,7 +35,9 @@ export const useBuses = () => {
         } catch (error) {
             console.error("Error fetching buses:", error);
             setError('Error al cargar los buses');
-            toast.error('Error al cargar los buses');
+            toast.error('Error al cargar los buses', {
+                description: 'No se pudieron obtener los datos de los buses. Por favor, intente nuevamente.'
+            });
         } finally {
             setLoading(false);
         }
@@ -62,7 +64,9 @@ export const useBuses = () => {
             return bus;
         } catch (error) {
             console.error("Error getting bus by id:", error);
-            toast.error('Error al obtener los detalles del bus');
+            toast.error('Error al obtener los detalles del bus', {
+                description: 'No se pudieron cargar los detalles del bus. Por favor, intente nuevamente.'
+            });
             throw error;
         }
     }, [token]);
@@ -76,12 +80,17 @@ export const useBuses = () => {
             const newBus = await BusService.create(data, token);
             if (newBus) {
                 await fetchBuses();
+                toast.success('Bus creado exitosamente', {
+                    description: `El bus número ${data.busInfo.numero} ha sido creado correctamente.`
+                });
                 return newBus;
             }
             throw new Error('Error al crear el bus');
         } catch (error) {
             console.error("Error al crear el bus:", error);
-            toast.error('Error al crear el bus');
+            toast.error('Error al crear el bus', {
+                description: 'No se pudo crear el bus. Por favor, verifique los datos e intente nuevamente.'
+            });
             throw error;
         }
     };
@@ -94,13 +103,18 @@ export const useBuses = () => {
         try {
             const updatedBus = await BusService.update(id, data, token);
             if (updatedBus) {
-                await fetchBuses(); // Recargar la lista completa para tener datos actualizados
+                await fetchBuses();
+                toast.success('Bus actualizado exitosamente', {
+                    description: `La información del bus ha sido actualizada correctamente.`
+                });
                 return updatedBus;
             }
             throw new Error('Error al actualizar el bus');
         } catch (error) {
             console.error("Error al actualizar el bus:", error);
-            toast.error('Error al actualizar el bus');
+            toast.error('Error al actualizar el bus', {
+                description: 'No se pudo actualizar la información del bus. Por favor, intente nuevamente.'
+            });
             throw error;
         }
     };
@@ -124,10 +138,34 @@ export const useBuses = () => {
 
         try {
             await BusService.updateSeats(busId, seats, token);
-            await fetchBuses(); // Recargar la lista completa para tener datos actualizados
+            await fetchBuses();
+            toast.success('Asientos actualizados exitosamente', {
+                description: 'La configuración de asientos ha sido actualizada correctamente.'
+            });
         } catch (error) {
             console.error("Error al actualizar los asientos:", error);
-            toast.error('Error al actualizar los asientos');
+            toast.error('Error al actualizar los asientos', {
+                description: 'No se pudo actualizar la configuración de asientos. Por favor, intente nuevamente.'
+            });
+            throw error;
+        }
+    };
+
+    const updateSingleSeat = async (seatId: string, seatData: SeatUpdate) => {
+        if (!token) {
+            throw new Error('No hay una sesión activa');
+        }
+
+        try {
+            await BusService.updateSingleSeat(seatId, seatData, token);
+            toast.success('Asiento actualizado', {
+                description: `El asiento ${seatData.numero} ha sido actualizado correctamente.`
+            });
+        } catch (error) {
+            console.error("Error al actualizar el asiento:", error);
+            toast.error('Error al actualizar el asiento', {
+                description: 'No se pudo actualizar el asiento. Por favor, intente nuevamente.'
+            });
             throw error;
         }
     };
@@ -144,9 +182,14 @@ export const useBuses = () => {
                     bus.id === id ? { ...bus, estado: "MANTENIMIENTO" } : bus
                 )
             );
+            toast.success('Estado actualizado', {
+                description: 'El bus ha sido puesto en mantenimiento.'
+            });
         } catch (error) {
             console.error("Error al cambiar el estado del bus a mantenimiento:", error);
-            toast.error('Error al cambiar el estado del bus a mantenimiento');
+            toast.error('Error al cambiar el estado', {
+                description: 'No se pudo cambiar el estado del bus a mantenimiento. Por favor, intente nuevamente.'
+            });
             throw error;
         }
     };
@@ -163,9 +206,14 @@ export const useBuses = () => {
                     bus.id === id ? { ...bus, estado: "ACTIVO" } : bus
                 )
             );
+            toast.success('Estado actualizado', {
+                description: 'El bus ha sido activado correctamente.'
+            });
         } catch (error) {
             console.error("Error al cambiar el estado del bus a activo:", error);
-            toast.error('Error al cambiar el estado del bus a activo');
+            toast.error('Error al cambiar el estado', {
+                description: 'No se pudo activar el bus. Por favor, intente nuevamente.'
+            });
             throw error;
         }
     };
@@ -182,9 +230,14 @@ export const useBuses = () => {
                     bus.id === id ? { ...bus, estado: "RETIRADO" } : bus
                 )
             );
+            toast.success('Estado actualizado', {
+                description: 'El bus ha sido retirado de servicio.'
+            });
         } catch (error) {
             console.error("Error al cambiar el estado del bus a retirado:", error);
-            toast.error('Error al cambiar el estado del bus a retirado');
+            toast.error('Error al cambiar el estado', {
+                description: 'No se pudo retirar el bus. Por favor, intente nuevamente.'
+            });
             throw error;
         }
     };
@@ -197,9 +250,9 @@ export const useBuses = () => {
         createBus,
         updateBus,
         updateBusSeats,
+        updateSingleSeat,
         setBusMantenimiento,
         setBusActivo,
-        setBusRetirado,
-        fetchBuses
+        setBusRetirado
     };
 }; 
