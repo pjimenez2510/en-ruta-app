@@ -12,8 +12,6 @@ import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { useTenantColors } from "@/core/context/tenant-context";
-import Image from "next/image";
 
 import {
   Sidebar,
@@ -30,7 +28,6 @@ import {
 export function AdminSidebar() {
   const router = useRouter();
   const userRole = useAuthStore((state) => state.userRole);
-  const { logoUrl } = useTenantColors();
 
   const handleLogout = async () => {
     try {
