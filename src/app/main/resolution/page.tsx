@@ -1,7 +1,12 @@
-import ResolucionesView from "@/features/resolution/presentation/views/resolution.view";
+// app/admin/resoluciones-ant/page.tsx
 
-export default function ResolutionPage() {
+import { ResolucionesAntTable } from "@/features/resolution/components/resoluciones-ant-table";
+
+
+export default function ResolucionesAntPage() {
   return (
-    <ResolucionesView/>
+    <div className="container mx-auto py-6">
+      <ResolucionesAntTable />
+    </div>
   );
 }
