@@ -1,6 +1,8 @@
 import { BusFormValues } from "./form-schema";
 
 export interface BusSeat {
+    id?: number;
+    pisoBusId: number;
     numero: string;
     fila: number;
     columna: number;
