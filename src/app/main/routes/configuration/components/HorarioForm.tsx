@@ -109,21 +109,21 @@ export function HorarioForm({
             Seleccione los días en que opera este horario
           </FormDescription>
 
-          {/* Grid responsivo de días */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          {/* Grid de días - Siempre 4 columnas en 2 filas */}
+          <div className="grid grid-cols-4 gap-3">
             {diasSemana.map((dia, index) => (
               <FormField
                 key={dia.value}
                 control={form.control}
                 name={`diasSemana.${index}`}
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormControl>
                       <label 
                         className={`
-                          flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md
+                          flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md w-full min-h-[80px]
                           ${field.value 
-                            ? `${dia.color} border-opacity-100 shadow-sm scale-105` 
+                            ? `${dia.color} border-opacity-100 shadow-sm transform scale-105` 
                             : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
                           }
                         `}
@@ -136,11 +136,11 @@ export function HorarioForm({
                         <span className="text-lg font-bold mb-1">
                           {dia.short}
                         </span>
-                        <span className="text-xs font-medium text-center leading-tight">
+                        <span className="text-xs font-medium text-center leading-tight px-1">
                           {dia.label}
                         </span>
                         {field.value && (
-                          <CheckCircle2 size={14} className="mt-1 opacity-70" />
+                          <CheckCircle2 size={12} className="mt-1 opacity-70" />
                         )}
                       </label>
                     </FormControl>

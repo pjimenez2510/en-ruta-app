@@ -51,6 +51,20 @@ export function HorariosTab({ ruta }: { ruta: Ruta }) {
     }
   }, [ruta.id, fetchHorarios]);
 
+  // Verificar que la ruta sea válida
+  useEffect(() => {
+    if (!ruta?.id) {
+      console.error('No se proporcionó un ID de ruta válido');
+      toast.error('Error: No se puede acceder a la ruta');
+      return;
+    }
+    
+    console.log('=== Información de la Ruta ===');
+    console.log('ID:', ruta.id);
+    console.log('Nombre:', ruta.nombre);
+    console.log('Activo:', ruta.activo);
+  }, [ruta]);
+
   const formatDiasSemana = (diasBinario: string) => {
     return DIAS.filter((_, index) => diasBinario[index] === "1")
       .map(dia => dia.slice(0, 3))
@@ -70,8 +84,11 @@ export function HorariosTab({ ruta }: { ruta: Ruta }) {
     diasSemana: boolean[];
     activo: boolean;
   }
-
   const handleSubmit = async (data: HorarioFormData) => {
+    console.log('=== Datos del formulario ===');
+    console.log('Ruta ID:', ruta.id);
+    console.log('Datos recibidos:', data);
+
     const horarioData = {
       rutaId: ruta.id,
       horaSalida: data.horaSalida,
@@ -79,21 +96,27 @@ export function HorariosTab({ ruta }: { ruta: Ruta }) {
       activo: data.activo,
     };
 
+    console.log('=== Datos a enviar al servidor ===');
+    console.log('Horario data:', horarioData);
+
     try {
       setIsSubmitting(true);
       if (editingHorario?.id) {
+        console.log('Actualizando horario:', editingHorario.id);
         await horarioService.updateHorario(editingHorario.id, horarioData);
         toast.success("Horario actualizado exitosamente");
       } else {
+        console.log('Creando nuevo horario');
         await horarioService.createHorario(horarioData);
         toast.success("Horario creado exitosamente");
       }
       setOpenDialog(false);
       setEditingHorario(null);
       fetchHorarios();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving horario:", error);
-      toast.error("Error al guardar el horario");
+      const errorMessage = error.response?.data?.error || error.message || "Error al guardar el horario";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
