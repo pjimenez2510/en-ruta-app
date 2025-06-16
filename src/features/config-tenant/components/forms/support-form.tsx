@@ -48,7 +48,7 @@ export const SupportForm = ({
     try {
       // Solo enviamos los valores que no estén vacíos
       const valuesToSubmit = Object.fromEntries(
-        Object.entries(values).filter(([_, value]) => value !== "")
+        Object.entries(values).filter(([, value]) => value !== "")
       ) as SupportFormValues;
 
       await onSubmit(valuesToSubmit);
