@@ -14,8 +14,30 @@ import {
 } from "@/features/config-tenant/schemas/tenant.schemas";
 import { Tenant } from "../interfaces/tenant.interface";
 import { tenantService } from "../services/tenant.service";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useTenantColors } from "@/core/context/tenant-context";
+import { configTenantService } from "../services/config-tenant.service";
+
+interface ConfigData {
+  direccion: string;
+  ruc: string;
+  emailSoporte: string;
+  telefonoSoporte: string;
+  horarioAtencion: string;
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  youtube: string;
+  direccionId?: number;
+  rucId?: number;
+  emailSoporteId?: number;
+  telefonoSoporteId?: number;
+  horarioAtencionId?: number;
+  facebookId?: number;
+  twitterId?: number;
+  instagramId?: number;
+  youtubeId?: number;
+}
 
 export const ConfiguracionForm = () => {
   // Estados
@@ -35,6 +57,50 @@ export const ConfiguracionForm = () => {
   });
   const queryClient = useQueryClient();
   const { setColors: setTenantColors } = useTenantColors();
+
+  // Query para obtener todas las configuraciones
+  const { data: configData, isLoading: isLoadingConfig } = useQuery<ConfigData>(
+    {
+      queryKey: ["config-tenant", tenantId],
+      queryFn: async () => {
+        if (!tenantId) throw new Error("Tenant ID is required");
+        const configs = await configTenantService.getAllConfigTenants(tenantId);
+
+        // Extraer valores de las configuraciones
+        const getConfigValue = (clave: string) =>
+          configs.find((config) => config.clave === clave)?.valor || "";
+
+        const getConfigId = (clave: string) =>
+          configs.find((config) => config.clave === clave)?.id;
+
+        return {
+          // Valores
+          direccion: getConfigValue("DIRECCION"),
+          ruc: getConfigValue("RUC"),
+          emailSoporte: getConfigValue("EMAIL_SOPORTE"),
+          telefonoSoporte: getConfigValue("TELEFONO_SOPORTE"),
+          horarioAtencion: getConfigValue("HORARIO_ATENCION"),
+          facebook: getConfigValue("FACEBOOK"),
+          twitter: getConfigValue("TWITTER"),
+          instagram: getConfigValue("INSTAGRAM"),
+          youtube: getConfigValue("YOUTUBE"),
+          // IDs
+          direccionId: getConfigId("DIRECCION"),
+          rucId: getConfigId("RUC"),
+          emailSoporteId: getConfigId("EMAIL_SOPORTE"),
+          telefonoSoporteId: getConfigId("TELEFONO_SOPORTE"),
+          horarioAtencionId: getConfigId("HORARIO_ATENCION"),
+          facebookId: getConfigId("FACEBOOK"),
+          twitterId: getConfigId("TWITTER"),
+          instagramId: getConfigId("INSTAGRAM"),
+          youtubeId: getConfigId("YOUTUBE"),
+        };
+      },
+      enabled: !!tenantId,
+      staleTime: 0, // Forzar a que siempre se recarguen los datos
+      gcTime: 0, // No cachear los datos
+    }
+  );
 
   // Efectos para cargar datos iniciales
   useEffect(() => {
@@ -56,8 +122,8 @@ export const ConfiguracionForm = () => {
   const handleGeneralSubmit = async (values: GeneralFormValues) => {
     setIsLoading(true);
     try {
+      // Actualizar datos generales del tenant
       const updateData: Partial<Tenant> = {};
-
       if (values.nombreCooperativa) {
         updateData.nombre = values.nombreCooperativa;
       }
@@ -70,8 +136,45 @@ export const ConfiguracionForm = () => {
 
       await tenantService.updateTenant(tenantData?.data?.id || 0, updateData);
 
-      // Invalidamos la caché para forzar una nueva carga de datos
+      // Manejar la configuración de dirección y RUC
+      const configUpdates = [
+        {
+          clave: "DIRECCION",
+          valor: values.direccion,
+          id: configData?.direccionId,
+          descripcion: "Dirección de la cooperativa",
+        },
+        {
+          clave: "RUC",
+          valor: values.ruc,
+          id: configData?.rucId,
+          descripcion: "RUC de la cooperativa",
+        },
+      ];
+
+      for (const config of configUpdates) {
+        if (config.valor) {
+          if (config.id) {
+            await configTenantService.updateConfigTenant(config.id, {
+              valor: config.valor,
+              tipo: "TEXTO",
+              descripcion: config.descripcion,
+            });
+          } else {
+            await configTenantService.createConfigTenant({
+              clave: config.clave,
+              valor: config.valor,
+              tipo: "TEXTO",
+              descripcion: config.descripcion,
+            });
+          }
+        }
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["tenant", tenantId] });
+      await queryClient.invalidateQueries({
+        queryKey: ["config-tenant", tenantId],
+      });
 
       toast.success("La información general ha sido actualizada.");
     } catch (error) {
@@ -136,8 +239,55 @@ export const ConfiguracionForm = () => {
   const handleSocialSubmit = async (values: SocialFormValues) => {
     setIsLoading(true);
     try {
-      // Aquí iría la lógica para guardar en el servidor
-      console.log("Redes sociales actualizadas:", values);
+      const configUpdates = [
+        {
+          clave: "FACEBOOK",
+          valor: values.facebook,
+          id: configData?.facebookId,
+          descripcion: "Facebook de la cooperativa",
+        },
+        {
+          clave: "TWITTER",
+          valor: values.twitter,
+          id: configData?.twitterId,
+          descripcion: "Twitter de la cooperativa",
+        },
+        {
+          clave: "INSTAGRAM",
+          valor: values.instagram,
+          id: configData?.instagramId,
+          descripcion: "Instagram de la cooperativa",
+        },
+        {
+          clave: "YOUTUBE",
+          valor: values.youtube,
+          id: configData?.youtubeId,
+          descripcion: "YouTube de la cooperativa",
+        },
+      ];
+
+      for (const config of configUpdates) {
+        if (config.valor) {
+          if (config.id) {
+            await configTenantService.updateConfigTenant(config.id, {
+              valor: config.valor,
+              tipo: "TEXTO",
+              descripcion: config.descripcion,
+            });
+          } else {
+            await configTenantService.createConfigTenant({
+              clave: config.clave,
+              valor: config.valor,
+              tipo: "TEXTO",
+              descripcion: config.descripcion,
+            });
+          }
+        }
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: ["config-tenant", tenantId],
+      });
       toast.success("Las redes sociales han sido actualizadas.");
     } catch (error) {
       console.error("Error al guardar las redes sociales:", error);
@@ -150,11 +300,52 @@ export const ConfiguracionForm = () => {
   const handleSupportSubmit = async (values: SupportFormValues) => {
     setIsLoading(true);
     try {
-      // Aquí iría la lógica para guardar en el servidor
-      console.log("Datos de soporte actualizados:", values);
+      const configUpdates = [
+        {
+          clave: "EMAIL_SOPORTE",
+          valor: values.emailSoporte,
+          id: configData?.emailSoporteId,
+          descripcion: "Email de soporte",
+        },
+        {
+          clave: "TELEFONO_SOPORTE",
+          valor: values.telefonoSoporte,
+          id: configData?.telefonoSoporteId,
+          descripcion: "Teléfono de soporte",
+        },
+        {
+          clave: "HORARIO_ATENCION",
+          valor: values.horarioAtencion,
+          id: configData?.horarioAtencionId,
+          descripcion: "Horario de atención",
+        },
+      ];
+
+      for (const config of configUpdates) {
+        if (config.valor) {
+          if (config.id) {
+            await configTenantService.updateConfigTenant(config.id, {
+              valor: config.valor,
+              tipo: "TEXTO",
+              descripcion: config.descripcion,
+            });
+          } else {
+            await configTenantService.createConfigTenant({
+              clave: config.clave,
+              valor: config.valor,
+              tipo: "TEXTO",
+              descripcion: config.descripcion,
+            });
+          }
+        }
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: ["config-tenant", tenantId],
+      });
       toast.success("La información de soporte ha sido actualizada.");
     } catch (error) {
-      console.error("Error al guardar los datos de soporte:", error);
+      console.error("Error al guardar la información de soporte:", error);
       toast.error("Ocurrió un error al guardar los cambios");
     } finally {
       setIsLoading(false);
@@ -180,17 +371,23 @@ export const ConfiguracionForm = () => {
       </TabsList>
 
       <TabsContent value="general">
-        <GeneralForm
-          initialData={{
-            nombreCooperativa: tenantData?.data?.nombre || "",
-            telefono: tenantData?.data?.telefono || "",
-            email: tenantData?.data?.emailContacto || "",
-            direccion: "",
-            ruc: "",
-          }}
-          onSubmit={handleGeneralSubmit}
-          isLoading={isLoading}
-        />
+        {isLoadingTenant || isLoadingConfig ? (
+          <div className="flex items-center justify-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <GeneralForm
+            initialData={{
+              nombreCooperativa: tenantData?.data?.nombre || "",
+              telefono: tenantData?.data?.telefono || "",
+              email: tenantData?.data?.emailContacto || "",
+              direccion: configData?.direccion || "",
+              ruc: configData?.ruc || "",
+            }}
+            onSubmit={handleGeneralSubmit}
+            isLoading={isLoading}
+          />
+        )}
       </TabsContent>
 
       <TabsContent value="apariencia">
@@ -204,7 +401,12 @@ export const ConfiguracionForm = () => {
 
       <TabsContent value="social">
         <SocialForm
-          initialData={{}}
+          initialData={{
+            facebook: configData?.facebook || "",
+            twitter: configData?.twitter || "",
+            instagram: configData?.instagram || "",
+            youtube: configData?.youtube || "",
+          }}
           onSubmit={handleSocialSubmit}
           isLoading={isLoading}
         />
@@ -213,10 +415,9 @@ export const ConfiguracionForm = () => {
       <TabsContent value="soporte">
         <SupportForm
           initialData={{
-            emailSoporte: tenantData?.data?.emailContacto || "",
-            telefonoSoporte: tenantData?.data?.telefono || "",
-            horarioAtencion:
-              "Lunes a Viernes: 8:00 - 17:00, Sábados: 8:00 - 12:00",
+            emailSoporte: configData?.emailSoporte || "",
+            telefonoSoporte: configData?.telefonoSoporte || "",
+            horarioAtencion: configData?.horarioAtencion || "",
           }}
           onSubmit={handleSupportSubmit}
           isLoading={isLoading}
