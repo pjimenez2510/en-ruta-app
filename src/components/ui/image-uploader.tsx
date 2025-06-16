@@ -96,21 +96,23 @@ export const ImageUploader = ({
             setIsUploading(false);
           }}
         >
-          {({ open }) => (
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              onClick={() => {
-                setIsUploading(true);
-                open();
-              }}
-              disabled={isUploading}
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              {isUploading ? "Subiendo..." : buttonText}
-            </Button>
-          )}
+           {({ open }) => (
+    <div onClick={(e) => e.stopPropagation()}>
+      <Button
+        variant="outline"
+        size="sm"
+        type="button"
+        onClick={() => {
+          setIsUploading(true);
+          open();
+        }}
+        disabled={isUploading}
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {isUploading ? "Subiendo..." : buttonText}
+      </Button>
+    </div>
+  )}
         </CldUploadWidget>
       </div>
     </div>
