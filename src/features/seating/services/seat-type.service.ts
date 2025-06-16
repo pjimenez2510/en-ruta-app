@@ -16,11 +16,7 @@ const api: AxiosInstance = axios.create({
 
 const BASE_URL = "/tipo-asientos";
 
-export const getAll = async (token: string | null = null): Promise<SeatType[]> => {
-    if (!token) {
-        throw new Error('No hay una sesión activa');
-    }
-
+export const getAll = async (token: string): Promise<SeatType[]> => {
     try {
         const response = await api.get(BASE_URL, {
             headers: {
