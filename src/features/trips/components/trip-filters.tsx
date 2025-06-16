@@ -6,9 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FC, useState } from "react";
 import { useTrips } from "../hooks/use-trips";
 import { Trip } from "../interfaces/trips.interface";
-import { JSX } from "react";
 
-interface TripFiltersProps {}
+type TripFiltersProps = object;
 
 export const TripFilters: FC<TripFiltersProps> = () => {
   const { trips, setFilters } = useTrips();

@@ -1,8 +1,5 @@
 "use client";
-import { useCrewData } from "../hooks/use-crew-data";
-import { useEffect, useState } from "react";
-import { RouteSchedule, Bus, UsuarioTenant } from "../interfaces/crew.interface";
-import { createAuthApi } from "@/core/infrastructure/auth-axios";
+
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -12,6 +9,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import * as z from "zod";
 import { Trip, CreateTripDTO } from "../interfaces/trips.interface";
+import { useCrewData } from "../hooks/use-crew-data";
+import { useEffect, useState } from "react";
+import { RouteSchedule, Bus, DriverUser, HelperUser } from "../interfaces/crew.interface";
+import { createAuthApi } from "@/core/infrastructure/auth-axios";
 
 const tripSchema = z.object({
   fecha: z.string().min(1, "La fecha es requerida"),
@@ -55,7 +56,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
   }, []);
 
   // Estado para conductores desde la API externa
-  const [externalDrivers, setExternalDrivers] = useState<UsuarioTenant[]>([]);
+  const [externalDrivers, setExternalDrivers] = useState<DriverUser[]>([]);
   const [loadingDrivers, setLoadingDrivers] = useState(false);
   const [errorDrivers, setErrorDrivers] = useState<string | null>(null);
 
@@ -77,7 +78,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
   }, []);
 
   // Estado para ayudantes desde la API externa
-  const [externalHelpers, setExternalHelpers] = useState<UsuarioTenant[]>([]);
+  const [externalHelpers, setExternalHelpers] = useState<HelperUser[]>([]);
   const [loadingHelpers, setLoadingHelpers] = useState(false);
   const [errorHelpers, setErrorHelpers] = useState<string | null>(null);
 
@@ -104,12 +105,13 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
     hasErrors, 
     refetchSchedules 
   } = useCrewData();
-    const form = useForm<TripFormValues>({
+  
+  const form = useForm<TripFormValues>({
     resolver: zodResolver(tripSchema),
     defaultValues: {
       fecha: "",
       estado: "PROGRAMADO",
-      observaciones: "",
+      observaciones: null,
       horarioRutaId: "",
       busId: "",
       conductorId: null,
@@ -123,9 +125,10 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
       form.reset({
         fecha: new Date(trip.fecha).toISOString().split('T')[0],
         estado: trip.estado,
-        observaciones: trip.observaciones || "",
+        observaciones: trip.observaciones || null,
         horarioRutaId: trip.horarioRuta.id.toString(),
-        busId: trip.bus.id.toString(),        conductorId: trip.conductorId?.toString() || null,
+        busId: trip.bus.id.toString(),
+        conductorId: trip.conductorId?.toString() || null,
         ayudanteId: trip.ayudanteId?.toString() || null,
         generacion: trip.generacion || "MANUAL"
       });
@@ -139,12 +142,14 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
         horarioRutaId: Number(values.horarioRutaId),
         busId: Number(values.busId),
         fecha: new Date(values.fecha).toISOString(),
-      };      // Agregar campos opcionales solo si tienen valor
-      if (values.conductorId && values.conductorId !== null) {
+      };
+
+      // Agregar campos opcionales solo si tienen valor
+      if (values.conductorId && values.conductorId !== "none" && values.conductorId !== "") {
         tripData.conductorId = Number(values.conductorId);
       }
 
-      if (values.ayudanteId && values.ayudanteId !== null) {
+      if (values.ayudanteId && values.ayudanteId !== "none" && values.ayudanteId !== "") {
         tripData.ayudanteId = Number(values.ayudanteId);
       }
 
@@ -217,7 +222,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
               </div>
               <Select 
                 onValueChange={field.onChange} 
-                value={field.value} 
+                value={field.value || ""} 
                 required
               >
                 <FormControl>
@@ -252,7 +257,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Bus *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} required>
+              <Select onValueChange={field.onChange} value={field.value || ""} required>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar bus" />
@@ -280,19 +285,16 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
               <FormMessage />
             </FormItem>
           )}
-        />        {/* Campo Conductor - OPCIONAL */}
+        />
+
+        {/* Campo Conductor - OPCIONAL */}
         <FormField
           control={form.control}
           name="conductorId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Conductor (Opcional)</FormLabel>
-              <Select 
-                onValueChange={(value) => {
-                  field.onChange(value === "none" ? null : value);
-                }} 
-                value={field.value || "none"}
-              >
+              <Select onValueChange={field.onChange} value={field.value || "none"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar conductor" />
@@ -305,7 +307,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
                   ) : errorDrivers ? (
                     <div className="px-4 py-2 text-sm text-red-500">{errorDrivers}</div>
                   ) : availableDrivers.length > 0 ? (
-                    availableDrivers.map((driver: UsuarioTenant) => (
+                    availableDrivers.map((driver: DriverUser) => (
                       <SelectItem key={driver.id} value={driver.id.toString()}>
                         {driver.usuario?.username || `Conductor #${driver.id}`}
                       </SelectItem>
@@ -318,19 +320,16 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
               <FormMessage />
             </FormItem>
           )}
-        />        {/* Campo Ayudante - OPCIONAL */}
+        />
+
+        {/* Campo Ayudante - OPCIONAL */}
         <FormField
           control={form.control}
           name="ayudanteId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Ayudante (Opcional)</FormLabel>
-              <Select 
-                onValueChange={(value) => {
-                  field.onChange(value === "none" ? null : value);
-                }} 
-                value={field.value || "none"}
-              >
+              <Select onValueChange={field.onChange} value={field.value || "none"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar ayudante" />
@@ -343,7 +342,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
                   ) : errorHelpers ? (
                     <div className="px-4 py-2 text-sm text-red-500">{errorHelpers}</div>
                   ) : availableHelpers.length > 0 ? (
-                    availableHelpers.map((helper: UsuarioTenant) => (
+                    availableHelpers.map((helper: HelperUser) => (
                       <SelectItem key={helper.id} value={helper.id.toString()}>
                         {helper.usuario?.username || `Ayudante #${helper.id}`}
                       </SelectItem>
@@ -365,7 +364,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Estado</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || "PROGRAMADO"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar estado" />
@@ -410,7 +409,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Generación</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || "MANUAL"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar tipo de generación" />

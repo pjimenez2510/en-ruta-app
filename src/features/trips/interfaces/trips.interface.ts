@@ -24,7 +24,7 @@ export interface Trip {
   ayudanteId: number | null;
   fecha: string;
   horaSalidaReal: string | null;
-  estado: 'PROGRAMADO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELADO';
+  estado: 'PROGRAMADO' | 'EN_RUTA' | 'COMPLETADO' | 'CANCELADO' | 'RETRASADO';
   observaciones: string | null;
   capacidadTotal: number;
   asientosOcupados: number;
@@ -47,12 +47,12 @@ export interface TripFilters {
 }
 
 export interface CreateTripDTO {
-  fecha: string;
-  horaSalidaReal?: string | null;
-  estado: Trip['estado'];
-  observaciones?: string | null;
   horarioRutaId: number;
   busId: number;
   conductorId?: number | null;
   ayudanteId?: number | null;
+  fecha: string;
+  estado?: Trip['estado'];
+  observaciones?: string | null;
+  generacion?: 'MANUAL' | 'AUTOMATICA';
 }
