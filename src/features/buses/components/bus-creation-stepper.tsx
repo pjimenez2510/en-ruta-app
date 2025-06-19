@@ -7,15 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { BusForm } from "./bus-form";
-import { SeatGrid } from "./seat-grid-simple"; // Usando versión simplificada temporalmente
+import { SeatGrid } from "./seat-grid";
 import { BusFormValues } from "../interfaces/form-schema";
 import { BusCreationData, BusSeat } from "../interfaces/seat-config";
 import { useBusModels } from "../hooks/use-bus-models";
 import { useSeatTypes } from "../hooks/use-seat-types";
 import { useFloorConfiguration } from "../hooks/use-floor-configuration";
-// import { useSeatDragDrop } from "../hooks/use-seat-drag-drop"; // Comentado temporalmente
+import { useSeatDragDrop } from "../hooks/use-seat-drag-drop";
 import { Armchair, Loader2 } from "lucide-react";
-
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
 import React from "react";
 
@@ -64,11 +64,13 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
   
   const { 
     floorConfigs, 
+    setFloorConfigs, 
     floorDimensions, 
     updateFloorDimensions, 
+    reorderSeatNumbers 
   } = useFloorConfiguration({ busInfo, busModels, initialData });
 
-  // const { onDragEnd } = useSeatDragDrop({ floorConfigs, setFloorConfigs, reorderSeatNumbers }); // Comentado temporalmente
+  const { onDragEnd } = useSeatDragDrop({ floorConfigs, setFloorConfigs, reorderSeatNumbers });
 
   const handleSeatLayoutSubmit = async () => {
     try {
@@ -94,8 +96,9 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
       setIsSubmitting(false);
     }
   };
+
   return (
-    // <DragDropContext onDragEnd={onDragEnd}> {/* Comentado temporalmente */}
+    <DragDropContext onDragEnd={onDragEnd}>
       <div className="space-y-8">
         {step === 1 && (
           <div className="space-y-6">
@@ -215,35 +218,58 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                           </div>
                         </button>
                       ))}
-                    </div>                    <h3 className="font-medium mb-2 mt-6">Asientos Disponibles</h3>
+                    </div>
+
+                    <h3 className="font-medium mb-2 mt-6">Asientos Disponibles</h3>
                     <div className="space-y-4">
                       {availableSeatTypes.map((type) => (
                         <div key={`template-${type.id}`}>
                           <h4 className="text-sm text-gray-500 mb-2">
                             {type.nombre}
                           </h4>
-                          {/* Droppable comentado temporalmente */}
-                          <div
-                            className="p-4 bg-gray-50 rounded-lg"
-                            style={{ borderColor: type.color }}
+                          <Droppable
+                            droppableId={`template-${type.id}`}
+                            isDropDisabled={true}
+                            type="SEAT"
+                            isCombineEnabled={false}
+                            ignoreContainerClipping={true}
                           >
-                            {/* Draggable comentado temporalmente */}
-                            <div className="flex flex-col items-center">
-                              {type.icono && AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS] ? (
-                                <div className="h-6 w-6">
-                                  {React.createElement(AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS], {
-                                    className: "h-6 w-6",
-                                    style: { color: type.color }
-                                  })}
-                                </div>
-                              ) : (
-                                <Armchair className="h-6 w-6" style={{ color: type.color }} />
-                              )}
-                              <span className="text-xs mt-1">Tipo: {type.nombre}</span>
-                            </div>
-                            {/* </Draggable> comentado temporalmente */}
-                          </div>
-                          {/* </Droppable> comentado temporalmente */}
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className="p-4 bg-gray-50 rounded-lg"
+                                style={{ borderColor: type.color }}
+                              >
+                                <Draggable
+                                  draggableId={`template-${type.id}`}
+                                  index={0}
+                                >
+                                  {(provided) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className="flex flex-col items-center"
+                                    >
+                                      {type.icono && AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS] ? (
+                                        <div className="h-6 w-6">
+                                          {React.createElement(AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS], {
+                                            className: "h-6 w-6",
+                                            style: { color: type.color }
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <Armchair className="h-6 w-6" style={{ color: type.color }} />
+                                      )}
+                                      <span className="text-xs mt-1">Arrastrar</span>
+                                    </div>
+                                  )}
+                                </Draggable>
+                                {provided.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
                         </div>
                       ))}
                     </div>
@@ -263,12 +289,13 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                     </>
                   ) : (
                     'Finalizar'
-                  )}                </Button>
+                  )}
+                </Button>
               </div>
             </Card>
           </div>
         )}
       </div>
-    // </DragDropContext> {/* Comentado temporalmente */}
+    </DragDropContext>
   );
 };

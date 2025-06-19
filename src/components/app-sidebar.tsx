@@ -3,7 +3,6 @@
 import {
   Bus,
   Users,
-  Clock,
   LogOut,
   Settings,
   List,
@@ -72,7 +71,6 @@ const menuItems: MenuItem[] = [
   { title: "Resoluciones", path: "/main/resolution", icon: FileText },
   { title: "Rutas", path: "/main/routes", icon: Map},
 	{ title: "Viajes", path: "/main/trips", icon: List },
-  { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
 ];
 
