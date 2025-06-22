@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const LoginView = () => {
   const { login, isLoading, error } = useLogin();
@@ -32,6 +33,12 @@ const LoginView = () => {
       }
     }
   }, [session, status, router]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,12 +133,7 @@ const LoginView = () => {
                 </div>
               </div>
             </div>
-            {error && (
-              <div className="text-sm text-red-500 mt-2 text-center p-2 bg-red-50 rounded">
-                <p className="font-medium">Error de autenticación:</p>
-                <p>{error}</p>
-              </div>
-            )}
+
             <Button
               type="submit"
               className="w-full h-12"

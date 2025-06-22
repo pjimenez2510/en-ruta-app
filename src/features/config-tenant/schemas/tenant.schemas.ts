@@ -11,7 +11,11 @@ export const generalFormSchema = z.object({
   email: z.string().email({
     message: "Ingrese un correo electrónico válido.",
   }),
-  ruc: z.string().optional(),
+  ruc: z
+    .string()
+    .length(13, { message: "El RUC debe tener 13 dígitos." })
+    .optional()
+    .or(z.literal("")),
   sitioWeb: z.string().url({ message: "Ingrese una URL válida." }).optional(),
 });
 

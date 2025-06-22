@@ -15,6 +15,7 @@ import { configTenantService } from "@/features/config-tenant/services/config-te
 import { toast } from "sonner";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 
 interface RegisterCooperativaFormInput extends RegisterCooperativaInput {
   ruc: string;
@@ -62,9 +63,17 @@ export default function RegisterCooperativaForm() {
       router.push("/login");
     } catch (error) {
       console.error(error);
-      toast.error(
-        "Hubo un error en el registro. Por favor, intente nuevamente."
-      );
+      let errorMessage =
+        "Hubo un error en el registro. Por favor, intente nuevamente.";
+      if (isAxiosError(error)) {
+        errorMessage =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Ocurrió un error en el servidor.";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      toast.error(errorMessage);
     }
   };
 
@@ -134,7 +143,11 @@ export default function RegisterCooperativaForm() {
             <Label htmlFor="ruc">RUC de la cooperativa</Label>
             <Input
               id="ruc"
-              {...register("ruc", { required: true })}
+              {...register("ruc", {
+                required: "El RUC es requerido.",
+                validate: (value) =>
+                  value.length === 13 || "El RUC debe tener 13 dígitos.",
+              })}
               placeholder="1234567890001"
               maxLength={13}
               onChange={(e) => {
@@ -145,9 +158,7 @@ export default function RegisterCooperativaForm() {
               }}
             />
             {errors.ruc && (
-              <span className="text-red-500 text-xs">
-                Este campo es requerido
-              </span>
+              <span className="text-red-500 text-xs">{errors.ruc.message}</span>
             )}
           </div>
           <div className="space-y-2">

@@ -79,7 +79,14 @@ export const GeneralForm = ({
                   <FormItem>
                     <FormLabel>RUC</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        maxLength={13}
+                        onChange={(e) => {
+                          const { value } = e.target;
+                          field.onChange(value.replace(/\\D/g, ""));
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
