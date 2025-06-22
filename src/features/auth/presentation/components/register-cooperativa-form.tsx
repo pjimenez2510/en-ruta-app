@@ -35,6 +35,10 @@ export default function RegisterCooperativaForm() {
     const { ruc, ...registerData } = data;
     registerData.tenant.identificador = ruc;
 
+    if (!registerData.tenant.sitioWeb) {
+      delete registerData.tenant.sitioWeb;
+    }
+
     try {
       await registerCooperativa(registerData);
       toast.success("Cooperativa registrada con éxito!");
@@ -147,10 +151,10 @@ export default function RegisterCooperativaForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="sitioWeb">Sitio web</Label>
+            <Label htmlFor="sitioWeb">Sitio web (Opcional)</Label>
             <Input
               id="sitioWeb"
-              {...register("tenant.sitioWeb", { required: true })}
+              {...register("tenant.sitioWeb")}
               placeholder="https://www.cooperativa-esmeraldas.com"
             />
             {errors.tenant?.sitioWeb && (
@@ -201,15 +205,6 @@ export default function RegisterCooperativaForm() {
             ¿Ya tienes una cuenta?
             <Link href="/login" className="text-primary hover:underline ml-1">
               Inicia Sesión
-            </Link>
-          </p>
-          <p className="text-muted-foreground mt-2">
-            ¿Eres un cliente?{" "}
-            <Link
-              href="/register"
-              className="text-primary hover:underline ml-1"
-            >
-              Regístrate aquí
             </Link>
           </p>
         </div>

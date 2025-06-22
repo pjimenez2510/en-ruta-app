@@ -12,6 +12,7 @@ export const generalFormSchema = z.object({
     message: "Ingrese un correo electrónico válido.",
   }),
   ruc: z.string().optional(),
+  sitioWeb: z.string().url({ message: "Ingrese una URL válida." }).optional(),
 });
 
 export const socialFormSchema = z.object({

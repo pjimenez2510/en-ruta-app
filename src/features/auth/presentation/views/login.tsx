@@ -74,7 +74,7 @@ const LoginView = () => {
               <TabsTrigger
                 value="register"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-10"
-                onClick={() => router.push("/register")}
+                onClick={() => router.push("/register-cooperativa")}
               >
                 Registrarse
               </TabsTrigger>

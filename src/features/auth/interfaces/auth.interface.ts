@@ -28,7 +28,7 @@ export interface RegisterCooperativaInput {
   tenant: {
     nombre: string;
     identificador: string;
-    sitioWeb: string;
+    sitioWeb?: string;
     emailContacto: string;
     telefono: string;
   };
