@@ -73,8 +73,6 @@ export function useManagementUsers(): UseManagementUsersReturn {
     queryFn: managementUsersService.getAllUsers,
   });
 
- 
-  
   // Mutación para eliminar usuario
   const deleteMutation = useMutation({
     mutationFn: managementUsersService.deleteUser,
@@ -96,8 +94,8 @@ export function useManagementUsers(): UseManagementUsersReturn {
           formData.numeroDocumento
         );
         const partes = nombreCompleto.split(" ");
-        const nombres = partes.slice(0, 2).join(" ");
-        const apellidos = partes.slice(2).join(" ");
+        const apellidos = partes.slice(0, 2).join(" ");
+        const nombres = partes.slice(2).join(" ");
         setFormData((prev) => ({
           ...prev,
           nombres,

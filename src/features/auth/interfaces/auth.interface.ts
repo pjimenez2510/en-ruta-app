@@ -10,7 +10,7 @@ interface Cliente {
   numeroDocumento: string;
   telefono?: string;
   username?: string;
-  email?: string; 
+  email?: string;
   fechaNacimiento?: string;
   esDiscapacitado?: boolean;
   porcentajeDiscapacidad?: number;
@@ -28,10 +28,7 @@ export interface RegisterCooperativaInput {
   tenant: {
     nombre: string;
     identificador: string;
-    logoUrl: string;
-    colorPrimario: string;
-    colorSecundario: string;
-    sitioWeb: string;
+    sitioWeb?: string;
     emailContacto: string;
     telefono: string;
   };

@@ -5,6 +5,7 @@ import {
   RegisterCooperativaInput,
   RegisterInput,
 } from "../interfaces/auth.interface";
+import { isAxiosError } from "axios";
 
 interface Cliente {
   id: number;
@@ -53,7 +54,8 @@ interface LoginResponse {
 
 export async function loginService(input: LoginInput): Promise<string> {
   const client = AxiosClient.getInstance();
-  try {    console.log("=== Login Service ===");
+  try {
+    console.log("=== Login Service ===");
     console.log("URL de login:", API_ROUTES.AUTH.LOGIN);
     console.log("Credenciales:", { username: input.username, password: "***" });
 
@@ -81,17 +83,13 @@ export async function loginService(input: LoginInput): Promise<string> {
 
     console.log("Token obtenido exitosamente");
     return token;
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("=== Error en loginService ===");
-    if (error instanceof Error) {
-      console.error("Mensaje:", error.message);
-      if ("response" in error) {
-        const axiosError = error as {
-          response?: { status?: number; data?: unknown };
-        };
-        console.error("Status:", axiosError.response?.status);
-        console.error("Datos:", axiosError.response?.data);
-      }
+    if (isAxiosError(error)) {
+      const errorData = error.response?.data || error.message;
+      console.error("Detalles del error:", errorData);
+    } else {
+      console.error("Error no relacionado con Axios:", error);
     }
     throw error;
   }
