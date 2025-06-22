@@ -6,33 +6,89 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { registerCooperativa } from "../../services/auth.service";
 import { useLogin } from "../../hooks/use-login";
 import type { RegisterCooperativaInput } from "../../interfaces/auth.interface";
+import { PasswordInput } from "./password-input";
+import { configTenantService } from "@/features/config-tenant/services/config-tenant.service";
+import { toast } from "sonner";
+import { getSession, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
+interface RegisterCooperativaFormInput extends RegisterCooperativaInput {
+  ruc: string;
+}
 export default function RegisterCooperativaForm() {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterCooperativaInput>();
+    setValue,
+  } = useForm<RegisterCooperativaFormInput>();
 
+  const router = useRouter();
   const { login, isLoading: isLoginLoading } = useLogin();
+  const { update } = useSession();
 
-  const onSubmit = async (data: RegisterCooperativaInput) => {
-    await registerCooperativa(data);
-    // Auto login después de registrar
-    await login({ username: data.username, password: data.password });
+  const onSubmit = async (data: RegisterCooperativaFormInput) => {
+    const { ruc, ...registerData } = data;
+    registerData.tenant.identificador = ruc;
+
+    try {
+      await registerCooperativa(registerData);
+      toast.success("Cooperativa registrada con éxito!");
+
+      // Auto login después de registrar
+      await login({ username: data.username, password: data.password });
+
+      await update();
+      const session = await getSession();
+
+      if (session?.user?.tenantId) {
+        await configTenantService.createConfigTenant({
+          clave: "RUC",
+          valor: ruc,
+          tipo: "TEXTO",
+          descripcion: "RUC de la cooperativa",
+        });
+      } else {
+        throw new Error("No se pudo obtener el tenantId de la sesión.");
+      }
+      router.push("/login");
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        "Hubo un error en el registro. Por favor, intente nuevamente."
+      );
+    }
   };
 
   return (
     <Card className="w-full max-w-lg mx-auto mt-8">
       <CardHeader>
-        <h2 className="text-2xl font-semibold">Registro de Cooperativa</h2>
+        <div className="flex items-center space-x-2">
+          <Link href="/login" className="text-primary hover:opacity-80">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </Link>
+          <h2 className="text-2xl font-semibold">Registro de Cooperativa</h2>
+        </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-2">
             <Label htmlFor="username">Usuario administrador</Label>
             <Input
               id="username"
@@ -45,11 +101,10 @@ export default function RegisterCooperativaForm() {
               </span>
             )}
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="password">Contraseña</Label>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               {...register("password", { required: true })}
             />
             {errors.password && (
@@ -58,12 +113,12 @@ export default function RegisterCooperativaForm() {
               </span>
             )}
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="nombre">Nombre de la cooperativa</Label>
             <Input
               id="nombre"
               {...register("tenant.nombre", { required: true })}
-              placeholder="Cooperativa Esmeraldas2"
+              placeholder="Cooperativa Esmeraldas"
             />
             {errors.tenant?.nombre && (
               <span className="text-red-500 text-xs">
@@ -71,59 +126,27 @@ export default function RegisterCooperativaForm() {
               </span>
             )}
           </div>
-          <div>
-            <Label htmlFor="identificador">Identificador único</Label>
+          <div className="space-y-2">
+            <Label htmlFor="ruc">RUC de la cooperativa</Label>
             <Input
-              id="identificador"
-              {...register("tenant.identificador", { required: true })}
-              placeholder="esmeraldas-coop1"
+              id="ruc"
+              {...register("ruc", { required: true })}
+              placeholder="1234567890001"
+              maxLength={13}
+              onChange={(e) => {
+                const { value } = e.target;
+                setValue("ruc", value.replace(/\\D/g, ""), {
+                  shouldValidate: true,
+                });
+              }}
             />
-            {errors.tenant?.identificador && (
+            {errors.ruc && (
               <span className="text-red-500 text-xs">
                 Este campo es requerido
               </span>
             )}
           </div>
-          <div>
-            <Label htmlFor="logoUrl">Logo (URL)</Label>
-            <Input
-              id="logoUrl"
-              {...register("tenant.logoUrl", { required: true })}
-              placeholder="https://example.com/logo.png"
-            />
-            {errors.tenant?.logoUrl && (
-              <span className="text-red-500 text-xs">
-                Este campo es requerido
-              </span>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="colorPrimario">Color primario</Label>
-            <Input
-              id="colorPrimario"
-              type="color"
-              {...register("tenant.colorPrimario", { required: true })}
-            />
-            {errors.tenant?.colorPrimario && (
-              <span className="text-red-500 text-xs">
-                Este campo es requerido
-              </span>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="colorSecundario">Color secundario</Label>
-            <Input
-              id="colorSecundario"
-              type="color"
-              {...register("tenant.colorSecundario", { required: true })}
-            />
-            {errors.tenant?.colorSecundario && (
-              <span className="text-red-500 text-xs">
-                Este campo es requerido
-              </span>
-            )}
-          </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="sitioWeb">Sitio web</Label>
             <Input
               id="sitioWeb"
@@ -136,7 +159,7 @@ export default function RegisterCooperativaForm() {
               </span>
             )}
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="emailContacto">Email de contacto</Label>
             <Input
               id="emailContacto"
@@ -150,7 +173,7 @@ export default function RegisterCooperativaForm() {
               </span>
             )}
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="telefono">Teléfono</Label>
             <Input
               id="telefono"
@@ -165,7 +188,7 @@ export default function RegisterCooperativaForm() {
           </div>
           <Button
             type="submit"
-            className="w-full mt-4"
+            className="w-full mt-6"
             disabled={isSubmitting || isLoginLoading}
           >
             {isSubmitting || isLoginLoading
@@ -173,6 +196,23 @@ export default function RegisterCooperativaForm() {
               : "Registrar cooperativa"}
           </Button>
         </form>
+        <div className="text-center text-sm mt-4">
+          <p className="text-muted-foreground">
+            ¿Ya tienes una cuenta?
+            <Link href="/login" className="text-primary hover:underline ml-1">
+              Inicia Sesión
+            </Link>
+          </p>
+          <p className="text-muted-foreground mt-2">
+            ¿Eres un cliente?{" "}
+            <Link
+              href="/register"
+              className="text-primary hover:underline ml-1"
+            >
+              Regístrate aquí
+            </Link>
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
