@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import { LoginInput } from "../interfaces/auth.interface";
 import { useAuthStore } from "../presentation/context/auth.store";
 import { loginService } from "../services/auth.service";
+import { isAxiosError } from "axios";
 
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +57,17 @@ export function useLogin() {
     } catch (err) {
       console.error("=== Error inesperado en login ===");
       console.error("Error completo:", err);
-      setError("Error inesperado al iniciar sesión");
+
+      let errorMessage = "Error inesperado al iniciar sesión";
+      if (isAxiosError(err)) {
+        errorMessage =
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Ocurrió un error en el servidor.";
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
       localStorage.removeItem("token");
       setToken(null);
     } finally {
