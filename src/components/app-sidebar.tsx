@@ -3,18 +3,18 @@
 import {
   Bus,
   Users,
-  Clock,
   LogOut,
   Settings,
   List,
   ChevronDown,
+  ChartLine,
+  FileText,
+  Map,
   Plus,
-  Angry,
   Ticket,
-  TicketPlus,
   CircleDollarSign,
+  TicketPlus,
   Tickets
-
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect, useState } from "react";
@@ -45,8 +45,9 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { title: "Dashboard", path: "/main/dashboard", icon: Bus },
+  { title: "Dashboard", path: "/main/dashboard", icon: ChartLine },
   { title: "Usuarios", path: "/main/user-tenant", icon: Users },
+
   {
     title: "Unidades",
     icon: Bus,
@@ -70,9 +71,6 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
-  { title: "Resoluciones", path: "/main/resolution", icon: Angry },
-  { title: "Rutas", path: "/main/routes", icon: Bus },
-  { title: "Viajes", path: "/main/frequencies", icon: Bus },
   {
     title: "Tickets",
     icon: Ticket,
@@ -82,7 +80,9 @@ const menuItems: MenuItem[] = [
       { title: "Boletos", path: "/main/tickets", icon: Tickets },
     ],
   },
-  { title: "Frecuencias", path: "/main/frequencies", icon: Clock },
+  { title: "Resoluciones", path: "/main/resolution", icon: FileText },
+  { title: "Rutas", path: "/main/routes", icon: Map},
+	{ title: "Viajes", path: "/main/trips", icon: List },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
 ];
 

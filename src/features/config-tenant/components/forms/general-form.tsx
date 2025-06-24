@@ -1,11 +1,26 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GeneralFormValues, generalFormSchema } from "@/features/config-tenant/schemas/tenant.schemas";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  GeneralFormValues,
+  generalFormSchema,
+} from "@/features/config-tenant/schemas/tenant.schemas";
 
 interface GeneralFormProps {
   initialData?: Partial<GeneralFormValues>;
@@ -13,28 +28,23 @@ interface GeneralFormProps {
   isLoading: boolean;
 }
 
-export const GeneralForm = ({ initialData, onSubmit, isLoading }: GeneralFormProps) => {
+export const GeneralForm = ({
+  initialData,
+  onSubmit,
+  isLoading,
+}: GeneralFormProps) => {
   const form = useForm<GeneralFormValues>({
     resolver: zodResolver(generalFormSchema),
     defaultValues: {
-      nombreCooperativa: '',
-      direccion: '',
-      telefono: '',
-      email: '',
-      ruc: '',
+      nombreCooperativa: "",
+      direccion: "",
+      telefono: "",
+      email: "",
+      ruc: "",
+      sitioWeb: "",
       ...initialData,
     },
   });
-
-  const handleSubmit = async (values: GeneralFormValues) => {
-    try {
-      await onSubmit(values);
-      toast.success("La información general ha sido actualizada.");
-    } catch (error) {
-      console.error("Error al guardar los cambios:", error);
-      toast.error("Ocurrió un error al guardar los cambios");
-    }
-  };
 
   return (
     <Card>
@@ -46,7 +56,7 @@ export const GeneralForm = ({ initialData, onSubmit, isLoading }: GeneralFormPro
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -69,7 +79,14 @@ export const GeneralForm = ({ initialData, onSubmit, isLoading }: GeneralFormPro
                   <FormItem>
                     <FormLabel>RUC</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        maxLength={13}
+                        onChange={(e) => {
+                          const { value } = e.target;
+                          field.onChange(value.replace(/\\D/g, ""));
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -96,6 +113,20 @@ export const GeneralForm = ({ initialData, onSubmit, isLoading }: GeneralFormPro
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Teléfono</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="sitioWeb"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sitio Web</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

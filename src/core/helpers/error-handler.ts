@@ -1,6 +1,5 @@
 import type { AxiosError } from 'axios'
 import { ResponseErrorAPI } from '../interfaces/api.interface'
-import { useAuthStore } from '@/features/auth/presentation/context/auth.store'
 
 interface ErrorResponseData {
   message?: string
@@ -19,11 +18,9 @@ export class ApiErrorHandler {
     },
     401: {
       message: 'No autorizado',
-      handle: () => useAuthStore.getState().logout(),
     },
     403: {
       message: 'No tiene permisos para realizar esta acción',
-      handle: () => useAuthStore.getState().logout(),
     },
     404: {
       message: 'Recurso no encontrado',
