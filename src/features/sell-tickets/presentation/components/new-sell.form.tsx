@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -43,6 +43,25 @@ const metodosPago = [
   { id: 3, nombre: "PayPal", descripcion: "Pago con PayPal" },
 ];
 
+function getCssVariableValue(variableName: string) {
+  if (typeof window === "undefined") return "";
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(variableName)
+    .trim();
+}
+
+function getContrastYIQ(hexcolor: string) {
+  let color = hexcolor.replace("#", "");
+  if (color.length === 4)
+    color = color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+  if (color.length !== 6) return "black";
+  const r = parseInt(color.substr(0, 2), 16);
+  const g = parseInt(color.substr(2, 2), 16);
+  const b = parseInt(color.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? "black" : "white";
+}
+
 export function NuevaVentaForm() {
   const [paso, setPaso] = useState(1);
   const [viajeSeleccionado, setViajeSeleccionado] = useState<any>(null);
@@ -55,6 +74,31 @@ export function NuevaVentaForm() {
   const [modalCliente, setModalCliente] = useState(false);
   const [modalAsientos, setModalAsientos] = useState(false);
   const [modalCrearCliente, setModalCrearCliente] = useState(false);
+
+  const [secondaryColor, setSecondaryColor] = useState<string>("");
+  const [secondaryContrast, setSecondaryContrast] = useState<"white" | "black">(
+    "white"
+  );
+
+  useEffect(() => {
+    const cssColor = getCssVariableValue("--secondary");
+    // Convert oklch or rgb to hex if needed (simple fallback for now)
+    let hex = cssColor;
+    if (cssColor.startsWith("rgb")) {
+      const rgb = cssColor.match(/\d+/g);
+      if (rgb && rgb.length >= 3) {
+        hex =
+          "#" +
+          rgb
+            .slice(0, 3)
+            .map((x) => (+x).toString(16).padStart(2, "0"))
+            .join("");
+      }
+    }
+    if (cssColor.startsWith("#")) hex = cssColor;
+    setSecondaryColor(hex);
+    setSecondaryContrast(getContrastYIQ(hex));
+  }, []);
 
   const calcularTotal = () => {
     if (!viajeSeleccionado || !asientosSeleccionados.length) return 0;
@@ -106,10 +150,13 @@ export function NuevaVentaForm() {
               {[1, 2, 3, 4].map((numeroStep) => {
                 const isActive = numeroStep === paso;
                 const isCompleted = numeroStep < paso;
+                let iconColor = "text-gray-500";
+                if (isActive || isCompleted) {
+                  iconColor =
+                    secondaryContrast === "white" ? "text-white" : "text-black";
+                }
                 const iconProps = {
-                  className: `w-6 h-6 ${
-                    isActive ? "text-secondary-foreground" : "text-gray-500"
-                  }`,
+                  className: `w-6 h-6 ${iconColor}`,
                 };
                 let IconComponent = null;
                 if (numeroStep === 1) IconComponent = Bus;
@@ -122,12 +169,12 @@ export function NuevaVentaForm() {
                     className="flex flex-col items-center relative z-10 bg-transparent"
                   >
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200 bg-white
-                      ${
-                        isActive
-                          ? "bg-secondary border-secondary shadow-lg text-secondary-foreground"
-                          : "bg-white border-gray-300"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200
+                        ${
+                          isActive || isCompleted
+                            ? "bg-secondary border-secondary shadow-lg"
+                            : "bg-white border-gray-300"
+                        }`}
                     >
                       {IconComponent && <IconComponent {...iconProps} />}
                     </div>
