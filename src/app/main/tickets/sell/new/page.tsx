@@ -7,7 +7,7 @@ export default function NuevaVentaPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Nueva Venta</h1>
-          <p className="text-muted-foreground">Genere una nueva venta de boletos.</p>
+          <p className="text-muted-foreground">Genere una nueva venta de boletos paso a paso.</p>
         </div>
       </div>
 
