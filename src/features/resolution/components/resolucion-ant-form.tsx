@@ -25,6 +25,8 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useResolucionAntForm } from "../hooks/use-resolucion-ant-form";
 import type { ResolucionAnt } from "../interfaces/resolucion-ant.interface";
+import RequiredLabel from "@/shared/components/RequiredLabel";
+import type { ResolucionAntSchema } from "../schemas/resolucion-ant.schema";
 
 interface ResolucionAntFormProps {
   resolucion?: ResolucionAnt;
@@ -32,6 +34,13 @@ interface ResolucionAntFormProps {
 
 export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
   const { form, onSubmit, isSubmitting, isEditing } = useResolucionAntForm(resolucion);
+
+  // Helper para mostrar asterisco si el campo está vacío o tiene error
+  const showAsterisk = (name: keyof ResolucionAntSchema) => {
+    const field = form.getFieldState(name, form.formState);
+    const value = form.watch(name);
+    return !value || !!field.error;
+  };
 
   return (
     <Form {...form}>
@@ -42,7 +51,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
             name="numeroResolucion"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Número de Resolución</FormLabel>
+                <RequiredLabel htmlFor="numeroResolucion" required showAsterisk={showAsterisk("numeroResolucion" as keyof ResolucionAntSchema)}>Número de Resolución</RequiredLabel>
                 <FormControl>
                   <Input 
                     placeholder="ANT-2025-001" 
@@ -62,7 +71,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
             name="documentoUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>URL del Documento</FormLabel>
+                <RequiredLabel htmlFor="documentoUrl" required showAsterisk={showAsterisk("documentoUrl" as keyof ResolucionAntSchema)}>URL del Documento</RequiredLabel>
                 <FormControl>
                   <Input 
                     type="url"
@@ -82,7 +91,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
             name="fechaEmision"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Emisión</FormLabel>
+                <RequiredLabel htmlFor="fechaEmision" required showAsterisk={showAsterisk("fechaEmision" as keyof ResolucionAntSchema)}>Fecha de Emisión</RequiredLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -127,7 +136,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
             name="fechaVigencia"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Vigencia</FormLabel>
+                <RequiredLabel htmlFor="fechaVigencia" required showAsterisk={showAsterisk("fechaVigencia" as keyof ResolucionAntSchema)}>Fecha de Vigencia</RequiredLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -173,7 +182,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
           name="descripcion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <RequiredLabel htmlFor="descripcion" required showAsterisk={showAsterisk("descripcion" as keyof ResolucionAntSchema)}>Descripción</RequiredLabel>
               <FormControl>
                 <Textarea
                   placeholder="Descripción de la resolución ANT..."

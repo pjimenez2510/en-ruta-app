@@ -66,7 +66,9 @@ export const ImageUploader = ({
             <NextImage
               src={imageUrl}
               alt="Imagen subida"
-              fill
+              width={width}
+              height={height}
+              style={{ objectFit: 'contain' }}
               className="object-contain p-1"
             />
           ) : (
