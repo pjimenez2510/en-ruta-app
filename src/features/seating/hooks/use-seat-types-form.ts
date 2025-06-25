@@ -1,11 +1,11 @@
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
 import { SeatType } from "../interfaces/seat-type.interface";
 import { seatTypeFormSchema, SeatTypeFormValues } from "../interfaces/form-schema";
 
-export const useSeatTypeForm = (initialData?: SeatType) => {
+export const useSeatTypeForm = (initialData?: SeatType): { form: UseFormReturn<SeatTypeFormValues>; tenantId: number | null } => {
     const { data: session } = useSession();
     let tenantId: number | null = null;
 

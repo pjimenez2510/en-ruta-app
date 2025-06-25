@@ -1,4 +1,3 @@
-// features/resoluciones-ant/schemas/resolucion-ant.schema.ts
 import { z } from "zod";
 
 export const resolucionAntSchema = z.object({
