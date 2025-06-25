@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Eye, EyeOff, Search } from "lucide-react";
 import { CloudinaryUploader } from "@/components/ui/cloudinary-uploader";
 import { toast } from "sonner";
@@ -72,10 +82,77 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   onSubmit,
   onReset,
 }) => {
- 
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
+
+  // Función para verificar si hay datos en el formulario
+  const hasFormData = () => {
+    return (
+      formData.username ||
+      formData.numeroDocumento ||
+      formData.nombres ||
+      formData.apellidos ||
+      formData.password ||
+      formData.email ||
+      formData.telefono ||
+      formData.fechaNacimiento ||
+      formData.direccion ||
+      formData.ciudadResidencia ||
+      formData.genero ||
+      formData.fotoPerfil ||
+      formData.fechaContratacion ||
+      formData.licenciaConducir ||
+      formData.tipoLicencia ||
+      formData.fechaExpiracionLicencia ||
+      confirmPassword
+    );
+  };
+
+  // Función para manejar el cierre del modal
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasFormData() && !isEditing) {
+      setShowConfirmDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  // Función para manejar el cierre cuando se presiona Escape o se hace clic fuera
+  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && isOpen && hasFormData() && !isEditing) {
+      event.preventDefault();
+      setShowConfirmDialog(true);
+      setPendingClose(true);
+    }
+  };
+
+  // Agregar event listener para la tecla Escape
+  React.useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscapeKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleEscapeKeyDown);
+      };
+    }
+  }, [isOpen, formData, confirmPassword, isEditing]);
+
+  // Función para confirmar el cierre
+  const handleConfirmClose = () => {
+    setShowConfirmDialog(false);
+    setPendingClose(false);
+    onReset();
+    onOpenChange(false);
+  };
+
+  // Función para cancelar el cierre
+  const handleCancelClose = () => {
+    setShowConfirmDialog(false);
+    setPendingClose(false);
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <span>
           <Button onClick={onReset}>Nuevo Usuario</Button>
@@ -433,11 +510,49 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            {isEditing ? "Guardar Cambios" : "Crear Usuario"}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => {
+                if (hasFormData() && !isEditing) {
+                  setShowConfirmDialog(true);
+                  setPendingClose(true);
+                } else {
+                  onReset();
+                  onOpenChange(false);
+                }
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1">
+              {isEditing ? "Guardar Cambios" : "Crear Usuario"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
+
+      {/* Diálogo de confirmación para cerrar el formulario */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Deseas salir sin guardar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tienes información sin guardar en el formulario. Si sales ahora, perderás todos los datos ingresados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelClose}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmClose} className="bg-red-600 hover:bg-red-700">
+              Salir sin guardar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
