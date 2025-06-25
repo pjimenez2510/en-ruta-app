@@ -57,9 +57,9 @@ const FormValidationExample = () => {
     e.preventDefault();
     
     // Validar todos los campos
-    const isValid = validateFields(formData);
+    validateFields(formData);
     
-    if (isValid) {
+    if (areAllFieldsValid()) {
       console.log('Formulario válido, enviando datos:', formData);
       // Aquí iría la lógica para enviar el formulario
     } else {

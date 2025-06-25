@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Eye, EyeOff, Search } from "lucide-react";
 import { CloudinaryUploader } from "@/components/ui/cloudinary-uploader";
-import { toast } from "sonner";
 
 interface FormData {
   id?: number;
@@ -74,7 +73,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   formData,
   confirmPassword,
   showPassword,
-  error,
   onFormDataChange,
   onConfirmPasswordChange,
   onShowPasswordChange,
@@ -83,10 +81,9 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   onReset,
 }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [pendingClose, setPendingClose] = useState(false);
 
   // Función para verificar si hay datos en el formulario
-  const hasFormData = () => {
+  const hasFormData = React.useCallback(() => {
     return (
       formData.username ||
       formData.numeroDocumento ||
@@ -106,26 +103,24 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       formData.fechaExpiracionLicencia ||
       confirmPassword
     );
-  };
+  }, [formData, confirmPassword]);
 
   // Función para manejar el cierre del modal
   const handleOpenChange = (open: boolean) => {
     if (!open && hasFormData() && !isEditing) {
       setShowConfirmDialog(true);
-      setPendingClose(true);
     } else {
       onOpenChange(open);
     }
   };
 
   // Función para manejar el cierre cuando se presiona Escape o se hace clic fuera
-  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+  const handleEscapeKeyDown = React.useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape' && isOpen && hasFormData() && !isEditing) {
       event.preventDefault();
       setShowConfirmDialog(true);
-      setPendingClose(true);
     }
-  };
+  }, [isOpen, hasFormData, isEditing]);
 
   // Agregar event listener para la tecla Escape
   React.useEffect(() => {
@@ -135,12 +130,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         document.removeEventListener('keydown', handleEscapeKeyDown);
       };
     }
-  }, [isOpen, formData, confirmPassword, isEditing]);
+  }, [isOpen, handleEscapeKeyDown]);
 
   // Función para confirmar el cierre
   const handleConfirmClose = () => {
     setShowConfirmDialog(false);
-    setPendingClose(false);
     onReset();
     onOpenChange(false);
   };
@@ -148,7 +142,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   // Función para cancelar el cierre
   const handleCancelClose = () => {
     setShowConfirmDialog(false);
-    setPendingClose(false);
   };
 
   return (
@@ -518,7 +511,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               onClick={() => {
                 if (hasFormData() && !isEditing) {
                   setShowConfirmDialog(true);
-                  setPendingClose(true);
                 } else {
                   onReset();
                   onOpenChange(false);

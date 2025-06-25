@@ -23,9 +23,9 @@ export const useFieldValidation = (requiredFields: string[]) => {
   });
 
   // ✅ SOLUCIÓN: Memorizar validateField con useCallback
-  const validateField = useCallback((fieldName: string, value: any) => {
+  const validateField = useCallback((fieldName: string, value: unknown) => {
     const hasValue = value !== null && value !== undefined && value !== '';
-    const isValid = hasValue && value.toString().trim().length > 0;
+    const isValid = hasValue && String(value).trim().length > 0;
         
     setFieldStates(prev => ({
       ...prev,
@@ -40,23 +40,21 @@ export const useFieldValidation = (requiredFields: string[]) => {
   }, []); // Array vacío porque no depende de ningún valor externo
 
   // ✅ También memorizar validateFields
-  const validateFields = useCallback((fields: { [key: string]: any }) => {
+  const validateFields = useCallback((fields: { [key: string]: unknown }) => {
     setFieldStates(prev => {
       const newStates = { ...prev };
-      let allValid = true;
 
       Object.keys(fields).forEach(fieldName => {
         if (requiredFields.includes(fieldName)) {
-          const hasValue = fields[fieldName] !== null && fields[fieldName] !== undefined && fields[fieldName] !== '';
-          const isValid = hasValue && fields[fieldName].toString().trim().length > 0;
+          const fieldValue = fields[fieldName];
+          const hasValue = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+          const isValid = hasValue && String(fieldValue).trim().length > 0;
                   
           newStates[fieldName] = {
             isValid,
             hasValue,
             showAsterisk: !isValid,
           };
-
-          if (!isValid) allValid = false;
         }
       });
 

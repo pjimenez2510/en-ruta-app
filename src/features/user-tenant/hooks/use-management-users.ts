@@ -60,23 +60,30 @@ const defaultFormData: FormData = {
 };
 
 // Helper function to parse backend errors
-const parseBackendError = (error: any): string => {
-  if (error?.response?.data) {
-    const { error: errorArray, message } = error.response.data;
-    
-    // If there's an array of specific errors, show them
-    if (Array.isArray(errorArray) && errorArray.length > 0) {
-      return errorArray.join(", ");
-    }
-    
-    // If there's a general message, show it
-    if (message) {
-      return message;
+const parseBackendError = (error: unknown): string => {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const response = (error as { response: { data: { error?: string[]; message?: string } } }).response;
+    if (response?.data) {
+      const { error: errorArray, message } = response.data;
+      
+      // If there's an array of specific errors, show them
+      if (Array.isArray(errorArray) && errorArray.length > 0) {
+        return errorArray.join(", ");
+      }
+      
+      // If there's a general message, show it
+      if (message) {
+        return message;
+      }
     }
   }
   
   // Fallback to error message or default
-  return error?.message || "Error desconocido";
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  return "Error desconocido";
 };
 
 export function useManagementUsers(): UseManagementUsersReturn {

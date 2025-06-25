@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CldUploadWidget } from "next-cloudinary";
+import NextImage from "next/image";
 
 interface ImageUploaderProps {
   imageUrl: string | null;
@@ -62,10 +63,11 @@ export const ImageUploader = ({
           style={{ width: `${width}px`, height: `${height}px` }}
         >
           {imageUrl ? (
-            <img
+            <NextImage
               src={imageUrl}
               alt="Imagen subida"
-              className="h-full w-full object-contain p-1"
+              fill
+              className="object-contain p-1"
             />
           ) : (
             <Upload className="h-8 w-8 text-gray-400" />

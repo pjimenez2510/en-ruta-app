@@ -73,7 +73,7 @@ const LoginView = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let errors: { [key: string]: string } = {};
+    const errors: { [key: string]: string } = {};
     if (!username) errors.username = "Este campo es requerido";
     if (!password) errors.password = "Este campo es requerido";
     setFieldErrors(errors);
