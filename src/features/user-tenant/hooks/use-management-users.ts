@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   UserTenant,
   CreateUserTenantDto,
@@ -58,6 +59,26 @@ const defaultFormData: FormData = {
   rol: "CONDUCTOR",
 };
 
+// Helper function to parse backend errors
+const parseBackendError = (error: any): string => {
+  if (error?.response?.data) {
+    const { error: errorArray, message } = error.response.data;
+    
+    // If there's an array of specific errors, show them
+    if (Array.isArray(errorArray) && errorArray.length > 0) {
+      return errorArray.join(", ");
+    }
+    
+    // If there's a general message, show it
+    if (message) {
+      return message;
+    }
+  }
+  
+  // Fallback to error message or default
+  return error?.message || "Error desconocido";
+};
+
 export function useManagementUsers(): UseManagementUsersReturn {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<FormData>(defaultFormData);
@@ -78,9 +99,12 @@ export function useManagementUsers(): UseManagementUsersReturn {
     mutationFn: managementUsersService.deleteUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("Usuario eliminado correctamente");
     },
     onError: (error: Error) => {
-      setError(error.message);
+      const errorMessage = parseBackendError(error);
+      toast.error(errorMessage);
+      setError(errorMessage);
     },
   });
 
@@ -102,9 +126,12 @@ export function useManagementUsers(): UseManagementUsersReturn {
           apellidos,
         }));
         setError(null);
+        toast.success("Información encontrada correctamente");
       } catch (error) {
         if (error instanceof Error) {
-          setError(error.message);
+          const errorMessage = parseBackendError(error);
+          toast.error(errorMessage);
+          setError(errorMessage);
         }
       }
     }
@@ -117,7 +144,9 @@ export function useManagementUsers(): UseManagementUsersReturn {
     // Solo validar contraseñas si se está creando un usuario nuevo o si se está cambiando la contraseña
     if (!isEditing || (isEditing && formData.password !== "")) {
       if (formData.password !== confirmPassword) {
-        setError("Las contraseñas no coinciden");
+        const errorMessage = "Las contraseñas no coinciden";
+        toast.error(errorMessage);
+        setError(errorMessage);
         return;
       }
     }
@@ -150,6 +179,7 @@ export function useManagementUsers(): UseManagementUsersReturn {
         };
 
         await managementUsersService.updateUser(formData.id, updateDto);
+        toast.success("Usuario actualizado correctamente");
       } else {
         const createDto: CreateUserTenantDto = {
           rol: formData.rol,
@@ -177,13 +207,16 @@ export function useManagementUsers(): UseManagementUsersReturn {
         };
 
         await managementUsersService.createUser(createDto);
+        toast.success("Usuario creado correctamente");
       }
 
       queryClient.invalidateQueries({ queryKey: ["users"] });
       resetForm();
       setDialogOpen(false);
     } catch (error) {
-      setError("Error al guardar el usuario");
+      const errorMessage = parseBackendError(error);
+      toast.error(errorMessage);
+      setError(errorMessage);
       console.error("Error:", error);
     }
   };

@@ -73,8 +73,9 @@ export const managementUsersService = {
         cleanedData
       );
       return data.data[0];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error en managementUsersService.createUser:", error);
+      // Re-throw the error to be handled by the hook
       throw error;
     }
   },
@@ -132,8 +133,9 @@ export const managementUsersService = {
       const url = buildUrl(API_ROUTES.USER_TENANT.UPDATE, { id });
       const { data } = await api.put<UserTenantResponse>(url, cleanedData);
       return data.data[0];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error en managementUsersService.updateUser:", error);
+      // Re-throw the error to be handled by the hook
       throw error;
     }
   },
@@ -144,8 +146,9 @@ export const managementUsersService = {
       const api = await createAuthApi();
       const url = buildUrl(API_ROUTES.USER_TENANT.DELETE, { id });
       await api.delete(url);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error en managementUsersService.deleteUser:", error);
+      // Re-throw the error to be handled by the hook
       throw error;
     }
   },

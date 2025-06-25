@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, EyeOff, Search } from "lucide-react";
 import { CloudinaryUploader } from "@/components/ui/cloudinary-uploader";
+import { toast } from "sonner";
 
 interface FormData {
   id?: number;
@@ -431,8 +432,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               </div>
             </div>
           </div>
-
-          {error && <div className="text-sm text-red-500">{error}</div>}
 
           <Button type="submit" className="w-full">
             {isEditing ? "Guardar Cambios" : "Crear Usuario"}
