@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLogin } from "../../hooks/use-login";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -20,9 +20,9 @@ const LoginView = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Configurar validación de campos requeridos
-  const requiredFields = ["username", "password"];
-  const { validateField, getFieldState, canEnableActionButton } = useFieldValidation(requiredFields);
+  // Usar useMemo para que requiredFields no cambie en cada render
+  const requiredFields = useMemo(() => ["username", "password"], []);
+  const { validateField, getFieldState } = useFieldValidation(requiredFields);
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
@@ -70,7 +70,6 @@ const LoginView = () => {
 
   const usernameState = getFieldState("username");
   const passwordState = getFieldState("password");
-  const canSubmit = canEnableActionButton();
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">
@@ -135,17 +134,10 @@ const LoginView = () => {
               type="submit"
               className="w-full h-12"
               variant="default"
-              disabled={isLoading || !canSubmit}
+              disabled={isLoading}
             >
               {isLoading ? "Ingresando..." : "Iniciar Sesión"}
             </Button>
-            
-            {!canSubmit && (
-              <p className="text-sm text-red-500 text-center">
-                Completa todos los campos requeridos para continuar
-              </p>
-            )}
-            
             <div className="text-center text-sm mt-8">
               <Link
                 href="/forgot-password"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 interface FieldValidationState {
   [key: string]: {
@@ -9,10 +9,8 @@ interface FieldValidationState {
 }
 
 export const useFieldValidation = (requiredFields: string[]) => {
-  const [fieldStates, setFieldStates] = useState<FieldValidationState>({});
-
-  // Inicializar estados de los campos requeridos
-  useEffect(() => {
+  // Inicializar el estado solo una vez
+  const [fieldStates, setFieldStates] = useState<FieldValidationState>(() => {
     const initialStates: FieldValidationState = {};
     requiredFields.forEach(fieldName => {
       initialStates[fieldName] = {
@@ -21,14 +19,14 @@ export const useFieldValidation = (requiredFields: string[]) => {
         showAsterisk: true,
       };
     });
-    setFieldStates(initialStates);
-  }, [requiredFields]);
+    return initialStates;
+  });
 
-  // Función para validar un campo específico
-  const validateField = (fieldName: string, value: any) => {
+  // ✅ SOLUCIÓN: Memorizar validateField con useCallback
+  const validateField = useCallback((fieldName: string, value: any) => {
     const hasValue = value !== null && value !== undefined && value !== '';
     const isValid = hasValue && value.toString().trim().length > 0;
-    
+        
     setFieldStates(prev => ({
       ...prev,
       [fieldName]: {
@@ -39,51 +37,52 @@ export const useFieldValidation = (requiredFields: string[]) => {
     }));
 
     return isValid;
-  };
+  }, []); // Array vacío porque no depende de ningún valor externo
 
-  // Función para validar múltiples campos
-  const validateFields = (fields: { [key: string]: any }) => {
-    const newStates = { ...fieldStates };
-    let allValid = true;
+  // ✅ También memorizar validateFields
+  const validateFields = useCallback((fields: { [key: string]: any }) => {
+    setFieldStates(prev => {
+      const newStates = { ...prev };
+      let allValid = true;
 
-    Object.keys(fields).forEach(fieldName => {
-      if (requiredFields.includes(fieldName)) {
-        const hasValue = fields[fieldName] !== null && fields[fieldName] !== undefined && fields[fieldName] !== '';
-        const isValid = hasValue && fields[fieldName].toString().trim().length > 0;
-        
-        newStates[fieldName] = {
-          isValid,
-          hasValue,
-          showAsterisk: !isValid,
-        };
+      Object.keys(fields).forEach(fieldName => {
+        if (requiredFields.includes(fieldName)) {
+          const hasValue = fields[fieldName] !== null && fields[fieldName] !== undefined && fields[fieldName] !== '';
+          const isValid = hasValue && fields[fieldName].toString().trim().length > 0;
+                  
+          newStates[fieldName] = {
+            isValid,
+            hasValue,
+            showAsterisk: !isValid,
+          };
 
-        if (!isValid) allValid = false;
-      }
+          if (!isValid) allValid = false;
+        }
+      });
+
+      return newStates;
     });
-
-    setFieldStates(newStates);
-    return allValid;
-  };
+  }, [requiredFields]);
 
   // Función para verificar si todos los campos requeridos son válidos
-  const areAllFieldsValid = () => {
+  const areAllFieldsValid = useCallback(() => {
     return Object.values(fieldStates).every(state => state.isValid);
-  };
+  }, [fieldStates]);
 
   // Función para verificar si hay asteriscos activos (campos requeridos sin completar)
-  const hasActiveAsterisks = () => {
+  const hasActiveAsterisks = useCallback(() => {
     return Object.values(fieldStates).some(state => state.showAsterisk);
-  };
+  }, [fieldStates]);
 
   // Función para obtener el estado de un campo específico
-  const getFieldState = (fieldName: string) => {
+  const getFieldState = useCallback((fieldName: string) => {
     return fieldStates[fieldName] || { isValid: false, hasValue: false, showAsterisk: true };
-  };
+  }, [fieldStates]);
 
   // Función para verificar si se puede habilitar el botón de acción
-  const canEnableActionButton = () => {
+  const canEnableActionButton = useCallback(() => {
     return !hasActiveAsterisks() && areAllFieldsValid();
-  };
+  }, [hasActiveAsterisks, areAllFieldsValid]);
 
   return {
     fieldStates,
@@ -94,4 +93,4 @@ export const useFieldValidation = (requiredFields: string[]) => {
     canEnableActionButton,
     getFieldState,
   };
-}; 
+};
