@@ -27,6 +27,8 @@ export const useSeatTypeForm = (initialData?: SeatType) => {
             color: initialData?.color || "#000000",
             icono: initialData?.icono || "Armchair",
         },
+        mode: "onChange",
+        reValidateMode: "onChange",
     });
 
     return { form, tenantId };

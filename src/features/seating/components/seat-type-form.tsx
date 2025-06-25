@@ -19,6 +19,8 @@ export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormPr
   const { form } = useSeatTypeForm(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isValid = form.formState.isValid;
+
   const handleSubmit = async (values: SeatTypeFormValues) => {
     try {
       setIsSubmitting(true);
@@ -43,7 +45,7 @@ export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormPr
           </Button>
           <Button 
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isValid}
           >
             {isSubmitting ? (
               <>
