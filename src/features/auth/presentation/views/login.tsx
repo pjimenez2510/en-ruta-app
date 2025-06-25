@@ -17,6 +17,7 @@ const LoginView = () => {
   const { login, isLoading, error } = useLogin();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -51,12 +52,32 @@ const LoginView = () => {
     validateField("password", password);
   }, [password, validateField]);
 
+  // Handlers para validación en tiempo real
+  const handleUsernameChange = (value: string) => {
+    setUsername(value);
+    if (!value) {
+      setFieldErrors(prev => ({ ...prev, username: "Este campo es requerido" }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, username: "" }));
+    }
+  };
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+    if (!value) {
+      setFieldErrors(prev => ({ ...prev, password: "Este campo es requerido" }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, password: "" }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
-      return;
-    }
-    console.log("Iniciando proceso de login...");
+    let errors: { [key: string]: string } = {};
+    if (!username) errors.username = "Este campo es requerido";
+    if (!password) errors.password = "Este campo es requerido";
+    setFieldErrors(errors);
+    if (Object.values(errors).some(Boolean)) return;
     await login({ username, password });
   };
 
@@ -111,23 +132,29 @@ const LoginView = () => {
                 type="text"
                 placeholder="username-example"
                 value={username}
-                onChange={setUsername}
+                onChange={handleUsernameChange}
                 required={true}
                 showAsterisk={usernameState.showAsterisk}
                 disabled={isLoading}
-                error={!!error}
+                error={!!error || !!fieldErrors.username}
               />
+              {fieldErrors.username && (
+                <p className="text-xs text-red-500 ml-1">{fieldErrors.username}</p>
+              )}
               <ValidatedPasswordInput
                 id="password"
                 label="Contraseña"
                 placeholder="**********"
                 value={password}
-                onChange={setPassword}
+                onChange={handlePasswordChange}
                 required={true}
                 showAsterisk={passwordState.showAsterisk}
                 disabled={isLoading}
-                error={!!error}
+                error={!!error || !!fieldErrors.password}
               />
+              {fieldErrors.password && (
+                <p className="text-xs text-red-500 ml-1">{fieldErrors.password}</p>
+              )}
             </div>
 
             <Button
