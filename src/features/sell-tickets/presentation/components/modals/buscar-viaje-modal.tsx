@@ -21,53 +21,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Search } from "lucide-react";
 import { useCiudades } from "@/features/auth/hooks/use-ciudades";
-
-const viajesDisponibles = [
-  {
-    id: 1,
-    ruta: "Quito - Guayaquil",
-    ciudadOrigen: "Quito",
-    ciudadDestino: "Guayaquil",
-    fecha: "2025-01-18",
-    hora: "08:30",
-    bus: "Bus 001",
-    precio: 22.75,
-    asientosDisponibles: 15,
-  },
-  {
-    id: 2,
-    ruta: "Ambato - Cuenca",
-    ciudadOrigen: "Ambato",
-    ciudadDestino: "Cuenca",
-    fecha: "2025-01-18",
-    hora: "14:15",
-    bus: "Bus 002",
-    precio: 18.5,
-    asientosDisponibles: 8,
-  },
-  {
-    id: 3,
-    ruta: "Quito - Loja",
-    ciudadOrigen: "Quito",
-    ciudadDestino: "Loja",
-    fecha: "2025-01-19",
-    hora: "06:45",
-    bus: "Bus 004",
-    precio: 25.0,
-    asientosDisponibles: 22,
-  },
-  {
-    id: 4,
-    ruta: "Guayaquil - Manta",
-    ciudadOrigen: "Guayaquil",
-    ciudadDestino: "Manta",
-    fecha: "2025-01-18",
-    hora: "16:00",
-    bus: "Bus 003",
-    precio: 15.0,
-    asientosDisponibles: 12,
-  },
-];
+import { useViajesPublicos } from "@/features/sell-tickets/hooks/use-viajes-publicos";
+import { ViajePublico } from "@/features/sell-tickets/interfaces/viaje-publico.interface";
 
 interface BuscarViajeModalProps {
   open: boolean;
@@ -84,36 +39,24 @@ export function BuscarViajeModal({
   const [ciudadOrigen, setCiudadOrigen] = useState("");
   const [ciudadDestino, setCiudadDestino] = useState("");
   const [fecha, setFecha] = useState("");
-  const [viajesFiltrados, setViajesFiltrados] = useState(viajesDisponibles);
 
-  const buscarViajes = () => {
-    let viajes = viajesDisponibles;
-    if (ciudadOrigen) {
-      const ciudadOrigenNombre = ciudadesOptions.find(
-        (c) => c.value === ciudadOrigen
-      )?.ciudad.nombre;
-      viajes = viajes.filter((v) => v.ciudadOrigen === ciudadOrigenNombre);
-    }
-    if (ciudadDestino) {
-      const ciudadDestinoNombre = ciudadesOptions.find(
-        (c) => c.value === ciudadDestino
-      )?.ciudad.nombre;
-      viajes = viajes.filter((v) => v.ciudadDestino === ciudadDestinoNombre);
-    }
-    if (fecha) {
-      viajes = viajes.filter((v) => v.fecha === fecha);
-    }
-    setViajesFiltrados(viajes);
+  const filtros = {
+    estado: "PROGRAMADO",
+    ciudadOrigenId: ciudadOrigen ? Number(ciudadOrigen) : undefined,
+    ciudadDestinoId: ciudadDestino ? Number(ciudadDestino) : undefined,
+    fecha: fecha || undefined,
   };
+
+  const { viajes: viajesRaw, isLoading: isLoadingViajes } =
+    useViajesPublicos(filtros);
+  const viajes = (viajesRaw ?? []) as ViajePublico[];
 
   const seleccionarViaje = (viaje: any) => {
     onViajeSeleccionado(viaje);
     onOpenChange(false);
-    // Limpiar filtros
     setCiudadOrigen("");
     setCiudadDestino("");
     setFecha("");
-    setViajesFiltrados(viajesDisponibles);
   };
 
   return (
@@ -229,7 +172,7 @@ export function BuscarViajeModal({
             </div>
 
             <div className="flex items-end">
-              <Button onClick={buscarViajes} className="w-full">
+              <Button onClick={() => {}} className="w-full">
                 <Search className="mr-2 h-4 w-4" />
                 Buscar
               </Button>
@@ -240,47 +183,67 @@ export function BuscarViajeModal({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">Viajes Disponibles</h3>
-              <Badge variant="secondary">
-                {viajesFiltrados.length} resultados
-              </Badge>
+              <Badge variant="secondary">{viajes.length} resultados</Badge>
             </div>
 
             <div className="grid gap-4 max-h-96 overflow-y-auto">
-              {viajesFiltrados.map((viaje) => (
-                <div
-                  key={viaje.id}
-                  className="p-4 border rounded-lg hover:border-[#006D8B] cursor-pointer transition-colors"
-                  onClick={() => seleccionarViaje(viaje)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{viaje.ruta}</span>
-                        <Badge variant="outline">{viaje.bus}</Badge>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {viaje.fecha}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {viaje.hora}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-lg">${viaje.precio}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {viaje.asientosDisponibles} asientos disponibles
-                      </p>
-                    </div>
-                  </div>
+              {isLoadingViajes ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Cargando viajes...</p>
                 </div>
-              ))}
-
-              {viajesFiltrados.length === 0 && (
+              ) : viajes.length > 0 ? (
+                viajes.map((viaje: ViajePublico) => {
+                  const paradas = viaje.horarioRuta.ruta.paradas;
+                  const ciudadOrigen = paradas[0]?.ciudad.nombre || "-";
+                  const ciudadDestino =
+                    paradas[paradas.length - 1]?.ciudad.nombre || "-";
+                  const ruta = viaje.horarioRuta.ruta.nombre;
+                  const fecha = viaje.fecha.split("T")[0];
+                  const hora = viaje.horarioRuta.horaSalida;
+                  const bus = viaje.bus.placa;
+                  const precio = viaje.precio;
+                  const asientosDisponibles =
+                    viaje.capacidadTotal - viaje.asientosOcupados;
+                  return (
+                    <div
+                      key={viaje.id}
+                      className="p-4 border rounded-lg hover:border-[#006D8B] cursor-pointer transition-colors"
+                      onClick={() => seleccionarViaje(viaje)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{ruta}</span>
+                            <Badge variant="outline">{bus}</Badge>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {fecha}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {hora}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>Origen: {ciudadOrigen}</span>
+                            <span>Destino: {ciudadDestino}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-lg">${precio}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {asientosDisponibles} asientos disponibles
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No se encontraron viajes con los filtros seleccionados</p>
