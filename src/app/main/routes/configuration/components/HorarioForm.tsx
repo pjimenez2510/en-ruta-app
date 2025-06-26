@@ -242,10 +242,7 @@ export function HorarioForm({
         />
 
         <DialogFooter className="pt-6">
-          <Button 
-            type="submit" 
-            className="w-full md:w-auto min-w-32 h-11 bg-blue-600 hover:bg-blue-700 transition-colors"
-          >
+          <Button type="submit">
             {isEditing ? "Actualizar" : "Crear"} Horario
           </Button>
         </DialogFooter>

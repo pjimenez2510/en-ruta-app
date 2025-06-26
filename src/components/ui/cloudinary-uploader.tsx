@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { Button } from "./button";
 import { Label } from "./label";
 import { Image } from "lucide-react";
+import NextImage from "next/image";
 
 interface CloudinaryUploaderProps {
   imageUrl: string | null;
@@ -54,10 +55,11 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
       <div className="flex items-center gap-4">
         {imageUrl && (
           <div className="relative w-20 h-20">
-            <img
+            <NextImage
               src={imageUrl}
               alt="Foto de perfil"
-              className="w-full h-full object-cover rounded-full"
+              fill
+              className="object-cover rounded-full"
             />
           </div>
         )}

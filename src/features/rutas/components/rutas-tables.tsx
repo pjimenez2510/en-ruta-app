@@ -107,43 +107,43 @@ export function RutasTable() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-full px-2 md:px-8 lg:px-16 xl:px-32 mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 text-center md:text-left">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Gestión de Rutas</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-base md:text-sm">
             Administra las rutas de transporte de tu cooperativa.
           </p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleCreate} className="w-full md:w-auto mt-2 md:mt-0">
           <Plus className="mr-2 h-4 w-4" />
           Nueva Ruta
         </Button>
       </div>
 
       {/* Search */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center w-full justify-center space-x-2">
         <Search className="h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Buscar por nombre, descripción o número de resolución..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
+          className="max-w-sm rounded-lg shadow-sm"
         />
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-xl border bg-white shadow-sm w-full">
+        <Table className="w-full table-auto">
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead>Resolución ANT</TableHead>
-              <TableHead>Cooperativa</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead className="text-center">Nombre</TableHead>
+              <TableHead className="text-center">Descripción</TableHead>
+              <TableHead className="text-center">Resolución ANT</TableHead>
+              <TableHead className="text-center">Cooperativa</TableHead>
+              <TableHead className="text-center">Estado</TableHead>
+              <TableHead className="text-center">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -157,106 +157,111 @@ export function RutasTable() {
               filteredRutas.map((ruta) => (
                 <TableRow 
                   key={ruta.id}
-                  className="hover:bg-muted/50"
+                  className="hover:bg-accent/30 transition-colors align-top"
                 >
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-center align-middle">
                     {ruta.nombre}
                   </TableCell>
-                  <TableCell className="max-w-xs">
-                    <div className="truncate" title={ruta.descripcion}>
+                  <TableCell className="max-w-xs text-center align-middle">
+                    <div className="truncate mx-auto text-center px-2 py-2" title={ruta.descripcion} style={{maxWidth: '180px'}}>
                       {ruta.descripcion}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center align-middle">
                     <div className="space-y-1">
                       <div className="font-medium">
                         {ruta.resolucion?.numeroResolucion}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Vigente hasta: {format(new Date(ruta.resolucion?.fechaVigencia), "dd/MM/yyyy", { locale: es })}
+                        Vigente hasta: {ruta.resolucion?.fechaVigencia ? format(new Date(ruta.resolucion?.fechaVigencia), "dd/MM/yyyy", { locale: es }) : "-"}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center align-middle">
                     {ruta.tenant?.nombre}
                   </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={ruta.activo ? "default" : "secondary"}
-                    >
-                      {ruta.activo ? "Activa" : "Inactiva"}
-                    </Badge>
+                  <TableCell className="text-center align-middle">
+                    <div className="flex justify-center">
+                      <Badge
+                        variant={ruta.activo ? "default" : "secondary"}
+                        className="px-3 py-1 text-xs rounded-full min-w-[80px] flex justify-center"
+                      >
+                        {ruta.activo ? "Activa" : "Inactiva"}
+                      </Badge>
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="h-8 w-8 p-0"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleView(ruta.id)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver Ruta
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(ruta.id)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar Ruta
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleConfigure(ruta.id)}>
-                          <Settings className="mr-2 h-4 w-4" />
-                          Configurar Ruta
-                        </DropdownMenuItem>
-                        {ruta.resolucion?.documentoUrl && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => openDocument(ruta.resolucion.documentoUrl)}
-                            >
-                              <ExternalLink className="mr-2 h-4 w-4" />
-                              Ver Resolución
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        <DropdownMenuSeparator />
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                ¿Estás seguro de eliminar esta ruta?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta acción no se puede deshacer. La ruta &quot;{ruta.nombre}&quot; será eliminada permanentemente.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(ruta.id, ruta.nombre)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  <TableCell className="text-center align-middle">
+                    <div className="flex items-center justify-center gap-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            className="h-8 w-8 p-0 flex items-center justify-center"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleView(ruta.id)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver Ruta
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEdit(ruta.id)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar Ruta
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleConfigure(ruta.id)}>
+                            <Settings className="mr-2 h-4 w-4" />
+                            Configurar Ruta
+                          </DropdownMenuItem>
+                          {ruta.resolucion?.documentoUrl && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => openDocument(ruta.resolucion.documentoUrl)}
                               >
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                Ver Resolución
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          <DropdownMenuSeparator />
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Eliminar
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  ¿Estás seguro de eliminar esta ruta?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción no se puede deshacer. La ruta &quot;{ruta.nombre}&quot; será eliminada permanentemente.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(ruta.id, ruta.nombre)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
