@@ -146,11 +146,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <span>
-          <Button onClick={onReset}>Nuevo Usuario</Button>
-        </span>
-      </DialogTrigger>
+
 
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>

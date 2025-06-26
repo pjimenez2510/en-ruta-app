@@ -32,36 +32,44 @@ export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProp
   };
 
   return (
-    <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-      <Table>
-        <TableHeader className="bg-gray-100">
+    <div className="rounded-xl border bg-white shadow-lg w-full">
+      <Table className="w-full text-sm">
+        <TableHeader>
           <TableRow>
-            <TableHead className="px-4 py-3">Nombre</TableHead>
-            <TableHead className="px-4 py-3">Descripción</TableHead>
-            <TableHead className="px-4 py-3">Factor Precio</TableHead>
-            <TableHead className="px-4 py-3">Color</TableHead>
-            <TableHead className="px-4 py-3">Icono</TableHead>
-            <TableHead className="px-4 py-3">Estado</TableHead>
-            <TableHead className="px-4 py-3 text-right">Acciones</TableHead>
+            <TableHead className="px-4 py-3 text-center">Nombre</TableHead>
+            <TableHead className="px-4 py-3 text-center">Descripción</TableHead>
+            <TableHead className="px-4 py-3 text-center">Factor Precio</TableHead>
+            <TableHead className="px-4 py-3 text-center">Color</TableHead>
+            <TableHead className="px-4 py-3 text-center">Icono</TableHead>
+            <TableHead className="px-4 py-3 text-center">Estado</TableHead>
+            <TableHead className="px-4 py-3 text-center">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {seatTypes.map((seatType) => (
-            <TableRow key={seatType.id} className="hover:bg-gray-50 transition">
-              <TableCell className="px-4 py-3">{seatType.nombre}</TableCell>
-              <TableCell className="px-4 py-3">{seatType.descripcion}</TableCell>
-              <TableCell className="px-4 py-3">
+            <TableRow key={seatType.id} className="hover:bg-accent/30 transition-colors align-middle">
+              <TableCell className="px-4 py-3 text-center max-w-[120px] truncate" title={seatType.nombre}>
+                {seatType.nombre}
+              </TableCell>
+              <TableCell className="px-4 py-3 text-center max-w-[180px] truncate" title={seatType.descripcion}>
+                {seatType.descripcion}
+              </TableCell>
+              <TableCell className="px-4 py-3 text-center">
                 ${seatType.factorPrecio}
               </TableCell>
-              <TableCell className="px-4 py-3">
+              <TableCell className="px-4 py-3 text-center">
                 <span
-                  className="inline-block w-6 h-6 rounded-full border"
+                  className="inline-block w-6 h-6 rounded-full border mx-auto"
                   style={{ backgroundColor: seatType.color }}
                   title={seatType.color}
                 />
               </TableCell>
-              <TableCell className="px-4 py-3">{seatType.icono}</TableCell>
-              <TableCell className="px-4 py-3">
+              <TableCell className="px-4 py-3 text-center">
+                <span className="inline-flex items-center justify-center w-6 h-6 mx-auto">
+                  {seatType.icono}
+                </span>
+              </TableCell>
+              <TableCell className="px-4 py-3 text-center">
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-semibold ${
                     seatType.activo
@@ -72,34 +80,35 @@ export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProp
                   {seatType.activo ? "Activo" : "Inactivo"}
                 </span>
               </TableCell>
-              <TableCell className="px-4 py-3 text-right space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleAction(async () => onEdit(seatType), seatType.id)}
-                  disabled={loadingStates[seatType.id]}
-                >
-                  {loadingStates[seatType.id] ? (
-                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                  ) : (
-                    <Pencil className="w-4 h-4 mr-1" />
-                  )}
-                  Editar
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:bg-red-50"
-                  onClick={() => handleAction(async () => onDelete(seatType.id), seatType.id)}
-                  disabled={loadingStates[seatType.id]}
-                >
-                  {loadingStates[seatType.id] ? (
-                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-4 h-4 mr-1" />
-                  )}
-                  Eliminar
-                </Button>
+              <TableCell className="px-4 py-3 text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleAction(async () => onEdit(seatType), seatType.id)}
+                    disabled={loadingStates[seatType.id]}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    {loadingStates[seatType.id] ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Pencil className="w-4 h-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => handleAction(async () => onDelete(seatType.id), seatType.id)}
+                    disabled={loadingStates[seatType.id]}
+                  >
+                    {loadingStates[seatType.id] ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}

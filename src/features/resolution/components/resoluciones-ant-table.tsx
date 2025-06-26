@@ -83,46 +83,46 @@ export function ResolucionesAntTable() {
 
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-full px-2 md:px-8 lg:px-16 xl:px-32 mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 text-center md:text-left">
         <div>
           <h1 className="text-2xl font-bold">Resoluciones ANT</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-base md:text-sm">
             Gestiona las resoluciones de la Agencia Nacional de Tránsito
           </p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleCreate} className="w-full md:w-auto mt-2 md:mt-0">
           <Plus className="mr-2 h-4 w-4" />
           Nueva Resolución
         </Button>
       </div>
 
       {/* Search */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 w-full justify-center">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por número o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
+            className="pl-8 rounded-lg shadow-sm"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-xl border bg-white shadow-sm overflow-x-auto w-full">
+        <Table className="min-w-[700px] md:min-w-full">
           <TableHeader>
             <TableRow>
-              <TableHead>Número</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead>Fecha Emisión</TableHead>
-              <TableHead>Fecha Vigencia</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Documento</TableHead>
-              <TableHead className="w-[70px]">Acciones</TableHead>
+              <TableHead className="text-center">Número</TableHead>
+              <TableHead className="text-center">Descripción</TableHead>
+              <TableHead className="text-center">Fecha Emisión</TableHead>
+              <TableHead className="text-center">Fecha Vigencia</TableHead>
+              <TableHead className="text-center">Estado</TableHead>
+              <TableHead className="text-center">Documento</TableHead>
+              <TableHead className="w-[70px] text-center">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -143,88 +143,93 @@ export function ResolucionesAntTable() {
               </TableRow>
             ) : (
               filteredResoluciones.map((resolucion) => (
-                <TableRow key={resolucion.id}>
-                  <TableCell className="font-medium">
+                <TableRow key={resolucion.id} className="hover:bg-accent/30 transition-colors">
+                  <TableCell className="font-medium text-center align-middle">
                     {resolucion.numeroResolucion}
                   </TableCell>
-                  <TableCell className="max-w-[300px]">
-                    <p className="truncate" title={resolucion.descripcion}>
+                  <TableCell className="max-w-[300px] text-center align-middle">
+                    <p className="truncate mx-auto" title={resolucion.descripcion}>
                       {resolucion.descripcion}
                     </p>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center align-middle">
                     {format(new Date(resolucion.fechaEmision), "dd/MM/yyyy", { locale: es })}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center align-middle">
                     {format(new Date(resolucion.fechaVigencia), "dd/MM/yyyy", { locale: es })}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant={resolucion.activo ? "default" : "secondary"}>
-                      {resolucion.activo ? "Activa" : "Inactiva"}
-                    </Badge>
+                  <TableCell className="text-center align-middle">
+                    <div className="flex justify-center">
+                      <Badge variant={resolucion.activo ? "default" : "secondary"} className="px-3 py-1 text-xs rounded-full min-w-[80px] flex justify-center">
+                        {resolucion.activo ? "Activa" : "Inactiva"}
+                      </Badge>
+                    </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center align-middle">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="mx-auto flex items-center justify-center rounded-full border-gray-300"
                       onClick={() => openDocument(resolucion.documentoUrl)}
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleView(resolucion.id)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(resolucion.id)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onSelect={(e) => e.preventDefault()}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta acción no se puede deshacer. Se eliminará permanentemente
-                                la resolución <strong>{resolucion.numeroResolucion}</strong>.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                onClick={() => handleDelete(resolucion.id, resolucion.numeroResolucion)}
-                                disabled={deleteMutation.isPending}
+                  <TableCell className="text-center align-middle">
+                    <div className="flex items-center justify-center gap-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0 flex items-center justify-center">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => handleView(resolucion.id)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEdit(resolucion.id)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onSelect={(e) => e.preventDefault()}
                               >
-                                {deleteMutation.isPending && (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                )}
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Eliminar
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción no se puede deshacer. Se eliminará permanentemente
+                                  la resolución <strong>{resolucion.numeroResolucion}</strong>.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => handleDelete(resolucion.id, resolucion.numeroResolucion)}
+                                  disabled={deleteMutation.isPending}
+                                >
+                                  {deleteMutation.isPending && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  )}
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
