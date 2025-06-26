@@ -68,8 +68,6 @@ export class ApiErrorHandler {
       apiError.message = this.handleRequestError(error)
     }
 
-
-
     return apiError
   }
 
@@ -78,7 +76,6 @@ export class ApiErrorHandler {
   }
 
   private static logError(error: AxiosError, apiError: ResponseErrorAPI): void {
-    // eslint-disable-next-line no-console
     console.log('[API Error]:', {
       status: error.response?.status,
       url: error.config?.url,

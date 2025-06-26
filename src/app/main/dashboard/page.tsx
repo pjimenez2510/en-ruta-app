@@ -24,7 +24,7 @@ export default function Dashboard() {
             Bienvenido al sistema de gestión de cooperativa de transporte.
           </p>
         </div>
-        <Link href="/dashboard/buses/new">
+        <Link href="/main/buses/add">
           <Button className="w-full sm:w-auto">
             <PlusCircle className="mr-2 h-4 w-4" />
             Nuevo Bus
