@@ -1,22 +1,26 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, MapPin, Search } from "lucide-react"
-
-const ciudades = [
-  { id: 1, nombre: "Quito" },
-  { id: 2, nombre: "Guayaquil" },
-  { id: 3, nombre: "Cuenca" },
-  { id: 4, nombre: "Ambato" },
-  { id: 5, nombre: "Loja" },
-  { id: 6, nombre: "Manta" },
-]
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, MapPin, Search } from "lucide-react";
+import { useCiudades } from "@/features/auth/hooks/use-ciudades";
 
 const viajesDisponibles = [
   {
@@ -63,45 +67,54 @@ const viajesDisponibles = [
     precio: 15.0,
     asientosDisponibles: 12,
   },
-]
+];
 
 interface BuscarViajeModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onViajeSeleccionado: (viaje: any) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onViajeSeleccionado: (viaje: any) => void;
 }
 
-export function BuscarViajeModal({ open, onOpenChange, onViajeSeleccionado }: BuscarViajeModalProps) {
-  const [ciudadOrigen, setCiudadOrigen] = useState("")
-  const [ciudadDestino, setCiudadDestino] = useState("")
-  const [fecha, setFecha] = useState("")
-  const [viajesFiltrados, setViajesFiltrados] = useState(viajesDisponibles)
+export function BuscarViajeModal({
+  open,
+  onOpenChange,
+  onViajeSeleccionado,
+}: BuscarViajeModalProps) {
+  const { ciudadesOptions, isLoading } = useCiudades();
+  const [ciudadOrigen, setCiudadOrigen] = useState("");
+  const [ciudadDestino, setCiudadDestino] = useState("");
+  const [fecha, setFecha] = useState("");
+  const [viajesFiltrados, setViajesFiltrados] = useState(viajesDisponibles);
 
   const buscarViajes = () => {
-    let viajes = viajesDisponibles
-
+    let viajes = viajesDisponibles;
     if (ciudadOrigen) {
-      viajes = viajes.filter((v) => v.ciudadOrigen === ciudadOrigen)
+      const ciudadOrigenNombre = ciudadesOptions.find(
+        (c) => c.value === ciudadOrigen
+      )?.ciudad.nombre;
+      viajes = viajes.filter((v) => v.ciudadOrigen === ciudadOrigenNombre);
     }
     if (ciudadDestino) {
-      viajes = viajes.filter((v) => v.ciudadDestino === ciudadDestino)
+      const ciudadDestinoNombre = ciudadesOptions.find(
+        (c) => c.value === ciudadDestino
+      )?.ciudad.nombre;
+      viajes = viajes.filter((v) => v.ciudadDestino === ciudadDestinoNombre);
     }
     if (fecha) {
-      viajes = viajes.filter((v) => v.fecha === fecha)
+      viajes = viajes.filter((v) => v.fecha === fecha);
     }
-
-    setViajesFiltrados(viajes)
-  }
+    setViajesFiltrados(viajes);
+  };
 
   const seleccionarViaje = (viaje: any) => {
-    onViajeSeleccionado(viaje)
-    onOpenChange(false)
+    onViajeSeleccionado(viaje);
+    onOpenChange(false);
     // Limpiar filtros
-    setCiudadOrigen("")
-    setCiudadDestino("")
-    setFecha("")
-    setViajesFiltrados(viajesDisponibles)
-  }
+    setCiudadOrigen("");
+    setCiudadDestino("");
+    setFecha("");
+    setViajesFiltrados(viajesDisponibles);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -112,7 +125,8 @@ export function BuscarViajeModal({ open, onOpenChange, onViajeSeleccionado }: Bu
             Buscar Viaje
           </DialogTitle>
           <DialogDescription>
-            Filtre por ciudad de origen, destino y fecha para encontrar el viaje deseado
+            Filtre por ciudad de origen, destino y fecha para encontrar el viaje
+            deseado
           </DialogDescription>
         </DialogHeader>
 
@@ -121,39 +135,97 @@ export function BuscarViajeModal({ open, onOpenChange, onViajeSeleccionado }: Bu
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-gray-50">
             <div className="space-y-2">
               <Label>Ciudad de Origen</Label>
-              <Select value={ciudadOrigen} onValueChange={setCiudadOrigen}>
+              <Select
+                value={ciudadOrigen}
+                onValueChange={setCiudadOrigen}
+                disabled={isLoading}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar origen" />
+                  <SelectValue
+                    placeholder={
+                      isLoading ? "Cargando ciudades..." : "Seleccionar origen"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {ciudades.map((ciudad) => (
-                    <SelectItem key={ciudad.id} value={ciudad.nombre}>
-                      {ciudad.nombre}
+                  {isLoading ? (
+                    <SelectItem value="loading" disabled>
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
+                        Cargando ciudades...
+                      </div>
                     </SelectItem>
-                  ))}
+                  ) : ciudadesOptions.length === 0 ? (
+                    <SelectItem value="no-data" disabled>
+                      <div className="flex items-center gap-2 text-gray-500">
+                        <MapPin size={16} />
+                        No hay ciudades disponibles
+                      </div>
+                    </SelectItem>
+                  ) : (
+                    ciudadesOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} className="text-gray-400" />
+                          {option.label}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label>Ciudad de Destino</Label>
-              <Select value={ciudadDestino} onValueChange={setCiudadDestino}>
+              <Select
+                value={ciudadDestino}
+                onValueChange={setCiudadDestino}
+                disabled={isLoading}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar destino" />
+                  <SelectValue
+                    placeholder={
+                      isLoading ? "Cargando ciudades..." : "Seleccionar destino"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {ciudades.map((ciudad) => (
-                    <SelectItem key={ciudad.id} value={ciudad.nombre}>
-                      {ciudad.nombre}
+                  {isLoading ? (
+                    <SelectItem value="loading" disabled>
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
+                        Cargando ciudades...
+                      </div>
                     </SelectItem>
-                  ))}
+                  ) : ciudadesOptions.length === 0 ? (
+                    <SelectItem value="no-data" disabled>
+                      <div className="flex items-center gap-2 text-gray-500">
+                        <MapPin size={16} />
+                        No hay ciudades disponibles
+                      </div>
+                    </SelectItem>
+                  ) : (
+                    ciudadesOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} className="text-gray-400" />
+                          {option.label}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label>Fecha</Label>
-              <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+              <Input
+                type="date"
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+              />
             </div>
 
             <div className="flex items-end">
@@ -168,7 +240,9 @@ export function BuscarViajeModal({ open, onOpenChange, onViajeSeleccionado }: Bu
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">Viajes Disponibles</h3>
-              <Badge variant="secondary">{viajesFiltrados.length} resultados</Badge>
+              <Badge variant="secondary">
+                {viajesFiltrados.length} resultados
+              </Badge>
             </div>
 
             <div className="grid gap-4 max-h-96 overflow-y-auto">
@@ -198,7 +272,9 @@ export function BuscarViajeModal({ open, onOpenChange, onViajeSeleccionado }: Bu
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-lg">${viaje.precio}</p>
-                      <p className="text-sm text-muted-foreground">{viaje.asientosDisponibles} asientos disponibles</p>
+                      <p className="text-sm text-muted-foreground">
+                        {viaje.asientosDisponibles} asientos disponibles
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -215,5 +291,5 @@ export function BuscarViajeModal({ open, onOpenChange, onViajeSeleccionado }: Bu
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

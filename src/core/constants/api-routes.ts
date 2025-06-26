@@ -11,7 +11,8 @@ export const API_ROUTES = {
     REFRESH_TOKEN: "/auth/refresh-token",
     FORGOT_PASSWORD: "/auth/forgot-password",
     RESET_PASSWORD: "/auth/reset-password",
-  },  ER: {
+  },
+  ER: {
     PROFILE: "/user/profile",
     UPDATE_PROFILE: "/user/profile",
     CHANGE_PASSWORD: "/user/change-password",
@@ -44,7 +45,8 @@ export const API_ROUTES = {
     UPDATE: "/rutas/:id",
     DELETE: "/rutas/:id",
     GET_BY_TENANT: "/rutas/tenant/:tenantId",
-  },  HORARIOS: {
+  },
+  HORARIOS: {
     GET_ALL: "/horarios-ruta",
     CREATE: "/horarios-ruta",
     GET_BY_ID: "/horarios-ruta/:id",
@@ -73,5 +75,10 @@ export const API_ROUTES = {
     UPDATE: "/usuario-tenant/:id",
     DELETE: "/usuario-tenant/:id",
     POST_PERSONAL_INFO: "/usuario-tenant/:id/asignar-info-personal",
+  },
+  VIAJES: {
+    GET_ALL: "/viajes",
+    GET_BY_ID: "/viajes/:id",
+    PUBLICO: "/viajes/publico",
   },
 };
