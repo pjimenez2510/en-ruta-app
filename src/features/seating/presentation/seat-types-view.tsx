@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { SeatType } from "../interfaces/seat-type.interface";
+import { IconName } from "../constants/available-icons";
 import { SeatTypeFormValues } from "../interfaces/form-schema";
 
 export const SeatTypesView = () => {
@@ -33,7 +34,7 @@ export const SeatTypesView = () => {
 
   const handleCreate = async (data: SeatTypeFormValues) => {
     try {
-      await createSeatType(data);
+      await createSeatType({ ...data, icono: data.icono as IconName });
       setIsDialogOpen(false);
       toast.success("Tipo de asiento creado correctamente");
     } catch {
@@ -44,7 +45,7 @@ export const SeatTypesView = () => {
   const handleEdit = async (data: SeatTypeFormValues, id: number) => {
     if (!selectedSeatType) return;
     try {
-      await updateSeatType(data, id);
+      await updateSeatType({ ...data, icono: data.icono as IconName }, id);
       setIsDialogOpen(false);
       setSelectedSeatType(undefined);
       toast.success("Tipo de asiento actualizado correctamente");
