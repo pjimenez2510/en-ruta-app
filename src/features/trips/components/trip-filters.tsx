@@ -43,24 +43,14 @@ export const TripFilters: FC<TripFiltersProps> = () => {
     <Card className="p-4">
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Fecha</label>          <div className="grid grid-cols-3 gap-2">
-            <Input
-              type="date"
-              value={date}
-              onChange={handleDateChange}
-              placeholder="Fecha específica"
-            />
-            <Input
-              type="date"
-              onChange={(e) => setFilters(prev => ({ ...prev, fechaDesde: e.target.value }))}
-              placeholder="Fecha desde"
-            />
-            <Input
-              type="date"
-              onChange={(e) => setFilters(prev => ({ ...prev, fechaHasta: e.target.value }))}
-              placeholder="Fecha hasta"
-            />
-          </div>
+          <label className="text-sm font-medium">Fecha</label>
+          <Input
+            type="date"
+            value={date}
+            onChange={handleDateChange}
+            placeholder="Selecciona una fecha"
+            className="rounded-lg shadow-sm text-sm px-3 py-2 placeholder:text-gray-400"
+          />
         </div>
 
         <div className="space-y-2">
