@@ -133,6 +133,9 @@ export const ConfiguracionForm = () => {
       if (values.email) {
         updateData.emailContacto = values.email;
       }
+      if (values.sitioWeb) {
+        updateData.sitioWeb = values.sitioWeb;
+      }
 
       await tenantService.updateTenant(tenantData?.data?.id || 0, updateData);
 
@@ -383,6 +386,7 @@ export const ConfiguracionForm = () => {
               email: tenantData?.data?.emailContacto || "",
               direccion: configData?.direccion || "",
               ruc: configData?.ruc || "",
+              sitioWeb: tenantData?.data?.sitioWeb || "",
             }}
             onSubmit={handleGeneralSubmit}
             isLoading={isLoading}

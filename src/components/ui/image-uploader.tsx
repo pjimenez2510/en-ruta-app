@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CldUploadWidget } from "next-cloudinary";
+import NextImage from "next/image";
 
 interface ImageUploaderProps {
   imageUrl: string | null;
@@ -62,10 +63,13 @@ export const ImageUploader = ({
           style={{ width: `${width}px`, height: `${height}px` }}
         >
           {imageUrl ? (
-            <img
+            <NextImage
               src={imageUrl}
               alt="Imagen subida"
-              className="h-full w-full object-contain p-1"
+              width={width}
+              height={height}
+              style={{ objectFit: 'contain' }}
+              className="object-contain p-1"
             />
           ) : (
             <Upload className="h-8 w-8 text-gray-400" />
@@ -96,21 +100,23 @@ export const ImageUploader = ({
             setIsUploading(false);
           }}
         >
-          {({ open }) => (
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              onClick={() => {
-                setIsUploading(true);
-                open();
-              }}
-              disabled={isUploading}
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              {isUploading ? "Subiendo..." : buttonText}
-            </Button>
-          )}
+           {({ open }) => (
+    <div onClick={(e) => e.stopPropagation()}>
+      <Button
+        variant="outline"
+        size="sm"
+        type="button"
+        onClick={() => {
+          setIsUploading(true);
+          open();
+        }}
+        disabled={isUploading}
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {isUploading ? "Subiendo..." : buttonText}
+      </Button>
+    </div>
+  )}
         </CldUploadWidget>
       </div>
     </div>

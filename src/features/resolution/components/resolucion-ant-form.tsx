@@ -1,4 +1,3 @@
-// features/resoluciones-ant/components/resolucion-ant-form.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,8 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useResolucionAntForm } from "../hooks/use-resolucion-ant-form";
 import type { ResolucionAnt } from "../interfaces/resolucion-ant.interface";
+import RequiredLabel from "@/shared/components/RequiredLabel";
+import type { ResolucionAntSchema } from "../schemas/resolucion-ant.schema";
 
 interface ResolucionAntFormProps {
   resolucion?: ResolucionAnt;
@@ -33,6 +34,13 @@ interface ResolucionAntFormProps {
 
 export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
   const { form, onSubmit, isSubmitting, isEditing } = useResolucionAntForm(resolucion);
+
+  // Helper para mostrar asterisco si el campo está vacío o tiene error
+  const showAsterisk = (name: keyof ResolucionAntSchema) => {
+    const field = form.getFieldState(name, form.formState);
+    const value = form.watch(name);
+    return !value || !!field.error;
+  };
 
   return (
     <Form {...form}>
@@ -43,7 +51,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
             name="numeroResolucion"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Número de Resolución</FormLabel>
+                <RequiredLabel htmlFor="numeroResolucion" required showAsterisk={showAsterisk("numeroResolucion" as keyof ResolucionAntSchema)}>Número de Resolución</RequiredLabel>
                 <FormControl>
                   <Input 
                     placeholder="ANT-2025-001" 
@@ -63,7 +71,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
             name="documentoUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>URL del Documento</FormLabel>
+                <RequiredLabel htmlFor="documentoUrl" required showAsterisk={showAsterisk("documentoUrl" as keyof ResolucionAntSchema)}>URL del Documento</RequiredLabel>
                 <FormControl>
                   <Input 
                     type="url"
@@ -83,7 +91,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
             name="fechaEmision"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Emisión</FormLabel>
+                <RequiredLabel htmlFor="fechaEmision" required showAsterisk={showAsterisk("fechaEmision" as keyof ResolucionAntSchema)}>Fecha de Emisión</RequiredLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -110,13 +118,14 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
                       onSelect={(date) => {
                         field.onChange(date ? format(date, "yyyy-MM-dd") : "");
                       }}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
+                <FormDescription>
+                  Fecha en la que se emitió la resolución
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -127,7 +136,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
             name="fechaVigencia"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Vigencia</FormLabel>
+                <RequiredLabel htmlFor="fechaVigencia" required showAsterisk={showAsterisk("fechaVigencia" as keyof ResolucionAntSchema)}>Fecha de Vigencia</RequiredLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -159,6 +168,9 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
                     />
                   </PopoverContent>
                 </Popover>
+                <FormDescription>
+                  Fecha hasta la cual la resolución es válida
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -170,16 +182,17 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
           name="descripcion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <RequiredLabel htmlFor="descripcion" required showAsterisk={showAsterisk("descripcion" as keyof ResolucionAntSchema)}>Descripción</RequiredLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describe el contenido y alcance de esta resolución..."
-                  className="min-h-[100px]"
+                  placeholder="Descripción de la resolución ANT..."
+                  className="resize-none"
+                  rows={4}
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                Máximo 500 caracteres
+                Descripción detallada de la resolución (máximo 500 caracteres)
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -190,7 +203,7 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
           control={form.control}
           name="activo"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
               <FormControl>
                 <Checkbox
                   checked={field.value}
@@ -198,27 +211,28 @@ export function ResolucionAntForm({ resolucion }: ResolucionAntFormProps) {
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>Resolución activa</FormLabel>
+                <FormLabel>
+                  Resolución Activa
+                </FormLabel>
                 <FormDescription>
-                  Marca esta opción si la resolución está vigente y activa.
+                  Marque esta opción si la resolución está actualmente vigente
                 </FormDescription>
               </div>
             </FormItem>
           )}
         />
 
-        <div className="flex gap-4">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEditing ? "Actualizar" : "Crear"} Resolución
-          </Button>
-          
+        <div className="flex justify-end space-x-4">
           <Button 
             type="button" 
             variant="outline"
             onClick={() => window.history.back()}
           >
             Cancelar
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isEditing ? "Actualizar Resolución" : "Crear Resolución"}
           </Button>
         </div>
       </form>

@@ -1,33 +1,37 @@
 import AxiosClient from "@/core/infrastructure/axios-client";
 
-export interface CreateHorarioDto {
+export interface CreateHorarioRutaDto {
+  rutaId: number;
+  horaSalida: string;
+  diasSemana: string;
+  activo?: boolean;
+}
+
+export interface UpdateHorarioRutaDto {
+  rutaId?: number;
+  horaSalida?: string;
+  diasSemana?: string;
+  activo?: boolean;
+}
+
+export interface HorarioResponse {
+  id: number;
   rutaId: number;
   horaSalida: string;
   diasSemana: string;
   activo: boolean;
 }
 
-export interface UpdateHorarioDto extends CreateHorarioDto {
-  id: number;
-}
-
-export interface HorarioResponse extends CreateHorarioDto {
-  id: number;
-}
-
 const axiosClient = AxiosClient.getInstance();
-
-import { API_ROUTES } from "@/core/constants/api-routes";
 
 export const horarioService = {
   getHorarios: async (rutaId: number): Promise<HorarioResponse[]> => {
     try {
       console.log('=== Obtener Horarios Service ===');
-      console.log('URL:', API_ROUTES.HORARIOS.GET_BY_RUTA.replace(':rutaId', rutaId.toString()));
+      const url = `/horarios-ruta?rutaId=${rutaId}`;
+      console.log('URL:', url);
       
-      const { data } = await axiosClient.get<HorarioResponse[]>(
-        API_ROUTES.HORARIOS.GET_BY_RUTA.replace(':rutaId', rutaId.toString())
-      );
+      const { data } = await axiosClient.get<HorarioResponse[]>(url);
       console.log('Respuesta:', data);
       return data.data;
     } catch (error) {
@@ -35,28 +39,35 @@ export const horarioService = {
       throw error;
     }
   },
-  createHorario: async (horario: CreateHorarioDto): Promise<HorarioResponse> => {
+
+  getAllHorarios: async (): Promise<HorarioResponse[]> => {
+    try {
+      console.log('=== Obtener Todos los Horarios Service ===');
+      const url = `/horarios-ruta`;
+      console.log('URL:', url);
+      
+      const { data } = await axiosClient.get<HorarioResponse[]>(url);
+      console.log('Respuesta:', data);
+      return data.data;
+    } catch (error) {
+      console.error('Error al obtener horarios:', error);
+      throw error;
+    }
+  },
+
+  createHorario: async (horario: CreateHorarioRutaDto): Promise<HorarioResponse> => {
     try {
       console.log('=== Crear Horario Service ===');
-      console.log('URL base:', process.env.NEXT_PUBLIC_BACKEND_API_URL);
-      console.log('Ruta:', API_ROUTES.HORARIOS.CREATE);
-      console.log('URL completa:', `${process.env.NEXT_PUBLIC_BACKEND_API_URL}${API_ROUTES.HORARIOS.CREATE}`);
-      console.log('Data a enviar:', {
+      console.log('Data a enviar:', horario);
+      
+      const createHorarioDto: CreateHorarioRutaDto = {
         rutaId: horario.rutaId,
         horaSalida: horario.horaSalida,
         diasSemana: horario.diasSemana,
-        activo: horario.activo
-      });
+        activo: horario.activo ?? true
+      };
       
-      const { data } = await axiosClient.post<HorarioResponse>(
-        API_ROUTES.HORARIOS.CREATE,
-        {
-          rutaId: horario.rutaId,
-          horaSalida: horario.horaSalida,
-          diasSemana: horario.diasSemana,
-          activo: true
-        }
-      );
+      const { data } = await axiosClient.post<HorarioResponse>('/horarios-ruta', createHorarioDto);
       console.log('Respuesta del servidor:', data);
       return data.data;
     } catch (error) {
@@ -65,10 +76,10 @@ export const horarioService = {
     }
   },
 
-  updateHorario: async (id: number, horario: CreateHorarioDto): Promise<HorarioResponse> => {
+  updateHorario: async (id: number, horario: UpdateHorarioRutaDto): Promise<HorarioResponse> => {
     try {
       console.log('=== Actualizar Horario Service ===');
-      const url = API_ROUTES.HORARIOS.UPDATE.replace(':id', id.toString());
+      const url = `/horarios-ruta/${id}`;
       console.log('URL:', url);
       console.log('Data:', horario);
       
@@ -84,7 +95,7 @@ export const horarioService = {
   deleteHorario: async (id: number): Promise<void> => {
     try {
       console.log('=== Eliminar Horario Service ===');
-      const url = API_ROUTES.HORARIOS.DELETE.replace(':id', id.toString());
+      const url = `/horarios-ruta/${id}`;
       console.log('URL:', url);
       
       await axiosClient.delete(url);

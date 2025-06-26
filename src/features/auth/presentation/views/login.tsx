@@ -1,25 +1,29 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLogin } from "../../hooks/use-login";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
 import { APP_ASSETS } from "@/core/constants/app-assets";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, EyeOff } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useFieldValidation } from "@/shared/hooks/use-field-validation";
+import { ValidatedInput, ValidatedPasswordInput } from "@/shared/components";
 
 const LoginView = () => {
   const { login, isLoading, error } = useLogin();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  // Usar useMemo para que requiredFields no cambie en cada render
+  const requiredFields = useMemo(() => ["username", "password"], []);
+  const { validateField, getFieldState } = useFieldValidation(requiredFields);
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
@@ -33,12 +37,47 @@ const LoginView = () => {
     }
   }, [session, status, router]);
 
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
+  // Validar campos cuando cambian
+  useEffect(() => {
+    validateField("username", username);
+  }, [username, validateField]);
+
+  useEffect(() => {
+    validateField("password", password);
+  }, [password, validateField]);
+
+  // Handlers para validación en tiempo real
+  const handleUsernameChange = (value: string) => {
+    setUsername(value);
+    if (!value) {
+      setFieldErrors(prev => ({ ...prev, username: "Este campo es requerido" }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, username: "" }));
+    }
+  };
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+    if (!value) {
+      setFieldErrors(prev => ({ ...prev, password: "Este campo es requerido" }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, password: "" }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
-      return;
-    }
-    console.log("Iniciando proceso de login...");
+    const errors: { [key: string]: string } = {};
+    if (!username) errors.username = "Este campo es requerido";
+    if (!password) errors.password = "Este campo es requerido";
+    setFieldErrors(errors);
+    if (Object.values(errors).some(Boolean)) return;
     await login({ username, password });
   };
 
@@ -49,6 +88,9 @@ const LoginView = () => {
       </div>
     );
   }
+
+  const usernameState = getFieldState("username");
+  const passwordState = getFieldState("password");
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">
@@ -74,7 +116,7 @@ const LoginView = () => {
               <TabsTrigger
                 value="register"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-10"
-                onClick={() => router.push("/register")}
+                onClick={() => router.push("/register-cooperativa")}
               >
                 Registrarse
               </TabsTrigger>
@@ -84,54 +126,37 @@ const LoginView = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Nombre de usuario</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="username-example"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  className={error ? "border-red-500" : ""}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="**********"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className={error ? "border-red-500" : ""}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
+              <ValidatedInput
+                id="username"
+                label="Nombre de usuario"
+                type="text"
+                placeholder="username-example"
+                value={username}
+                onChange={handleUsernameChange}
+                required={true}
+                showAsterisk={usernameState.showAsterisk}
+                disabled={isLoading}
+                error={!!error || !!fieldErrors.username}
+              />
+              {fieldErrors.username && (
+                <p className="text-xs text-red-500 ml-1">{fieldErrors.username}</p>
+              )}
+              <ValidatedPasswordInput
+                id="password"
+                label="Contraseña"
+                placeholder="**********"
+                value={password}
+                onChange={handlePasswordChange}
+                required={true}
+                showAsterisk={passwordState.showAsterisk}
+                disabled={isLoading}
+                error={!!error || !!fieldErrors.password}
+              />
+              {fieldErrors.password && (
+                <p className="text-xs text-red-500 ml-1">{fieldErrors.password}</p>
+              )}
             </div>
-            {error && (
-              <div className="text-sm text-red-500 mt-2 text-center p-2 bg-red-50 rounded">
-                <p className="font-medium">Error de autenticación:</p>
-                <p>{error}</p>
-              </div>
-            )}
+
             <Button
               type="submit"
               className="w-full h-12"
