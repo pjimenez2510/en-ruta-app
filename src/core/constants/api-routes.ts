@@ -1,5 +1,12 @@
 export const AR_KEYS = {
   AUTH: "auth",
+  BUSES: {
+    BASE: "/buses",
+    MODELOS: "/modelos-bus",
+    PISOS: "/pisos-bus",
+    ASIENTOS: "/asientos",
+    ASIENTOS_MASIVO: "/asientos/masivo"
+  }
 };
 
 export const API_ROUTES = {
@@ -11,7 +18,7 @@ export const API_ROUTES = {
     REFRESH_TOKEN: "/auth/refresh-token",
     FORGOT_PASSWORD: "/auth/forgot-password",
     RESET_PASSWORD: "/auth/reset-password",
-  },  ER: {
+  }, ER: {
     PROFILE: "/user/profile",
     UPDATE_PROFILE: "/user/profile",
     CHANGE_PASSWORD: "/user/change-password",
@@ -44,7 +51,7 @@ export const API_ROUTES = {
     UPDATE: "/rutas/:id",
     DELETE: "/rutas/:id",
     GET_BY_TENANT: "/rutas/tenant/:tenantId",
-  },  HORARIOS: {
+  }, HORARIOS: {
     GET_ALL: "/horarios-ruta",
     CREATE: "/horarios-ruta",
     GET_BY_ID: "/horarios-ruta/:id",
