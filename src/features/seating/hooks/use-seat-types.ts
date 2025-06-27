@@ -15,8 +15,20 @@ let seatTypesCache: SeatType[] = [];
 let lastFetch = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
+// Función para eliminar duplicados basados en el ID
+const removeDuplicates = (seatTypes: SeatType[]): SeatType[] => {
+  const seen = new Set();
+  return seatTypes.filter(type => {
+    if (seen.has(type.id)) {
+      return false;
+    }
+    seen.add(type.id);
+    return true;
+  });
+};
+
 export const useSeatTypes = () => {
-  const [seatTypes, setSeatTypes] = useState<SeatType[]>(seatTypesCache);
+  const [seatTypes, setSeatTypes] = useState<SeatType[]>(removeDuplicates(seatTypesCache));
   const [loading, setLoading] = useState(!seatTypesCache.length);
   const [error, setError] = useState<string | null>(null);
   const [selectedSeatType, setSelectedSeatType] = useState<number | null>(null);
@@ -26,7 +38,7 @@ export const useSeatTypes = () => {
   const fetchSeatTypes = useCallback(async (force = false) => {
     // Si hay datos en caché y no ha pasado el tiempo de expiración, usar caché
     if (!force && seatTypesCache.length > 0 && Date.now() - lastFetch < CACHE_DURATION) {
-      setSeatTypes(seatTypesCache);
+      setSeatTypes(removeDuplicates(seatTypesCache));
       setLoading(false);
       return;
     }
@@ -37,9 +49,10 @@ export const useSeatTypes = () => {
       setLoading(true);
       const data = await getAll(token);
       if (Array.isArray(data)) {
-        seatTypesCache = data;
+        const uniqueData = removeDuplicates(data);
+        seatTypesCache = uniqueData;
         lastFetch = Date.now();
-        setSeatTypes(data);
+        setSeatTypes(uniqueData);
       } else {
         console.error("Los datos recibidos no son un array:", data);
         setSeatTypes([]);
@@ -59,7 +72,7 @@ export const useSeatTypes = () => {
     try {
       const newSeatType = await createSeatingType(data, token);
       if (newSeatType) {
-        seatTypesCache = [...seatTypesCache, newSeatType];
+        seatTypesCache = removeDuplicates([...seatTypesCache, newSeatType]);
         setSeatTypes(seatTypesCache);
       }
       return newSeatType;
@@ -76,8 +89,8 @@ export const useSeatTypes = () => {
     try {
       const updatedSeatType = await updateSeatingType(data, id, token);
       if (updatedSeatType) {
-        seatTypesCache = seatTypesCache.map(type =>
-          type.id === id ? updatedSeatType : type
+        seatTypesCache = removeDuplicates(
+          seatTypesCache.map(type => type.id === id ? updatedSeatType : type)
         );
         setSeatTypes(seatTypesCache);
       }
@@ -106,6 +119,16 @@ export const useSeatTypes = () => {
   useEffect(() => {
     fetchSeatTypes();
   }, [fetchSeatTypes]);
+
+  // Limpiar el caché cuando el componente se desmonta
+  useEffect(() => {
+    return () => {
+      if (Date.now() - lastFetch > CACHE_DURATION) {
+        seatTypesCache = [];
+        lastFetch = 0;
+      }
+    };
+  }, []);
 
   return {
     seatTypes,

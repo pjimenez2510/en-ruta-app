@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { SeatType } from "../interfaces/seat-type.interface";
-import { Pencil, Trash2, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Loader2, Armchair } from "lucide-react";
 import { useState } from "react";
+import { AVAILABLE_ICONS } from "../constants/available-icons";
 
 interface SeatTypeTableProps {
   seatTypes: SeatType[];
@@ -31,6 +32,18 @@ export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProp
     }
   };
 
+  const renderIcon = (iconName: string) => {
+    const IconComponent = AVAILABLE_ICONS[iconName as keyof typeof AVAILABLE_ICONS];
+    if (IconComponent) {
+      return <IconComponent className="w-5 h-5" />;
+    }
+    return (
+      <div title="Icono por defecto">
+        <Armchair className="w-5 h-5 text-gray-400" />
+      </div>
+    );
+  };
+
   return (
     <div className="rounded-xl border bg-white shadow-lg w-full">
       <Table className="w-full text-sm">
@@ -38,7 +51,7 @@ export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProp
           <TableRow>
             <TableHead className="px-4 py-3 text-center">Nombre</TableHead>
             <TableHead className="px-4 py-3 text-center">Descripción</TableHead>
-            <TableHead className="px-4 py-3 text-center">Factor Precio</TableHead>
+            <TableHead className="px-4 py-3 text-center">Valor Base</TableHead>
             <TableHead className="px-4 py-3 text-center">Color</TableHead>
             <TableHead className="px-4 py-3 text-center">Icono</TableHead>
             <TableHead className="px-4 py-3 text-center">Estado</TableHead>
@@ -55,7 +68,7 @@ export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProp
                 {seatType.descripcion}
               </TableCell>
               <TableCell className="px-4 py-3 text-center">
-                ${seatType.factorPrecio}
+                {seatType.factorPrecio * 100}%
               </TableCell>
               <TableCell className="px-4 py-3 text-center">
                 <span
@@ -65,9 +78,9 @@ export const SeatTypeTable = ({ seatTypes, onEdit, onDelete }: SeatTypeTableProp
                 />
               </TableCell>
               <TableCell className="px-4 py-3 text-center">
-                <span className="inline-flex items-center justify-center w-6 h-6 mx-auto">
-                  {seatType.icono}
-                </span>
+                <div className="flex items-center justify-center" title={seatType.icono}>
+                  {renderIcon(seatType.icono)}
+                </div>
               </TableCell>
               <TableCell className="px-4 py-3 text-center">
                 <span
