@@ -110,6 +110,11 @@ export const BusForm = ({ initialData, onSubmit, onCancel, isEdit = false }: Bus
               initialImageUrl={initialData?.fotoUrl}
               isEdit={isEdit}
             />
+            <div className="flex justify-start">
+              <p className="text-xs text-gray-500">
+                Los campos marcados con <span className="text-red-500">*</span> son obligatorios
+              </p>
+            </div>
             <div className="flex justify-end space-x-4 pt-4 border-t">
               <Button 
                 type="button" 
