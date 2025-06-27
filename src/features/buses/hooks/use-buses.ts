@@ -6,6 +6,7 @@ import { Bus } from '../interfaces/bus.interface';
 import { BusCreationData } from '../interfaces/seat-config';
 import { toast } from 'sonner';
 import { SeatUpdate } from '../interfaces/seat.interface';
+import { useSession } from 'next-auth/react';
 
 // Cache global para buses
 let busesCache: Bus[] = [];
@@ -19,13 +20,26 @@ export const useBuses = () => {
     const [buses, setBuses] = useState<Bus[]>(busesCache);
     const [loading, setLoading] = useState(!busesCache.length);
     const [error, setError] = useState<string | null>(null);
+    const { data: session } = useSession();
+    const token = session?.user?.accessToken || "";
 
-    // Limpiar el caché cuando cambia la sesión
+    // Limpiar el caché cuando cambia la sesión (token)
     useEffect(() => {
+        if (!token) {
+            // Si no hay token, solo limpia el cache y el estado, pero NO intentes fetch
+            busesCache = [];
+            lastFetch = 0;
+            setBuses([]);
+            setLoading(false);
+            return;
+        }
         busesCache = [];
         lastFetch = 0;
+        setBuses([]);
+        setLoading(true);
         fetchBuses(true);
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]);
 
     const fetchBuses = useCallback(async (force = false) => {
         // Si hay datos en caché y no ha pasado el tiempo de expiración, usar caché

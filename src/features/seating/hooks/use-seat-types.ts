@@ -130,6 +130,16 @@ export const useSeatTypes = () => {
     };
   }, []);
 
+  // Limpiar cache cuando cambia el token (usuario)
+  useEffect(() => {
+    seatTypesCache = [];
+    lastFetch = 0;
+    setSeatTypes([]);
+    setLoading(true);
+    fetchSeatTypes(true); // Forzar recarga
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
   return {
     seatTypes,
     loading,
