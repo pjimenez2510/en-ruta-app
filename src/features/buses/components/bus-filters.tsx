@@ -16,7 +16,7 @@ import { useBusModels } from "../hooks/use-bus-models";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-export interface BusFilters {
+interface BusFilters {
   numero?: string;
   placa?: string;
   estado?: string;
@@ -68,7 +68,7 @@ export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
             </Badge>
             <Button 
               variant="ghost" 
-              size="sm"
+              size="sm" 
               onClick={clearFilters}
               className="h-8 px-2"
             >
@@ -148,4 +148,4 @@ export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
       </div>
     </Card>
   );
-};
+};  
