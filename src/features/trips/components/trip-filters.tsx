@@ -10,7 +10,7 @@ import { Trip } from "../interfaces/trips.interface";
 type TripFiltersProps = object;
 
 export const TripFilters: FC<TripFiltersProps> = () => {
-  const { setFilters } = useTrips();
+  const { setFilters, allTrips } = useTrips(); // ← Usar allTrips en lugar de trips
   const [date, setDate] = useState("");
   const [selectedEstado, setSelectedEstado] = useState<string>("ALL");
   const [selectedRuta, setSelectedRuta] = useState<string>("ALL");
@@ -18,29 +18,32 @@ export const TripFilters: FC<TripFiltersProps> = () => {
   const [selectedHorario, setSelectedHorario] = useState<string>("ALL");
   const [selectedGeneracion, setSelectedGeneracion] = useState<string>("ALL");
 
-  // Para evitar inconsistencias, resetea los filtros cuando cambie alguno principal
+  // Aplicar filtros cuando cambien los valores
   useEffect(() => {
-    setFilters({
+    const filters = {
       fecha: date || undefined,
       estado: selectedEstado === "ALL" ? undefined : selectedEstado as Trip["estado"],
       rutaId: selectedRuta === "ALL" ? undefined : Number(selectedRuta),
       busId: selectedBus === "ALL" ? undefined : Number(selectedBus),
       horarioRutaId: selectedHorario === "ALL" ? undefined : Number(selectedHorario),
       generacion: selectedGeneracion === "ALL" ? undefined : selectedGeneracion as "AUTOMATICA" | "MANUAL",
-    });
+    };
+    
+    console.log("Aplicando filtros:", filters); // Debug
+    setFilters(filters);
   }, [date, selectedEstado, selectedRuta, selectedBus, selectedHorario, selectedGeneracion, setFilters]);
 
-  // Get unique routes and buses for filters
-  const { trips } = useTrips();
-  const routes = Array.from(new Set(trips.map((trip: Trip) => trip.horarioRuta.ruta.id))).map(
-    (id: number) => trips.find((trip: Trip) => trip.horarioRuta.ruta.id === id)?.horarioRuta.ruta
+  // Usar allTrips para obtener las opciones de filtros (no los trips filtrados)
+  const routes = Array.from(new Set(allTrips.map((trip: Trip) => trip.horarioRuta.ruta.id))).map(
+    (id: number) => allTrips.find((trip: Trip) => trip.horarioRuta.ruta.id === id)?.horarioRuta.ruta
   ).filter(Boolean);
-  const buses = Array.from(new Set(trips.map((trip: Trip) => trip.bus.id))).map(
-    (id: number) => trips.find((trip: Trip) => trip.bus.id === id)?.bus
+  
+  const buses = Array.from(new Set(allTrips.map((trip: Trip) => trip.bus.id))).map(
+    (id: number) => allTrips.find((trip: Trip) => trip.bus.id === id)?.bus
   ).filter(Boolean);
 
-  const schedules = Array.from(new Set(trips.map(trip => trip.horarioRuta.id))).map(
-    id => trips.find(trip => trip.horarioRuta.id === id)?.horarioRuta
+  const schedules = Array.from(new Set(allTrips.map(trip => trip.horarioRuta.id))).map(
+    id => allTrips.find(trip => trip.horarioRuta.id === id)?.horarioRuta
   ).filter(Boolean);
 
   return (

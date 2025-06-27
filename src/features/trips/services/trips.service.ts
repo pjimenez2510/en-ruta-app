@@ -3,10 +3,11 @@ import { Trip, CreateTripDTO, TripFilters } from '../interfaces/trips.interface'
 
 const BASE_URL = '/viajes';
 
-export const TripsService = {  getAll: async (filters?: TripFilters): Promise<Trip[]> => {
+export const TripsService = {
+  getAll: async (filters?: TripFilters): Promise<Trip[]> => {
     const api = await createAuthApi();
     const queryParams = new URLSearchParams();
-    
+   
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -14,17 +15,44 @@ export const TripsService = {  getAll: async (filters?: TripFilters): Promise<Tr
         }
       });
     }
-
+    
     const queryString = queryParams.toString();
     const url = queryString ? `${BASE_URL}?${queryString}` : BASE_URL;
+   
+    console.log('=== TRIPS SERVICE DEBUG ===');
+    console.log('URL final:', url);
+    console.log('Filtros enviados:', filters);
+    console.log('Query params:', queryString);
     
-    const response = await api.get(url);
-    console.log("Respuesta viajes:", response.data);
-
-    if (Array.isArray(response.data)) return response.data;
-    if (Array.isArray(response.data.data)) return response.data.data;
-    if (Array.isArray(response.data.results)) return response.data.results;
-    return [];
+    try {
+      const response = await api.get(url);
+      console.log('Respuesta completa:', response);
+      console.log('Respuesta data:', response.data);
+      console.log('Status:', response.status);
+      
+      // Verificar estructura de la respuesta
+      let trips: Trip[] = [];
+      
+      if (Array.isArray(response.data)) {
+        trips = response.data;
+      } else if (response.data && Array.isArray(response.data.data)) {
+        trips = response.data.data;
+      } else if (response.data && Array.isArray(response.data.results)) {
+        trips = response.data.results;
+      } else {
+        console.warn('Estructura de respuesta no reconocida:', response.data);
+        trips = [];
+      }
+      
+      console.log('Trips procesados:', trips);
+      console.log('Cantidad de trips:', trips.length);
+      console.log('==========================');
+      
+      return trips;
+    } catch (error) {
+      console.error('Error en getAll:', error);
+      throw error;
+    }
   },
 
   getById: async (id: number): Promise<Trip> => {
@@ -32,6 +60,7 @@ export const TripsService = {  getAll: async (filters?: TripFilters): Promise<Tr
     const response = await api.get(`${BASE_URL}/${id}`);
     return response.data;
   },
+
   create: async (trip: CreateTripDTO): Promise<Trip> => {
     const api = await createAuthApi();
     const response = await api.post(BASE_URL, trip);

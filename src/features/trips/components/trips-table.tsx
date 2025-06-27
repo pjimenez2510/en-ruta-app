@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTrips } from "../hooks/use-trips";
 import { Trip, CreateTripDTO } from "../interfaces/trips.interface";
 import { TripFilters } from "../components/trip-filters";
@@ -29,6 +29,17 @@ export const TripsTable = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
   const router = useRouter();
+
+  // DEBUG: Log para ver qué está recibiendo
+  useEffect(() => {
+    console.log('=== DEBUG TRIPS TABLE ===');
+    console.log('trips:', trips);
+    console.log('trips.length:', trips?.length);
+    console.log('isLoading:', isLoading);
+    console.log('isFetching:', isFetching);
+    console.log('filters:', filters);
+    console.log('========================');
+  }, [trips, isLoading, isFetching, filters]);
 
   const handleCreate = async (data: CreateTripDTO) => {
     await createTrip.mutateAsync(data);
@@ -53,15 +64,18 @@ export const TripsTable = () => {
       setTripToDelete(null);
     }
   };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2">Cargando viajes...</span>
       </div>
     );
   }
 
-  return (    <div className="space-y-4">
+  return (
+    <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-bold text-center">Hoja de Ruta</h2>
@@ -96,9 +110,9 @@ export const TripsTable = () => {
 
       <TripFilters />
 
-      {trips.length === 0 ? (
+      {!trips || trips.length === 0 ? (
         <div className="w-full text-center text-gray-500 py-12 text-lg font-medium bg-white rounded-2xl shadow-lg border">
-          No hay viajes para mostrar.
+          {isLoading ? 'Cargando...' : 'No hay viajes para mostrar.'}
         </div>
       ) : (
         <Card className="rounded-2xl shadow-lg w-full">
@@ -152,7 +166,6 @@ export const TripsTable = () => {
                             <Eye className="mr-2 h-4 w-4" />
                             Ver detalles/ editar
                           </DropdownMenuItem>
-
                           <DropdownMenuItem onClick={() => handleDelete(trip)}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Eliminar
