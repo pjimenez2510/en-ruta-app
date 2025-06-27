@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,9 +16,10 @@ import { useSeatTypes } from "../hooks/use-seat-types";
 import { useFloorConfiguration } from "../hooks/use-floor-configuration";
 import { useSeatDragDrop } from "../hooks/use-seat-drag-drop";
 import { Armchair, Loader2 } from "lucide-react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DndContext, useSensor, useSensors, PointerSensor } from "@dnd-kit/core";
+import { useDraggable } from "@dnd-kit/core";
+import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
-import React from "react";
 
 export interface BusCreationStepperProps {
   onSubmit: (data: BusCreationData) => Promise<void>;
@@ -60,7 +62,7 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
   });
 
   const { busModels } = useBusModels();
-  const { seatTypes: availableSeatTypes, selectedSeatType, setSelectedSeatType } = useSeatTypes();
+  const { seatTypes: availableSeatTypes } = useSeatTypes();
   
   const { 
     floorConfigs, 
@@ -71,6 +73,15 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
   } = useFloorConfiguration({ busInfo, busModels, initialData });
 
   const { onDragEnd } = useSeatDragDrop({ floorConfigs, setFloorConfigs, reorderSeatNumbers });
+
+  // Agregar sensores para el drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   const handleSeatLayoutSubmit = async () => {
     try {
@@ -98,37 +109,56 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="space-y-8">
-        {step === 1 && (
-          <div className="space-y-6">
-            <BusForm
-              onSubmit={async (data) => {
-                console.log("Form submitted:", data);
-                setBusInfo(prev => ({ ...prev, ...data }));
-                setStep(2);
-              }}
-              initialData={busInfo}
-              onCancel={onCancel}
-            />
-          </div>
-        )}
+    <div className="space-y-6">
+      {step === 1 && (
+        <div className="space-y-6">
+          <BusForm
+            onSubmit={async (data) => {
+              console.log("Form submitted:", data);
+              setBusInfo(prev => ({ ...prev, ...data }));
+              setStep(2);
+            }}
+            initialData={busInfo}
+            onCancel={onCancel}
+          />
+        </div>
+      )}
 
-        {step === 2 && (
-          <div className="space-y-6">
-            <Card className="p-6 max-w-3xl mx-auto">
-              <h2 className="text-lg font-medium mb-4">Configuración de Asientos</h2>
-              
-              <div className="flex gap-8">
-                <div className="flex-1">
-                  <div className="space-y-8">
-                    {floorConfigs.map((floor) => (
-                      <div key={floor.numeroPiso} className="space-y-4">
-                        <h3 className="font-medium">Piso {floor.numeroPiso}</h3>
-                        
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <Label>Filas</Label>
+      {step === 2 && (
+        <DndContext
+          sensors={sensors}
+          onDragEnd={onDragEnd}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-3 space-y-6">
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold">Configuración de Asientos</h2>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => setStep(1)} disabled={isSubmitting}>
+                      Anterior
+                    </Button>
+                    <Button onClick={handleSeatLayoutSubmit} disabled={isSubmitting} className="min-w-[120px]">
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creando...
+                        </>
+                      ) : (
+                        'Finalizar'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-8">
+                  {floorConfigs.map((floor) => (
+                    <div key={floor.numeroPiso} className="space-y-6 bg-gray-50 rounded-xl p-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-medium">Piso {floor.numeroPiso}</h3>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Label className="min-w-[60px]">Filas</Label>
                             <Input
                               type="number"
                               min={3}
@@ -142,8 +172,8 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                             />
                           </div>
                           
-                          <div>
-                            <Label>Columnas Izquierda</Label>
+                          <div className="flex items-center gap-2">
+                            <Label className="min-w-[60px]">Col. Izq.</Label>
                             <Input
                               type="number"
                               min={1}
@@ -157,8 +187,8 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                             />
                           </div>
                           
-                          <div>
-                            <Label>Columnas Derecha</Label>
+                          <div className="flex items-center gap-2">
+                            <Label className="min-w-[60px]">Col. Der.</Label>
                             <Input
                               type="number"
                               min={1}
@@ -172,130 +202,73 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                             />
                           </div>
                         </div>
+                      </div>
 
-                        <div className="space-y-2 flex justify-center">
-                          <div>
-                            <SeatGrid 
-                              floor={floor} 
-                              floorDimensions={floorDimensions} 
-                              availableSeatTypes={availableSeatTypes} 
-                            />
-                          </div>
+                      <div className="flex justify-center bg-white rounded-lg p-6 shadow-sm">
+                        <SeatGrid
+                          floorConfig={floor}
+                          seatTypes={availableSeatTypes}
+                          disabled={false}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                <Card className="p-4">
+                  <h3 className="font-medium mb-4 text-lg">Tipos de Asiento</h3>
+                  <div className="space-y-4">
+                    {availableSeatTypes.map((type) => (
+                      <div key={`template-${type.id}`} className="bg-gray-50 rounded-lg p-4">
+                        <div className="text-sm font-medium text-gray-700 mb-2 text-center">{type.nombre}</div>
+                        <div className="flex items-center justify-center p-2 hover:bg-gray-100 transition-colors rounded-md cursor-move">
+                          <SeatTemplate type={type} />
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
-
-                <div className="w-48">
-                  <div className="sticky top-6">
-                    <h3 className="font-medium mb-2">Tipos de Asiento</h3>
-                    <div className="space-y-2">
-                      {availableSeatTypes.map((type) => (
-                        <button
-                          key={type.id}
-                          className={cn(
-                            "w-full p-2 rounded-lg border text-left",
-                            selectedSeatType === type.id
-                              ? "border-primary bg-primary/5"
-                              : "border-gray-200"
-                          )}
-                          onClick={() => setSelectedSeatType(type.id)}
-                          style={{ borderColor: selectedSeatType === type.id ? type.color : undefined }}
-                        >
-                          <div className="flex items-center gap-2">
-                            {type.icono && AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS] ? (
-                              <div className="h-5 w-5">
-                                {React.createElement(AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS], {
-                                  className: "h-5 w-5",
-                                  style: { color: type.color }
-                                })}
-                              </div>
-                            ) : (
-                              <Armchair className="h-5 w-5" style={{ color: type.color }} />
-                            )}
-                            <span>{type.nombre}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    <h3 className="font-medium mb-2 mt-6">Asientos Disponibles</h3>
-                    <div className="space-y-4">
-                      {availableSeatTypes.map((type) => (
-                        <div key={`template-${type.id}`}>
-                          <h4 className="text-sm text-gray-500 mb-2">
-                            {type.nombre}
-                          </h4>
-                          <Droppable
-                            droppableId={`template-${type.id}`}
-                            isDropDisabled={true}
-                            type="SEAT"
-                            isCombineEnabled={false}
-                            ignoreContainerClipping={true}
-                          >
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}
-                                className="p-4 bg-gray-50 rounded-lg"
-                                style={{ borderColor: type.color }}
-                              >
-                                <Draggable
-                                  draggableId={`template-${type.id}`}
-                                  index={0}
-                                >
-                                  {(provided) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className="flex flex-col items-center"
-                                    >
-                                      {type.icono && AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS] ? (
-                                        <div className="h-6 w-6">
-                                          {React.createElement(AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS], {
-                                            className: "h-6 w-6",
-                                            style: { color: type.color }
-                                          })}
-                                        </div>
-                                      ) : (
-                                        <Armchair className="h-6 w-6" style={{ color: type.color }} />
-                                      )}
-                                      <span className="text-xs mt-1">Arrastrar</span>
-                                    </div>
-                                  )}
-                                </Draggable>
-                                {provided.placeholder}
-                              </div>
-                            )}
-                          </Droppable>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                </Card>
               </div>
-
-              <div className="flex justify-end gap-2 mt-6">
-                <Button variant="outline" onClick={() => setStep(1)} disabled={isSubmitting}>
-                  Anterior
-                </Button>
-                <Button onClick={handleSeatLayoutSubmit} disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creando...
-                    </>
-                  ) : (
-                    'Finalizar'
-                  )}
-                </Button>
-              </div>
-            </Card>
+            </div>
           </div>
-        )}
-      </div>
-    </DragDropContext>
+        </DndContext>
+      )}
+    </div>
+  );
+};
+
+// Nuevo componente para las plantillas de asientos
+const SeatTemplate = ({ type }: { type: SeatType }) => {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `template-${type.id}`,
+    data: type,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className={cn(
+        "flex flex-col items-center",
+        isDragging && "opacity-50"
+      )}
+    >
+      {type.icono && AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS] ? (
+        <div className="h-6 w-6">
+          {React.createElement(AVAILABLE_ICONS[type.icono as keyof typeof AVAILABLE_ICONS], {
+            className: "h-6 w-6",
+            style: { color: type.color }
+          })}
+        </div>
+      ) : (
+        <Armchair className="h-6 w-6" style={{ color: type.color }} />
+      )}
+      <span className="text-xs mt-1">Arrastrar</span>
+    </div>
   );
 };
