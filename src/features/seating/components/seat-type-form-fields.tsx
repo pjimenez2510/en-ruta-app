@@ -61,12 +61,14 @@ export const FormFields = ({ control }: FormFieldsProps) => {
             <FormControl>
               <Input
                 type="number"
-                step="0.1"
+                step="0.01"
+                min="0.01"
                 {...field}
-                onChange={event => {
+                onChange={(event) => {
                   const value = parseFloat(event.target.value);
-                  field.onChange(isNaN(value) ? 0 : value);
+                  field.onChange(isNaN(value) ? 0.01 : value);
                 }}
+                value={field.value}
               />
             </FormControl>
             <FormMessage />
