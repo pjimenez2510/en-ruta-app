@@ -36,7 +36,7 @@ export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate }: BusDetail
       if (bus && isOpen) {
         try {
           setRefreshing(true);
-          const updatedBus = await getBusById(bus.id, true);
+          const updatedBus = await getBusById(bus.id);
           setCurrentBus(updatedBus);
           if (onBusUpdate) {
             onBusUpdate(updatedBus);
@@ -60,7 +60,7 @@ export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate }: BusDetail
     
     try {
       setRefreshing(true);
-      const updatedBus = await getBusById(currentBus.id, true);
+      const updatedBus = await getBusById(currentBus.id);
       setCurrentBus(updatedBus);
       if (onBusUpdate) {
         onBusUpdate(updatedBus);
