@@ -1,4 +1,4 @@
-import { DropResult } from "react-beautiful-dnd";
+import { DragEndEvent } from "@dnd-kit/core";
 import { BusSeat } from "../interfaces/seat-config";
 
 interface FloorConfig {
@@ -17,80 +17,110 @@ interface UseSeatDragDropProps {
   reorderSeatNumbers: (seats: BusSeat[]) => BusSeat[];
 }
 
+interface SourceInfo {
+  typeId?: number;
+  floor?: number;
+  row?: number;
+  col?: number;
+}
+
 export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeatDragDropProps) => {
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    // Si no hay destino, el usuario soltó fuera de un área válida
-    if (!destination) return;
+    if (!over) return;
 
-    // Extraer información del origen y destino
-    const [sourceFloor, sourceRow, sourceCol] = source.droppableId.split('-').map(Number);
-    const [destFloor, destRow, destCol] = destination.droppableId.split('-').map(Number);
+    // Extraer información del origen
+    const isFromTemplate = active.id.toString().startsWith('template-');
+    const sourceInfo: SourceInfo = isFromTemplate
+      ? { typeId: parseInt(active.id.toString().replace('template-', '')) }
+      : parseDroppableId(active.id.toString().replace('seat-', ''));
 
-    // Si es un arrastre desde la plantilla
-    if (source.droppableId.startsWith('template-')) {
-      const typeId = parseInt(source.droppableId.replace('template-', ''));
-      const newSeat: BusSeat = {
-        numero: `${destRow}-${destCol}`, // Número temporal que será reordenado
-        fila: destRow,
-        columna: destCol,
-        tipoId: typeId,
-        estado: 'DISPONIBLE',
-      };
+    // Extraer información del destino
+    const destInfo = parseDroppableId(over.id.toString());
 
-      setFloorConfigs(prev => {
-        const newConfigs = [...prev];
-        const floorIndex = newConfigs.findIndex(f => f.numeroPiso === destFloor);
-        if (floorIndex === -1) return prev;
-
-        // Eliminar asiento existente si lo hay
-        newConfigs[floorIndex].asientos = newConfigs[floorIndex].asientos.filter(
-          seat => !(seat.fila === destRow && seat.columna === destCol)
-        );
-
-        // Agregar nuevo asiento
-        newConfigs[floorIndex].asientos.push(newSeat);
-
-        // Renumerar todos los asientos
-        newConfigs[floorIndex].asientos = reorderSeatNumbers(newConfigs[floorIndex].asientos);
-
-        return newConfigs;
-      });
-      return;
-    }
+    // Validar que el destino no sea el pasillo
+    const isPasilloDestination = (config: FloorConfig, col: number, row: number) => {
+      return col === config.leftColumns && row !== config.rows;
+    };
 
     setFloorConfigs(prev => {
       const newConfigs = [...prev];
-      const sourceFloorIndex = newConfigs.findIndex(f => f.numeroPiso === sourceFloor);
-      const destFloorIndex = newConfigs.findIndex(f => f.numeroPiso === destFloor);
+      const destFloorIndex = newConfigs.findIndex(f => f.numeroPiso === destInfo.floor);
 
-      if (sourceFloorIndex === -1 || destFloorIndex === -1) return prev;
+      if (destFloorIndex === -1) return prev;
+
+      // Verificar si el destino es el pasillo
+      if (isPasilloDestination(newConfigs[destFloorIndex], destInfo.col, destInfo.row)) {
+        return prev;
+      }
+
+      if (isFromTemplate && sourceInfo.typeId) {
+        // Manejar arrastre desde la plantilla
+        const newSeat: BusSeat = {
+          numero: `${destInfo.row}-${destInfo.col}`,
+          fila: destInfo.row,
+          columna: destInfo.col,
+          tipoId: sourceInfo.typeId,
+          estado: 'DISPONIBLE',
+        };
+
+        // Eliminar asiento existente si lo hay
+        newConfigs[destFloorIndex].asientos = newConfigs[destFloorIndex].asientos.filter(
+          seat => !(seat.fila === destInfo.row && seat.columna === destInfo.col)
+        );
+
+        // Agregar nuevo asiento
+        newConfigs[destFloorIndex].asientos.push(newSeat);
+
+        // Renumerar todos los asientos
+        newConfigs[destFloorIndex].asientos = reorderSeatNumbers(newConfigs[destFloorIndex].asientos);
+
+        return newConfigs;
+      }
+
+      // Manejar arrastre entre posiciones
+      if (!sourceInfo.floor) return prev;
+
+      const sourceFloorIndex = newConfigs.findIndex(f => f.numeroPiso === sourceInfo.floor);
+
+      if (sourceFloorIndex === -1) return prev;
 
       // Encontrar el asiento que se está moviendo
       const sourceIndex = newConfigs[sourceFloorIndex].asientos.findIndex(
-        seat => seat.fila === sourceRow && seat.columna === sourceCol
+        seat => seat.fila === sourceInfo.row && seat.columna === sourceInfo.col
       );
 
       if (sourceIndex === -1) return prev;
 
-      // Obtener el asiento
-      const [movedSeat] = newConfigs[sourceFloorIndex].asientos.splice(sourceIndex, 1);
+      // Obtener el asiento y sus propiedades originales
+      const movedSeat = newConfigs[sourceFloorIndex].asientos[sourceIndex];
+      const originalSeatType = movedSeat.tipoId;
+      const originalSeatState = movedSeat.estado;
+
+      // Eliminar el asiento de la posición original
+      newConfigs[sourceFloorIndex].asientos.splice(sourceIndex, 1);
 
       // Eliminar asiento existente en el destino si lo hay
-      newConfigs[destFloorIndex].asientos = newConfigs[destFloorIndex].asientos.filter(
-        seat => !(seat.fila === destRow && seat.columna === destCol)
+      const existingSeatIndex = newConfigs[destFloorIndex].asientos.findIndex(
+        seat => seat.fila === destInfo.row && seat.columna === destInfo.col
       );
+
+      if (existingSeatIndex !== -1) {
+        newConfigs[destFloorIndex].asientos.splice(existingSeatIndex, 1);
+      }
 
       // Agregar el asiento en la nueva posición
       newConfigs[destFloorIndex].asientos.push({
         ...movedSeat,
-        fila: destRow,
-        columna: destCol
+        fila: destInfo.row,
+        columna: destInfo.col,
+        tipoId: originalSeatType,
+        estado: originalSeatState
       });
 
       // Renumerar asientos si es necesario
-      if (sourceFloor === destFloor) {
+      if (sourceFloorIndex === destFloorIndex) {
         newConfigs[sourceFloorIndex].asientos = reorderSeatNumbers(newConfigs[sourceFloorIndex].asientos);
       } else {
         newConfigs[sourceFloorIndex].asientos = reorderSeatNumbers(newConfigs[sourceFloorIndex].asientos);
@@ -103,3 +133,9 @@ export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeat
 
   return { onDragEnd };
 };
+
+// Función auxiliar para parsear los IDs de los droppables
+function parseDroppableId(id: string) {
+  const [floor, row, col] = id.split('-').map(Number);
+  return { floor, row, col };
+}
