@@ -3,17 +3,35 @@
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { useTrips } from "../hooks/use-trips";
 import { Trip } from "../interfaces/trips.interface";
 
 type TripFiltersProps = object;
 
 export const TripFilters: FC<TripFiltersProps> = () => {
-  const { trips, setFilters } = useTrips();
+  const { setFilters } = useTrips();
   const [date, setDate] = useState("");
+  const [selectedEstado, setSelectedEstado] = useState<string>("ALL");
+  const [selectedRuta, setSelectedRuta] = useState<string>("ALL");
+  const [selectedBus, setSelectedBus] = useState<string>("ALL");
+  const [selectedHorario, setSelectedHorario] = useState<string>("ALL");
+  const [selectedGeneracion, setSelectedGeneracion] = useState<string>("ALL");
 
-    // Get unique routes and buses for filters
+  // Para evitar inconsistencias, resetea los filtros cuando cambie alguno principal
+  useEffect(() => {
+    setFilters({
+      fecha: date || undefined,
+      estado: selectedEstado === "ALL" ? undefined : selectedEstado as Trip["estado"],
+      rutaId: selectedRuta === "ALL" ? undefined : Number(selectedRuta),
+      busId: selectedBus === "ALL" ? undefined : Number(selectedBus),
+      horarioRutaId: selectedHorario === "ALL" ? undefined : Number(selectedHorario),
+      generacion: selectedGeneracion === "ALL" ? undefined : selectedGeneracion as "AUTOMATICA" | "MANUAL",
+    });
+  }, [date, selectedEstado, selectedRuta, selectedBus, selectedHorario, selectedGeneracion, setFilters]);
+
+  // Get unique routes and buses for filters
+  const { trips } = useTrips();
   const routes = Array.from(new Set(trips.map((trip: Trip) => trip.horarioRuta.ruta.id))).map(
     (id: number) => trips.find((trip: Trip) => trip.horarioRuta.ruta.id === id)?.horarioRuta.ruta
   ).filter(Boolean);
@@ -24,20 +42,6 @@ export const TripFilters: FC<TripFiltersProps> = () => {
   const schedules = Array.from(new Set(trips.map(trip => trip.horarioRuta.id))).map(
     id => trips.find(trip => trip.horarioRuta.id === id)?.horarioRuta
   ).filter(Boolean);
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(e.target.value);
-    setFilters(prev => ({ ...prev, fecha: e.target.value }));
-  };  const handleStatusChange = (value: string) => {
-    setFilters(prev => ({ ...prev, estado: value === "ALL" ? undefined : value as Trip["estado"] }));
-  };
-
-  const handleRouteChange = (value: string) => {
-    setFilters(prev => ({ ...prev, rutaId: value === "ALL" ? undefined : Number(value) }));
-  };
-
-  const handleBusChange = (value: string) => {
-    setFilters(prev => ({ ...prev, busId: value === "ALL" ? undefined : Number(value) }));
-  };
 
   return (
     <Card className="p-4">
@@ -47,7 +51,7 @@ export const TripFilters: FC<TripFiltersProps> = () => {
           <Input
             type="date"
             value={date}
-            onChange={handleDateChange}
+            onChange={e => setDate(e.target.value)}
             placeholder="Selecciona una fecha"
             className="rounded-lg shadow-sm text-sm px-3 py-2 placeholder:text-gray-400"
           />
@@ -55,25 +59,28 @@ export const TripFilters: FC<TripFiltersProps> = () => {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Estado</label>
-          <Select onValueChange={handleStatusChange}>
+          <Select value={selectedEstado} onValueChange={setSelectedEstado}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar estado" />
-            </SelectTrigger>            <SelectContent>
+            </SelectTrigger>
+            <SelectContent>
               <SelectItem value="ALL">Todos</SelectItem>
               <SelectItem value="PROGRAMADO">Programado</SelectItem>
-              <SelectItem value="EN_CURSO">En Curso</SelectItem>
-              <SelectItem value="FINALIZADO">Finalizado</SelectItem>
+              <SelectItem value="EN_RUTA">En Ruta</SelectItem>
+              <SelectItem value="COMPLETADO">Completado</SelectItem>
               <SelectItem value="CANCELADO">Cancelado</SelectItem>
+              <SelectItem value="RETRASADO">Retrasado</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Ruta</label>
-          <Select onValueChange={handleRouteChange}>
+          <Select value={selectedRuta} onValueChange={setSelectedRuta}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar ruta" />
-            </SelectTrigger>            <SelectContent>
+            </SelectTrigger>
+            <SelectContent>
               <SelectItem value="ALL">Todas</SelectItem>
               {routes.map(route => route && (
                 <SelectItem key={route.id} value={route.id.toString()}>
@@ -86,10 +93,11 @@ export const TripFilters: FC<TripFiltersProps> = () => {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Bus</label>
-          <Select onValueChange={handleBusChange}>
+          <Select value={selectedBus} onValueChange={setSelectedBus}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar bus" />
-            </SelectTrigger>            <SelectContent>
+            </SelectTrigger>
+            <SelectContent>
               <SelectItem value="ALL">Todos</SelectItem>
               {buses.map(bus => bus && (
                 <SelectItem key={bus.id} value={bus.id.toString()}>
@@ -98,9 +106,11 @@ export const TripFilters: FC<TripFiltersProps> = () => {
               ))}
             </SelectContent>
           </Select>
-        </div>        <div className="space-y-2">
+        </div>
+
+        <div className="space-y-2">
           <label className="text-sm font-medium">Horario</label>
-          <Select onValueChange={(value) => setFilters(prev => ({ ...prev, horarioRutaId: value === "ALL" ? undefined : Number(value) }))}>
+          <Select value={selectedHorario} onValueChange={setSelectedHorario}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar horario" />
             </SelectTrigger>
@@ -117,7 +127,7 @@ export const TripFilters: FC<TripFiltersProps> = () => {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Generación</label>
-          <Select onValueChange={(value) => setFilters(prev => ({ ...prev, generacion: value === "ALL" ? undefined : value as "AUTOMATICA" | "MANUAL" }))}>
+          <Select value={selectedGeneracion} onValueChange={setSelectedGeneracion}>
             <SelectTrigger>
               <SelectValue placeholder="Tipo de generación" />
             </SelectTrigger>

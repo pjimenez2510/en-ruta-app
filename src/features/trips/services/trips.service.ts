@@ -19,7 +19,12 @@ export const TripsService = {  getAll: async (filters?: TripFilters): Promise<Tr
     const url = queryString ? `${BASE_URL}?${queryString}` : BASE_URL;
     
     const response = await api.get(url);
-    return response.data.data;
+    console.log("Respuesta viajes:", response.data);
+
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.data.data)) return response.data.data;
+    if (Array.isArray(response.data.results)) return response.data.results;
+    return [];
   },
 
   getById: async (id: number): Promise<Trip> => {

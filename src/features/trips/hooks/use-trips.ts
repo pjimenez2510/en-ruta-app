@@ -32,47 +32,9 @@ export const useTrips = () => {
       queryClient.invalidateQueries({ queryKey: ['trips'] });
     }
   });
-  const filteredTrips = trips.filter((trip: Trip) => {
-    // Filtros de fecha
-    if (filters.fecha && new Date(trip.fecha).toISOString().split('T')[0] !== filters.fecha) {
-      return false;
-    }
-    if (filters.fechaDesde && new Date(trip.fecha) < new Date(filters.fechaDesde)) {
-      return false;
-    }
-    if (filters.fechaHasta && new Date(trip.fecha) > new Date(filters.fechaHasta)) {
-      return false;
-    }
 
-    // Filtros de estado y generación
-    if (filters.estado && trip.estado !== filters.estado) {
-      return false;
-    }
-    if (filters.generacion && trip.generacion !== filters.generacion) {
-      return false;
-    }
-
-    // Filtros de IDs
-    if (filters.rutaId && trip.horarioRuta.ruta.id !== filters.rutaId) {
-      return false;
-    }
-    if (filters.horarioRutaId && trip.horarioRuta.id !== filters.horarioRutaId) {
-      return false;
-    }
-    if (filters.busId && trip.bus.id !== filters.busId) {
-      return false;
-    }
-    if (filters.conductorId && trip.conductorId !== filters.conductorId) {
-      return false;
-    }
-    if (filters.ayudanteId && trip.ayudanteId !== filters.ayudanteId) {
-      return false;
-    }
-
-    return true;
-  });
-
-  return {    trips: filteredTrips,
+  return {
+    trips,
     isLoading,
     isFetching,
     filters,

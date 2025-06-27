@@ -24,7 +24,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useRouter } from "next/navigation";
 
 export const TripsTable = () => {
-  const { trips, isLoading, isFetching, createTrip, updateTrip, deleteTrip } = useTrips();
+  const { trips, isLoading, isFetching, createTrip, updateTrip, deleteTrip, filters } = useTrips();
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
@@ -96,74 +96,77 @@ export const TripsTable = () => {
 
       <TripFilters />
 
-      <Card className="rounded-2xl shadow-lg w-full">
-        <Table className="w-full text-sm">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-center">Fecha</TableHead>
-              <TableHead className="text-center">Hora Salida</TableHead>
-              <TableHead className="text-center">Ruta</TableHead>
-              <TableHead className="text-center">Bus</TableHead>
-              <TableHead className="text-center">Estado</TableHead>
-              <TableHead className="text-center">Asientos</TableHead>
-              <TableHead className="text-center">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {trips.map((trip) => (
-              <TableRow key={trip.id} className="hover:bg-accent/30 transition-colors align-middle">
-                <TableCell className="text-center align-middle">
-                  {format(new Date(trip.fecha), "PP", { locale: es })}
-                </TableCell>
-                <TableCell className="text-center align-middle">{trip.horarioRuta.horaSalida}</TableCell>
-                <TableCell className="text-center align-middle max-w-[160px] truncate" title={trip.horarioRuta.ruta.nombre}>
-                  {trip.horarioRuta.ruta.nombre}
-                </TableCell>
-                <TableCell className="text-center align-middle max-w-[160px] truncate" title={`${trip.bus.numero} (${trip.bus.placa})`}>
-                  {`${trip.bus.numero} (${trip.bus.placa})`}
-                </TableCell>
-                <TableCell className="text-center align-middle">
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    trip.estado === 'COMPLETADO' ? 'bg-green-100 text-green-700' :
-                    trip.estado === 'CANCELADO' ? 'bg-red-100 text-red-700' :
-                    'bg-blue-100 text-blue-700'}`}
-                  >
-                    {trip.estado}
-                  </span>
-                </TableCell>
-                <TableCell className="text-center align-middle">
-                  {`${trip.asientosOcupados}/${trip.capacidadTotal}`}
-                </TableCell>
-                <TableCell className="text-center align-middle">
-                  <div className="flex items-center justify-center gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setSelectedTrip(trip)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver detalles
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setSelectedTrip(trip)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(trip)}>
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
+      {trips.length === 0 ? (
+        <div className="w-full text-center text-gray-500 py-12 text-lg font-medium bg-white rounded-2xl shadow-lg border">
+          No hay viajes para mostrar.
+        </div>
+      ) : (
+        <Card className="rounded-2xl shadow-lg w-full">
+          <Table className="w-full text-sm">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-center">Fecha</TableHead>
+                <TableHead className="text-center">Hora Salida</TableHead>
+                <TableHead className="text-center">Ruta</TableHead>
+                <TableHead className="text-center">Bus</TableHead>
+                <TableHead className="text-center">Estado</TableHead>
+                <TableHead className="text-center">Asientos</TableHead>
+                <TableHead className="text-center">Acciones</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+            </TableHeader>
+            <TableBody>
+              {trips.map((trip) => (
+                <TableRow key={trip.id} className="hover:bg-accent/30 transition-colors align-middle">
+                  <TableCell className="text-center align-middle">
+                    {format(new Date(trip.fecha), "PP", { locale: es })}
+                  </TableCell>
+                  <TableCell className="text-center align-middle">{trip.horarioRuta.horaSalida}</TableCell>
+                  <TableCell className="text-center align-middle max-w-[160px] truncate" title={trip.horarioRuta.ruta.nombre}>
+                    {trip.horarioRuta.ruta.nombre}
+                  </TableCell>
+                  <TableCell className="text-center align-middle max-w-[160px] truncate" title={`${trip.bus.numero} (${trip.bus.placa})`}>
+                    {`${trip.bus.numero} (${trip.bus.placa})`}
+                  </TableCell>
+                  <TableCell className="text-center align-middle">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      trip.estado === 'COMPLETADO' ? 'bg-green-100 text-green-700' :
+                      trip.estado === 'CANCELADO' ? 'bg-red-100 text-red-700' :
+                      'bg-blue-100 text-blue-700'}`}
+                    >
+                      {trip.estado}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center align-middle">
+                    {`${trip.asientosOcupados}/${trip.capacidadTotal}`}
+                  </TableCell>
+                  <TableCell className="text-center align-middle">
+                    <div className="flex items-center justify-center gap-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setSelectedTrip(trip)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver detalles/ editar
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem onClick={() => handleDelete(trip)}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
 
       <Dialog open={!!selectedTrip} onOpenChange={(open) => !open && setSelectedTrip(null)}>
         <DialogContent>
