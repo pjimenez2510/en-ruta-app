@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Armchair, Check, BedDouble } from "lucide-react";
 import { useBusDisponibilidad } from "@/features/sell-tickets/hooks/use-bus-disponibilidad";
+import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
+import React from "react";
 
 interface SeleccionarAsientosModalProps {
   open: boolean;
@@ -20,11 +22,6 @@ interface SeleccionarAsientosModalProps {
   onAsientosSeleccionados: (asientos: any[]) => void;
   asientosActuales: any[];
 }
-
-const iconMap: Record<string, any> = {
-  Armchair,
-  BedDouble,
-};
 
 // Función para determinar el color de icono según el fondo
 function getIconColor(bgColor: string) {
@@ -184,19 +181,33 @@ export function SeleccionarAsientosModal({
                     return (
                       <div key={tipo.id} className="flex items-center gap-2">
                         <div
-                          className="w-6 h-6 rounded border-2"
+                          className="w-6 h-6 rounded border-2 flex items-center justify-center"
                           style={{
                             backgroundColor: tipo.color,
                             borderColor: tipo.color,
                           }}
-                        ></div>
+                        >
+                          {tipo.icono &&
+                          AVAILABLE_ICONS[
+                            tipo.icono as keyof typeof AVAILABLE_ICONS
+                          ] ? (
+                            React.createElement(
+                              AVAILABLE_ICONS[
+                                tipo.icono as keyof typeof AVAILABLE_ICONS
+                              ],
+                              {
+                                className: "h-5 w-5",
+                                color: getIconColor(tipo.color),
+                              }
+                            )
+                          ) : (
+                            <Armchair
+                              className="h-5 w-5"
+                              color={getIconColor(tipo.color)}
+                            />
+                          )}
+                        </div>
                         <span>{tipo.nombre}</span>
-                        <span className="text-xs text-muted-foreground">
-                          ${tipo.descripcion}
-                        </span>
-                        <span className="text-xs font-bold">
-                          ${tipo.factorPrecio ? `x${tipo.factorPrecio}` : ""}
-                        </span>
                       </div>
                     );
                   }
@@ -260,12 +271,21 @@ export function SeleccionarAsientosModal({
                               <Check className="h-4 w-4" />
                             ) : (
                               <>
-                                {typeof iconMap[asiento.tipo.icono] ===
-                                "function" ? (
-                                  iconMap[asiento.tipo.icono]({
-                                    className: "h-5 w-5 mb-1",
-                                    color: getIconColor(asiento.tipo.color),
-                                  })
+                                {asiento.tipo.icono &&
+                                AVAILABLE_ICONS[
+                                  asiento.tipo
+                                    .icono as keyof typeof AVAILABLE_ICONS
+                                ] ? (
+                                  React.createElement(
+                                    AVAILABLE_ICONS[
+                                      asiento.tipo
+                                        .icono as keyof typeof AVAILABLE_ICONS
+                                    ],
+                                    {
+                                      className: "h-5 w-5 mb-1",
+                                      color: getIconColor(asiento.tipo.color),
+                                    }
+                                  )
                                 ) : (
                                   <Armchair
                                     className="h-5 w-5 mb-1"
@@ -313,12 +333,21 @@ export function SeleccionarAsientosModal({
                               <Check className="h-4 w-4" />
                             ) : (
                               <>
-                                {typeof iconMap[asiento.tipo.icono] ===
-                                "function" ? (
-                                  iconMap[asiento.tipo.icono]({
-                                    className: "h-5 w-5 mb-1",
-                                    color: getIconColor(asiento.tipo.color),
-                                  })
+                                {asiento.tipo.icono &&
+                                AVAILABLE_ICONS[
+                                  asiento.tipo
+                                    .icono as keyof typeof AVAILABLE_ICONS
+                                ] ? (
+                                  React.createElement(
+                                    AVAILABLE_ICONS[
+                                      asiento.tipo
+                                        .icono as keyof typeof AVAILABLE_ICONS
+                                    ],
+                                    {
+                                      className: "h-5 w-5 mb-1",
+                                      color: getIconColor(asiento.tipo.color),
+                                    }
+                                  )
                                 ) : (
                                   <Armchair
                                     className="h-5 w-5 mb-1"
