@@ -49,6 +49,25 @@ interface BuscarClienteModalProps {
   onCrearCliente: () => void;
 }
 
+// Función para calcular la edad a partir de la fecha de nacimiento
+function calcularEdad(fechaNacimiento: string): number {
+  const hoy = new Date();
+  const nacimiento = new Date(fechaNacimiento);
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const m = hoy.getMonth() - nacimiento.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+    edad--;
+  }
+  return edad;
+}
+
+function getEtiquetaEdad(fechaNacimiento: string): string {
+  const edad = calcularEdad(fechaNacimiento);
+  if (edad < 18) return "Niño";
+  if (edad >= 65) return "Adulto mayor";
+  return "Adulto";
+}
+
 export function BuscarClienteModal({
   open,
   onOpenChange,
@@ -73,6 +92,7 @@ export function BuscarClienteModal({
         email: c.email,
         telefono: c.telefono,
         esDiscapacitado: c.esDiscapacitado,
+        fechaNacimiento: c.fechaNacimiento,
       }));
       setClientes(clientesAdaptados);
       if (clientesAdaptados.length === 0) {
@@ -161,6 +181,11 @@ export function BuscarClienteModal({
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">{cliente.nombre}</span>
+                          {cliente.fechaNacimiento && (
+                            <Badge variant="secondary">
+                              {getEtiquetaEdad(cliente.fechaNacimiento)}
+                            </Badge>
+                          )}
                           {cliente.esDiscapacitado && (
                             <Badge variant="secondary">Discapacidad</Badge>
                           )}
