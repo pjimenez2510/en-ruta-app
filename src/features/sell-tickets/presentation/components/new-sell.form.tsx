@@ -36,12 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const metodosPago = [
-  { id: 1, nombre: "Efectivo", descripcion: "Pago en efectivo" },
-  { id: 2, nombre: "Transferencia", descripcion: "Transferencia bancaria" },
-  { id: 3, nombre: "PayPal", descripcion: "Pago con PayPal" },
-];
+import { useMetodosPago } from "@/features/sell-tickets/hooks/use-metodos-pago";
 
 function getCssVariableValue(variableName: string) {
   if (typeof window === "undefined") return "";
@@ -87,6 +82,8 @@ export function NuevaVentaForm() {
   const [secondaryContrast, setSecondaryContrast] = useState<"white" | "black">(
     "white"
   );
+
+  const { metodosPago, isLoading: isLoadingMetodosPago } = useMetodosPago();
 
   useEffect(() => {
     const cssColor = getCssVariableValue("--secondary");
@@ -441,21 +438,41 @@ export function NuevaVentaForm() {
               <CardDescription>Seleccione el método de pago</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Select value={metodoPago} onValueChange={setMetodoPago}>
+              <Select
+                value={metodoPago}
+                onValueChange={setMetodoPago}
+                disabled={isLoadingMetodosPago}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar método de pago" />
+                  <SelectValue
+                    placeholder={
+                      isLoadingMetodosPago
+                        ? "Cargando métodos de pago..."
+                        : "Seleccionar método de pago"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {metodosPago.map((metodo) => (
-                    <SelectItem key={metodo.id} value={metodo.id.toString()}>
-                      <div>
-                        <p className="font-medium">{metodo.nombre}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {metodo.descripcion}
-                        </p>
-                      </div>
+                  {isLoadingMetodosPago ? (
+                    <SelectItem value="loading" disabled>
+                      Cargando métodos de pago...
                     </SelectItem>
-                  ))}
+                  ) : metodosPago.length === 0 ? (
+                    <SelectItem value="no-data" disabled>
+                      No hay métodos de pago disponibles
+                    </SelectItem>
+                  ) : (
+                    metodosPago.map((metodo) => (
+                      <SelectItem key={metodo.id} value={metodo.id.toString()}>
+                        <div>
+                          <p className="font-medium">{metodo.nombre}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {metodo.descripcion}
+                          </p>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
 

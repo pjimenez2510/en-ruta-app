@@ -91,4 +91,10 @@ export const API_ROUTES = {
   BUSES: {
     DISPONIBILIDAD: "/buses/:id/disponibilidad",
   },
+  METODOS_PAGO: {
+    GET_ALL: "/metodos-pago",
+    POST: "/metodos-pago",
+    UPDATE: "/metodos-pago/:id",
+    DELETE: "/metodos-pago/:id",
+  },
 };
