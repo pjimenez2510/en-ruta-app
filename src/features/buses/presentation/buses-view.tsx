@@ -78,9 +78,14 @@ export const BusesView = () => {
     } catch (error) {
       console.error("Error al cargar detalles:", error);
       toast.error("Error al cargar los detalles del bus");
-    } finally {
       setIsViewingDetails(false);
     }
+  };
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedBus(null);
+    setIsViewingDetails(false);
   };
 
   const handleAddBus = () => {
@@ -121,10 +126,8 @@ export const BusesView = () => {
           <BusDetailsModal
             bus={selectedBus}
             isOpen={isDetailsModalOpen}
-            onClose={() => {
-              setIsDetailsModalOpen(false);
-              setSelectedBus(null);
-            }}
+            onClose={handleCloseDetailsModal}
+            onLoadComplete={() => setIsViewingDetails(false)}
           />
         </>
       )}
