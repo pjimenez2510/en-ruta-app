@@ -6,13 +6,12 @@ import { useSeatGridRenderer } from "../hooks/use-seat-grid-renderer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getStatusColor } from "../utils/status-utils";
 import { SeatTypeLegend } from "./seat-type-legend";
 import { useSeatTypes } from "../hooks/use-seat-types";
 import { useBuses } from "../hooks/use-buses";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 interface BusDetailsModalProps {
@@ -20,9 +19,10 @@ interface BusDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBusUpdate?: (updatedBus: Bus) => void;
+  onLoadComplete?: () => void;
 }
 
-export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate }: BusDetailsModalProps) => {
+export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate, onLoadComplete }: BusDetailsModalProps) => {
   const { seatTypes, loading: loadingSeatTypes } = useSeatTypes();
   const { renderSeatGrid } = useSeatGridRenderer();
   const { getBusById } = useBuses();
@@ -45,6 +45,9 @@ export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate }: BusDetail
           console.error('Error loading bus details:', error);
         } finally {
           setRefreshing(false);
+          if (onLoadComplete) {
+            onLoadComplete();
+          }
         }
       } else if (!isOpen) {
         setCurrentBus(null);
@@ -53,24 +56,7 @@ export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate }: BusDetail
     };
 
     loadBusDetails();
-  }, [bus, isOpen, getBusById, onBusUpdate]);
-
-  const handleRefresh = async () => {
-    if (!currentBus) return;
-    
-    try {
-      setRefreshing(true);
-      const updatedBus = await getBusById(currentBus.id);
-      setCurrentBus(updatedBus);
-      if (onBusUpdate) {
-        onBusUpdate(updatedBus);
-      }
-    } catch (error) {
-      console.error('Error refreshing bus details:', error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
+  }, [bus, isOpen, getBusById, onBusUpdate, onLoadComplete]);
 
   if (!currentBus) return null;
 
@@ -107,15 +93,6 @@ export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate }: BusDetail
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>Detalles del Bus</DialogTitle>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="h-8 w-8"
-            >
-              <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
-            </Button>
           </div>
         </DialogHeader>
 
@@ -192,34 +169,39 @@ export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate }: BusDetail
           </TabsContent>
 
           <TabsContent value="seats">
-            <div className="space-y-8">
-              {loadingSeatTypes || refreshing ? (
-                <div className="flex items-center justify-center h-48">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
-                </div>
-              ) : (
-                <>
-                  <div className="flex justify-end">
-                    <div className="w-64">
-                      <SeatTypeLegend seatTypes={seatTypes} />
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              <div className="lg:col-span-3 space-y-8">
+                {loadingSeatTypes || refreshing ? (
+                  <div className="flex items-center justify-center h-48">
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
                   </div>
-                  {currentBus.pisos && currentBus.pisos.length > 0 ? (
-                    currentBus.pisos.map((piso) => (
-                      <Card key={piso.id} className="p-6">
-                        <h3 className="font-medium mb-6">Piso {piso.numeroPiso}</h3>
-                        <div className="flex justify-center">
-                          {renderFloorContent(piso)}
-                        </div>
-                      </Card>
-                    ))
-                  ) : (
-                    <div className="flex items-center justify-center h-48">
-                      <p className="text-gray-500">No hay pisos configurados para este bus</p>
-                    </div>
+                ) : (
+                  <>
+                    {currentBus.pisos && currentBus.pisos.length > 0 ? (
+                      currentBus.pisos.map((piso) => (
+                        <Card key={piso.id} className="p-6">
+                          <h3 className="font-medium mb-6">Piso {piso.numeroPiso}</h3>
+                          <div className="flex justify-center">
+                            {renderFloorContent(piso)}
+                          </div>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="flex items-center justify-center h-48">
+                        <p className="text-gray-500">No hay pisos configurados para este bus</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="lg:col-span-2">
+                <div className="sticky top-24">
+                  {!loadingSeatTypes && !refreshing && (
+                    <SeatTypeLegend seatTypes={seatTypes} />
                   )}
-                </>
-              )}
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

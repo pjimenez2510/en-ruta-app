@@ -16,7 +16,7 @@ import { useSeatTypes } from "../hooks/use-seat-types";
 import { useFloorConfiguration } from "../hooks/use-floor-configuration";
 import { useSeatDragDrop } from "../hooks/use-seat-drag-drop";
 import { Armchair, Loader2 } from "lucide-react";
-import { DndContext, useSensor, useSensors, PointerSensor } from "@dnd-kit/core";
+import { DndContext, useSensor, useSensors, PointerSensor, DragOverlay, DragStartEvent, DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { useDraggable } from "@dnd-kit/core";
 import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
@@ -38,6 +38,7 @@ export interface BusCreationStepperProps {
 export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreationStepperProps) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [busInfo, setBusInfo] = useState<BusFormValues & { totalAsientos: number }>(() => {
     if (initialData) {
       return {
@@ -83,6 +84,15 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
     })
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+    onDragEnd(event);
+  };
+
   const handleSeatLayoutSubmit = async () => {
     try {
       setIsSubmitting(true);
@@ -108,6 +118,31 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
     }
   };
 
+  // Función para obtener el tipo de asiento activo
+  const getActiveSeatType = () => {
+    if (!activeId) return null;
+    
+    const activeIdStr = activeId.toString();
+    
+    if (activeIdStr.startsWith('template-')) {
+      const typeId = parseInt(activeIdStr.replace('template-', ''));
+      return availableSeatTypes.find(type => type.id === typeId);
+    }
+    
+    // Si es un asiento existente, encontrar su tipo
+    const seatId = activeIdStr.replace('seat-', '');
+    const [floor, row, col] = seatId.split('-').map(Number);
+    const floorConfig = floorConfigs.find(f => f.numeroPiso === floor);
+    if (!floorConfig) return null;
+    
+    const seat = floorConfig.asientos.find(s => s.fila === row && s.columna === col);
+    if (!seat) return null;
+    
+    return availableSeatTypes.find(type => type.id === seat.tipoId);
+  };
+
+  const activeSeatType = getActiveSeatType();
+
   return (
     <div className="space-y-6">
       {step === 1 && (
@@ -127,7 +162,8 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
       {step === 2 && (
         <DndContext
           sensors={sensors}
-          onDragEnd={onDragEnd}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
         >
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-3 space-y-6">
@@ -235,6 +271,27 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
               </div>
             </div>
           </div>
+
+          {/* Overlay para mostrar el asiento mientras se arrastra */}
+          <DragOverlay>
+            {activeId && activeSeatType ? (
+              <div className="h-16 w-16 rounded-lg border-2 border-dashed border-primary bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center shadow-lg">
+                {activeSeatType.icono && AVAILABLE_ICONS[activeSeatType.icono as keyof typeof AVAILABLE_ICONS] ? (
+                  <div className="h-6 w-6">
+                    {React.createElement(AVAILABLE_ICONS[activeSeatType.icono as keyof typeof AVAILABLE_ICONS], {
+                      className: "h-6 w-6",
+                      style: { color: activeSeatType.color }
+                    })}
+                  </div>
+                ) : (
+                  <Armchair className="h-6 w-6" style={{ color: activeSeatType.color }} />
+                )}
+                <span className="text-xs font-medium mt-1" style={{ color: activeSeatType.color }}>
+                  {activeId?.toString().startsWith('template-') ? 'Nuevo' : 'Mover'}
+                </span>
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       )}
     </div>
