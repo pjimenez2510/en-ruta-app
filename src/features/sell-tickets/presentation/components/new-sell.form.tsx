@@ -69,6 +69,14 @@ export function NuevaVentaForm() {
   const [asientosSeleccionados, setAsientosSeleccionados] = useState<any[]>([]);
   const [metodoPago, setMetodoPago] = useState("");
 
+  // Estados de IDs para el POST final
+  const [viajeId, setViajeId] = useState<number | null>(null);
+  const [ciudadOrigenId, setCiudadOrigenId] = useState<number | null>(null);
+  const [ciudadDestinoId, setCiudadDestinoId] = useState<number | null>(null);
+  const [metodoPagoId, setMetodoPagoId] = useState<number | null>(null);
+  const [clienteId, setClienteId] = useState<number | null>(null);
+  const [asientosIds, setAsientosIds] = useState<number[]>([]);
+
   // Estados de modales
   const [modalViaje, setModalViaje] = useState(false);
   const [modalCliente, setModalCliente] = useState(false);
@@ -108,14 +116,53 @@ export function NuevaVentaForm() {
     );
   };
 
+  const handleViajeSeleccionado = (viaje: any) => {
+    setViajeSeleccionado(viaje);
+    setViajeId(viaje.id);
+    // Guardar ciudad origen y destino desde las paradas de la ruta
+    const paradas = viaje.horarioRuta?.ruta?.paradas || [];
+    if (paradas.length > 0) {
+      setCiudadOrigenId(paradas[0].ciudad.id);
+      setCiudadDestinoId(paradas[paradas.length - 1].ciudad.id);
+    } else {
+      setCiudadOrigenId(null);
+      setCiudadDestinoId(null);
+    }
+  };
+
+  const handleClienteSeleccionado = (cliente: any) => {
+    setClienteSeleccionado(cliente);
+    setClienteId(cliente.id);
+  };
+
+  const handleAsientosSeleccionados = (asientos: any[]) => {
+    setAsientosSeleccionados(asientos);
+    setAsientosIds(asientos.map((a) => a.id));
+  };
+
+  useEffect(() => {
+    if (metodoPago) {
+      setMetodoPagoId(Number(metodoPago));
+    } else {
+      setMetodoPagoId(null);
+    }
+  }, [metodoPago]);
+
   const procesarVenta = () => {
-    console.log("Procesando venta:", {
-      viaje: viajeSeleccionado,
-      cliente: clienteSeleccionado,
-      asientos: asientosSeleccionados,
-      metodoPago,
-      total: calcularTotal(),
-    });
+    const data = {
+      viajeId,
+      ciudadOrigenId,
+      ciudadDestinoId,
+      metodoPagoId,
+      // oficinistaId: ... (debería venir del usuario logueado)
+      boletos: [
+        {
+          clienteId,
+          asientoId: asientosIds[0], // Si hay varios asientos, puedes mapearlos
+        },
+      ],
+    };
+    console.log("Procesando venta:", data);
     // Aquí iría la lógica para procesar la venta
   };
 
@@ -220,25 +267,29 @@ export function NuevaVentaForm() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">
-                          {viajeSeleccionado.ruta}
+                          {viajeSeleccionado.horarioRuta?.ruta?.nombre}
                         </span>
-                        <Badge variant="outline">{viajeSeleccionado.bus}</Badge>
+                        <Badge variant="outline">
+                          {viajeSeleccionado.bus?.placa}
+                        </Badge>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          {viajeSeleccionado.fecha}
+                          {viajeSeleccionado.fecha?.split("T")[0]}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          {viajeSeleccionado.hora}
+                          {viajeSeleccionado.horarioRuta?.horaSalida}
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">${viajeSeleccionado.precio}</p>
                       <p className="text-sm text-muted-foreground">
-                        {viajeSeleccionado.asientosDisponibles} disponibles
+                        {viajeSeleccionado.capacidadTotal -
+                          viajeSeleccionado.asientosOcupados}{" "}
+                        disponibles
                       </p>
                     </div>
                   </div>
@@ -436,11 +487,12 @@ export function NuevaVentaForm() {
               <div className="space-y-2">
                 <h4 className="font-medium">Viaje</h4>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p>{viajeSeleccionado.ruta}</p>
+                  <p>{viajeSeleccionado.horarioRuta?.ruta?.nombre}</p>
                   <p>
-                    {viajeSeleccionado.fecha} - {viajeSeleccionado.hora}
+                    {viajeSeleccionado.fecha?.split("T")[0]} -{" "}
+                    {viajeSeleccionado.horarioRuta?.horaSalida}
                   </p>
-                  <p>{viajeSeleccionado.bus}</p>
+                  <p>{viajeSeleccionado.bus?.placa}</p>
                 </div>
               </div>
             )}
@@ -487,13 +539,13 @@ export function NuevaVentaForm() {
       <BuscarViajeModal
         open={modalViaje}
         onOpenChange={setModalViaje}
-        onViajeSeleccionado={setViajeSeleccionado}
+        onViajeSeleccionado={handleViajeSeleccionado}
       />
 
       <BuscarClienteModal
         open={modalCliente}
         onOpenChange={setModalCliente}
-        onClienteSeleccionado={setClienteSeleccionado}
+        onClienteSeleccionado={handleClienteSeleccionado}
         onCrearCliente={() => {
           setModalCliente(false);
           setModalCrearCliente(true);
@@ -504,7 +556,7 @@ export function NuevaVentaForm() {
         open={modalAsientos}
         onOpenChange={setModalAsientos}
         viaje={viajeSeleccionado}
-        onAsientosSeleccionados={setAsientosSeleccionados}
+        onAsientosSeleccionados={handleAsientosSeleccionados}
         asientosActuales={asientosSeleccionados}
       />
 
