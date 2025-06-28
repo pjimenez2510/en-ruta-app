@@ -88,4 +88,7 @@ export const API_ROUTES = {
     UPDATE: "/clientes/:id",
     DELETE: "/clientes/:id",
   },
+  BUSES: {
+    DISPONIBILIDAD: "/buses/:id/disponibilidad",
+  },
 };
