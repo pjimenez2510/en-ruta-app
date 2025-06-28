@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Armchair, Check } from "lucide-react";
+import { Armchair, Check, BedDouble } from "lucide-react";
 import { useBusDisponibilidad } from "@/features/sell-tickets/hooks/use-bus-disponibilidad";
 
 interface SeleccionarAsientosModalProps {
@@ -19,6 +19,26 @@ interface SeleccionarAsientosModalProps {
   viaje: any;
   onAsientosSeleccionados: (asientos: any[]) => void;
   asientosActuales: any[];
+}
+
+const iconMap: Record<string, any> = {
+  Armchair,
+  BedDouble,
+};
+
+// Función para determinar el color de icono según el fondo
+function getIconColor(bgColor: string) {
+  // Extrae el color hexadecimal
+  let color = bgColor.replace("#", "");
+  if (color.length === 3) {
+    color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+  }
+  if (color.length !== 6) return "#222";
+  const r = parseInt(color.substr(0, 2), 16);
+  const g = parseInt(color.substr(2, 2), 16);
+  const b = parseInt(color.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? "#222" : "#fff";
 }
 
 export function SeleccionarAsientosModal({
@@ -114,7 +134,7 @@ export function SeleccionarAsientosModal({
       case "seleccionado":
         return "bg-[#006D8B] border-[#006D8B] text-white";
       default:
-        return `${asiento.tipo.color} cursor-pointer hover:opacity-80`;
+        return `border-2 cursor-pointer hover:opacity-80`;
     }
   };
 
@@ -151,6 +171,38 @@ export function SeleccionarAsientosModal({
                 </Button>
               ))}
             </div>
+
+            {/* Leyenda de Tipos de Asiento */}
+            {piso && (
+              <div className="flex flex-wrap gap-4 text-sm items-center mb-2">
+                {Array.from(new Set(asientosPorPiso.map((a) => a.tipo.id))).map(
+                  (tipoId) => {
+                    const tipo = asientosPorPiso.find(
+                      (a) => a.tipo.id === tipoId
+                    )?.tipo;
+                    if (!tipo) return null;
+                    return (
+                      <div key={tipo.id} className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 rounded border-2"
+                          style={{
+                            backgroundColor: tipo.color,
+                            borderColor: tipo.color,
+                          }}
+                        ></div>
+                        <span>{tipo.nombre}</span>
+                        <span className="text-xs text-muted-foreground">
+                          ${tipo.descripcion}
+                        </span>
+                        <span className="text-xs font-bold">
+                          ${tipo.factorPrecio ? `x${tipo.factorPrecio}` : ""}
+                        </span>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            )}
 
             {/* Leyenda */}
             <div className="flex flex-wrap gap-4 text-sm">
@@ -190,16 +242,45 @@ export function SeleccionarAsientosModal({
                         .map((asiento) => (
                           <div
                             key={asiento.id}
-                            className={`w-12 h-12 border-2 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${getColorAsiento(
+                            className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${getColorAsiento(
                               asiento
                             )}`}
+                            style={
+                              getEstadoAsiento(asiento) === "disponible"
+                                ? {
+                                    backgroundColor: asiento.tipo.color,
+                                    borderColor: asiento.tipo.color,
+                                  }
+                                : {}
+                            }
                             onClick={() => toggleAsiento(asiento)}
                             title={`Asiento ${asiento.numero} - ${asiento.tipo.nombre} - $${asiento.precio}`}
                           >
                             {getEstadoAsiento(asiento) === "seleccionado" ? (
                               <Check className="h-4 w-4" />
                             ) : (
-                              asiento.numero
+                              <>
+                                {typeof iconMap[asiento.tipo.icono] ===
+                                "function" ? (
+                                  iconMap[asiento.tipo.icono]({
+                                    className: "h-5 w-5 mb-1",
+                                    color: getIconColor(asiento.tipo.color),
+                                  })
+                                ) : (
+                                  <Armchair
+                                    className="h-5 w-5 mb-1"
+                                    color={getIconColor(asiento.tipo.color)}
+                                  />
+                                )}
+                                <span
+                                  style={{
+                                    color: getIconColor(asiento.tipo.color),
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {asiento.numero}
+                                </span>
+                              </>
                             )}
                           </div>
                         ))}
@@ -214,16 +295,45 @@ export function SeleccionarAsientosModal({
                         .map((asiento) => (
                           <div
                             key={asiento.id}
-                            className={`w-12 h-12 border-2 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${getColorAsiento(
+                            className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${getColorAsiento(
                               asiento
                             )}`}
+                            style={
+                              getEstadoAsiento(asiento) === "disponible"
+                                ? {
+                                    backgroundColor: asiento.tipo.color,
+                                    borderColor: asiento.tipo.color,
+                                  }
+                                : {}
+                            }
                             onClick={() => toggleAsiento(asiento)}
                             title={`Asiento ${asiento.numero} - ${asiento.tipo.nombre} - $${asiento.precio}`}
                           >
                             {getEstadoAsiento(asiento) === "seleccionado" ? (
                               <Check className="h-4 w-4" />
                             ) : (
-                              asiento.numero
+                              <>
+                                {typeof iconMap[asiento.tipo.icono] ===
+                                "function" ? (
+                                  iconMap[asiento.tipo.icono]({
+                                    className: "h-5 w-5 mb-1",
+                                    color: getIconColor(asiento.tipo.color),
+                                  })
+                                ) : (
+                                  <Armchair
+                                    className="h-5 w-5 mb-1"
+                                    color={getIconColor(asiento.tipo.color)}
+                                  />
+                                )}
+                                <span
+                                  style={{
+                                    color: getIconColor(asiento.tipo.color),
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {asiento.numero}
+                                </span>
+                              </>
                             )}
                           </div>
                         ))}
