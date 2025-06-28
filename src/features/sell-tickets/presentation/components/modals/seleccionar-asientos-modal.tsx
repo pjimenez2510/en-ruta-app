@@ -245,12 +245,22 @@ export function SeleccionarAsientosModal({
                     <span className="w-6 text-center text-sm font-medium">
                       {fila}
                     </span>
-                    {/* Lado izquierdo */}
+                    {/* Lado izquierdo y derecho juntos, con espacios vacíos si no hay asiento */}
                     <div className="flex gap-1">
-                      {asientosPorPiso
-                        .filter((a) => a.fila === fila && a.columna <= 2)
-                        .sort((a, b) => a.columna - b.columna)
-                        .map((asiento) => (
+                      {[1, 2, 3, 4].map((columna) => {
+                        const asiento = asientosPorPiso.find(
+                          (a) => a.fila === fila && a.columna === columna
+                        );
+                        if (!asiento) {
+                          // Espacio vacío para mantener la estructura
+                          return (
+                            <div
+                              key={`empty-${fila}-${columna}`}
+                              className="w-12 h-12"
+                            />
+                          );
+                        }
+                        return (
                           <div
                             key={asiento.id}
                             className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${getColorAsiento(
@@ -267,105 +277,37 @@ export function SeleccionarAsientosModal({
                             onClick={() => toggleAsiento(asiento)}
                             title={`Asiento ${asiento.numero} - ${asiento.tipo.nombre} - $${asiento.precio}`}
                           >
-                            {getEstadoAsiento(asiento) === "seleccionado" ? (
-                              <Check className="h-4 w-4" />
-                            ) : (
-                              <>
-                                {asiento.tipo.icono &&
+                            {asiento.tipo.icono &&
+                            AVAILABLE_ICONS[
+                              asiento.tipo.icono as keyof typeof AVAILABLE_ICONS
+                            ] ? (
+                              React.createElement(
                                 AVAILABLE_ICONS[
                                   asiento.tipo
                                     .icono as keyof typeof AVAILABLE_ICONS
-                                ] ? (
-                                  React.createElement(
-                                    AVAILABLE_ICONS[
-                                      asiento.tipo
-                                        .icono as keyof typeof AVAILABLE_ICONS
-                                    ],
-                                    {
-                                      className: "h-5 w-5 mb-1",
-                                      color: getIconColor(asiento.tipo.color),
-                                    }
-                                  )
-                                ) : (
-                                  <Armchair
-                                    className="h-5 w-5 mb-1"
-                                    color={getIconColor(asiento.tipo.color)}
-                                  />
-                                )}
-                                <span
-                                  style={{
-                                    color: getIconColor(asiento.tipo.color),
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {asiento.numero}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        ))}
-                    </div>
-                    {/* Pasillo */}
-                    <div className="w-8"></div>
-                    {/* Lado derecho */}
-                    <div className="flex gap-1">
-                      {asientosPorPiso
-                        .filter((a) => a.fila === fila && a.columna > 2)
-                        .sort((a, b) => a.columna - b.columna)
-                        .map((asiento) => (
-                          <div
-                            key={asiento.id}
-                            className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${getColorAsiento(
-                              asiento
-                            )}`}
-                            style={
-                              getEstadoAsiento(asiento) === "disponible"
-                                ? {
-                                    backgroundColor: asiento.tipo.color,
-                                    borderColor: asiento.tipo.color,
-                                  }
-                                : {}
-                            }
-                            onClick={() => toggleAsiento(asiento)}
-                            title={`Asiento ${asiento.numero} - ${asiento.tipo.nombre} - $${asiento.precio}`}
-                          >
-                            {getEstadoAsiento(asiento) === "seleccionado" ? (
-                              <Check className="h-4 w-4" />
+                                ],
+                                {
+                                  className: "h-5 w-5 mb-1",
+                                  color: getIconColor(asiento.tipo.color),
+                                }
+                              )
                             ) : (
-                              <>
-                                {asiento.tipo.icono &&
-                                AVAILABLE_ICONS[
-                                  asiento.tipo
-                                    .icono as keyof typeof AVAILABLE_ICONS
-                                ] ? (
-                                  React.createElement(
-                                    AVAILABLE_ICONS[
-                                      asiento.tipo
-                                        .icono as keyof typeof AVAILABLE_ICONS
-                                    ],
-                                    {
-                                      className: "h-5 w-5 mb-1",
-                                      color: getIconColor(asiento.tipo.color),
-                                    }
-                                  )
-                                ) : (
-                                  <Armchair
-                                    className="h-5 w-5 mb-1"
-                                    color={getIconColor(asiento.tipo.color)}
-                                  />
-                                )}
-                                <span
-                                  style={{
-                                    color: getIconColor(asiento.tipo.color),
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {asiento.numero}
-                                </span>
-                              </>
+                              <Armchair
+                                className="h-5 w-5 mb-1"
+                                color={getIconColor(asiento.tipo.color)}
+                              />
                             )}
+                            <span
+                              style={{
+                                color: getIconColor(asiento.tipo.color),
+                                fontWeight: 600,
+                              }}
+                            >
+                              {asiento.numero}
+                            </span>
                           </div>
-                        ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
