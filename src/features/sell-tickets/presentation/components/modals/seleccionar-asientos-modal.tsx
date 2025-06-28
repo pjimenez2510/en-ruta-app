@@ -14,6 +14,10 @@ import { Armchair, Check, BedDouble } from "lucide-react";
 import { useBusDisponibilidad } from "@/features/sell-tickets/hooks/use-bus-disponibilidad";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
 import React from "react";
+import {
+  PisoDisponibilidad,
+  AsientoDisponibilidad,
+} from "@/features/sell-tickets/interfaces/bus-disponibilidad.interface";
 
 interface SeleccionarAsientosModalProps {
   open: boolean;
@@ -75,12 +79,14 @@ export function SeleccionarAsientosModal({
   }
 
   // Obtener asientos del piso activo
-  const pisos = data?.data?.pisos || [];
-  const piso = pisos.find((p) => p.numeroPiso === pisoActivo);
-  const asientosPorPiso = piso ? piso.asientos : [];
-  const filas = [...new Set(asientosPorPiso.map((a) => a.fila))].sort(
-    (a, b) => a - b
+  const pisos: PisoDisponibilidad[] = (data as any)?.pisos || [];
+  const piso: PisoDisponibilidad | undefined = pisos.find(
+    (p: PisoDisponibilidad) => p.numeroPiso === pisoActivo
   );
+  const asientosPorPiso: AsientoDisponibilidad[] = piso ? piso.asientos : [];
+  const filas: number[] = [
+    ...new Set(asientosPorPiso.map((a: AsientoDisponibilidad) => a.fila)),
+  ].sort((a, b) => a - b);
 
   const toggleAsiento = (asiento: any) => {
     if (!asiento.disponible) return;
@@ -158,7 +164,7 @@ export function SeleccionarAsientosModal({
           <div className="space-y-6">
             {/* Selector de Piso */}
             <div className="flex gap-2">
-              {pisos.map((p) => (
+              {pisos.map((p: PisoDisponibilidad) => (
                 <Button
                   key={p.id}
                   variant={p.numeroPiso === pisoActivo ? "default" : "outline"}
@@ -172,46 +178,48 @@ export function SeleccionarAsientosModal({
             {/* Leyenda de Tipos de Asiento */}
             {piso && (
               <div className="flex flex-wrap gap-4 text-sm items-center mb-2">
-                {Array.from(new Set(asientosPorPiso.map((a) => a.tipo.id))).map(
-                  (tipoId) => {
-                    const tipo = asientosPorPiso.find(
-                      (a) => a.tipo.id === tipoId
-                    )?.tipo;
-                    if (!tipo) return null;
-                    return (
-                      <div key={tipo.id} className="flex items-center gap-2">
-                        <div
-                          className="w-6 h-6 rounded border-2 flex items-center justify-center"
-                          style={{
-                            backgroundColor: tipo.color,
-                            borderColor: tipo.color,
-                          }}
-                        >
-                          {tipo.icono &&
-                          AVAILABLE_ICONS[
-                            tipo.icono as keyof typeof AVAILABLE_ICONS
-                          ] ? (
-                            React.createElement(
-                              AVAILABLE_ICONS[
-                                tipo.icono as keyof typeof AVAILABLE_ICONS
-                              ],
-                              {
-                                className: "h-5 w-5",
-                                color: getIconColor(tipo.color),
-                              }
-                            )
-                          ) : (
-                            <Armchair
-                              className="h-5 w-5"
-                              color={getIconColor(tipo.color)}
-                            />
-                          )}
-                        </div>
-                        <span>{tipo.nombre}</span>
+                {Array.from(
+                  new Set(
+                    asientosPorPiso.map((a: AsientoDisponibilidad) => a.tipo.id)
+                  )
+                ).map((tipoId) => {
+                  const tipo = asientosPorPiso.find(
+                    (a: AsientoDisponibilidad) => a.tipo.id === tipoId
+                  )?.tipo;
+                  if (!tipo) return null;
+                  return (
+                    <div key={tipo.id} className="flex items-center gap-2">
+                      <div
+                        className="w-6 h-6 rounded border-2 flex items-center justify-center"
+                        style={{
+                          backgroundColor: tipo.color,
+                          borderColor: tipo.color,
+                        }}
+                      >
+                        {tipo.icono &&
+                        AVAILABLE_ICONS[
+                          tipo.icono as keyof typeof AVAILABLE_ICONS
+                        ] ? (
+                          React.createElement(
+                            AVAILABLE_ICONS[
+                              tipo.icono as keyof typeof AVAILABLE_ICONS
+                            ],
+                            {
+                              className: "h-5 w-5",
+                              color: getIconColor(tipo.color),
+                            }
+                          )
+                        ) : (
+                          <Armchair
+                            className="h-5 w-5"
+                            color={getIconColor(tipo.color)}
+                          />
+                        )}
                       </div>
-                    );
-                  }
-                )}
+                      <span>{tipo.nombre}</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -237,7 +245,7 @@ export function SeleccionarAsientosModal({
                 Frente del Bus
               </div>
               <div className="space-y-3">
-                {filas.map((fila) => (
+                {filas.map((fila: number) => (
                   <div
                     key={fila}
                     className="flex items-center justify-center gap-2"
@@ -247,9 +255,10 @@ export function SeleccionarAsientosModal({
                     </span>
                     {/* Lado izquierdo y derecho juntos, con espacios vacíos si no hay asiento */}
                     <div className="flex gap-1">
-                      {[1, 2, 3, 4].map((columna) => {
+                      {[1, 2, 3, 4].map((columna: number) => {
                         const asiento = asientosPorPiso.find(
-                          (a) => a.fila === fila && a.columna === columna
+                          (a: AsientoDisponibilidad) =>
+                            a.fila === fila && a.columna === columna
                         );
                         if (!asiento) {
                           // Espacio vacío para mantener la estructura
