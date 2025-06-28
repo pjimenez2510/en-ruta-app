@@ -1,12 +1,5 @@
 export const AR_KEYS = {
   AUTH: "auth",
-  BUSES: {
-    BASE: "/buses",
-    MODELOS: "/modelos-bus",
-    PISOS: "/pisos-bus",
-    ASIENTOS: "/asientos",
-    ASIENTOS_MASIVO: "/asientos/masivo"
-  }
 };
 
 export const API_ROUTES = {
@@ -81,4 +74,11 @@ export const API_ROUTES = {
     DELETE: "/usuario-tenant/:id",
     POST_PERSONAL_INFO: "/usuario-tenant/:id/asignar-info-personal",
   },
+  BUSES: {
+    BASE: "/buses",
+    MODELOS: "/modelos-bus",
+    PISOS: "/pisos-bus",
+    ASIENTOS: "/asientos",
+    ASIENTOS_MASIVO: "/asientos/masivo"
+  }
 };
