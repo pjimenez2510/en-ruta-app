@@ -1,12 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Search, User, Plus, UserPlus } from "lucide-react"
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Search, User, Plus, UserPlus } from "lucide-react";
+import { getClientesPorCedula } from "@/features/sell-tickets/services/clientes.service";
 
 const clientesDisponibles = [
   {
@@ -33,13 +40,13 @@ const clientesDisponibles = [
     telefono: "+593923456789",
     esDiscapacitado: false,
   },
-]
+];
 
 interface BuscarClienteModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onClienteSeleccionado: (cliente: any) => void
-  onCrearCliente: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onClienteSeleccionado: (cliente: any) => void;
+  onCrearCliente: () => void;
 }
 
 export function BuscarClienteModal({
@@ -48,33 +55,45 @@ export function BuscarClienteModal({
   onClienteSeleccionado,
   onCrearCliente,
 }: BuscarClienteModalProps) {
-  const [cedula, setCedula] = useState("")
-  const [clientesFiltrados, setClientesFiltrados] = useState(clientesDisponibles)
-  const [buscando, setBuscando] = useState(false)
+  const [cedula, setCedula] = useState("");
+  const [buscando, setBuscando] = useState(false);
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const buscarPorCedula = () => {
-    setBuscando(true)
-
-    // Simular búsqueda
-    setTimeout(() => {
-      const clientesEncontrados = clientesDisponibles.filter(
-        (cliente) => cliente.documento.includes(cedula) || cliente.nombre.toLowerCase().includes(cedula.toLowerCase()),
-      )
-      setClientesFiltrados(clientesEncontrados)
-      setBuscando(false)
-    }, 500)
-  }
+  const buscarPorCedula = async () => {
+    if (!cedula) return;
+    setBuscando(true);
+    setError(null);
+    try {
+      const clientesApi = await getClientesPorCedula(cedula);
+      const clientesAdaptados = (clientesApi || []).map((c: any) => ({
+        id: c.id,
+        nombre: `${c.nombres} ${c.apellidos}`,
+        documento: c.numeroDocumento,
+        email: c.email,
+        telefono: c.telefono,
+        esDiscapacitado: c.esDiscapacitado,
+      }));
+      setClientes(clientesAdaptados);
+      if (clientesAdaptados.length === 0) {
+        setError("No se encontró ningún cliente con esa cédula");
+      }
+    } catch (e) {
+      setError("Error al buscar cliente");
+    } finally {
+      setBuscando(false);
+    }
+  };
 
   const seleccionarCliente = (cliente: any) => {
-    onClienteSeleccionado(cliente)
-    onOpenChange(false)
-    setCedula("")
-    setClientesFiltrados(clientesDisponibles)
-  }
+    onClienteSeleccionado(cliente);
+    onOpenChange(false);
+    setCedula("");
+  };
 
   const handleCrearCliente = () => {
-    onCrearCliente()
-  }
+    onCrearCliente();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -84,31 +103,36 @@ export function BuscarClienteModal({
             <Search className="h-5 w-5" />
             Buscar Cliente
           </DialogTitle>
-          <DialogDescription>Busque por cédula o nombre del cliente</DialogDescription>
+          <DialogDescription>
+            Busque por cédula o nombre del cliente
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Búsqueda */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Cédula o Nombre</Label>
+              <Label>Cédula</Label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Ingrese cédula o nombre del cliente..."
+                  placeholder="Ingrese cédula del cliente..."
                   value={cedula}
                   onChange={(e) => setCedula(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && buscarPorCedula()}
                 />
-                <Button onClick={buscarPorCedula} disabled={!cedula || buscando}>
+                <Button
+                  onClick={buscarPorCedula}
+                  disabled={!cedula || buscando}
+                >
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
-            {clientesFiltrados.length === 0 && cedula && !buscando && (
+            {clientes.length === 0 && cedula && !buscando && error && (
               <div className="text-center py-6 border rounded-lg bg-gray-50">
                 <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">No se encontró ningún cliente con "{cedula}"</p>
+                <p className="text-muted-foreground mb-4">{error}</p>
                 <Button onClick={handleCrearCliente}>
                   <Plus className="mr-2 h-4 w-4" />
                   Crear Nuevo Cliente
@@ -118,15 +142,15 @@ export function BuscarClienteModal({
           </div>
 
           {/* Resultados */}
-          {clientesFiltrados.length > 0 && (
+          {clientes.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium">Clientes Encontrados</h3>
-                <Badge variant="secondary">{clientesFiltrados.length} resultados</Badge>
+                <Badge variant="secondary">{clientes.length} resultados</Badge>
               </div>
 
               <div className="grid gap-3 max-h-96 overflow-y-auto">
-                {clientesFiltrados.map((cliente) => (
+                {clientes.map((cliente) => (
                   <div
                     key={cliente.id}
                     className="p-4 border rounded-lg hover:border-[#006D8B] cursor-pointer transition-colors"
@@ -137,7 +161,9 @@ export function BuscarClienteModal({
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">{cliente.nombre}</span>
-                          {cliente.esDiscapacitado && <Badge variant="secondary">Discapacidad</Badge>}
+                          {cliente.esDiscapacitado && (
+                            <Badge variant="secondary">Discapacidad</Badge>
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <p>Cédula: {cliente.documento}</p>
@@ -163,5 +189,5 @@ export function BuscarClienteModal({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

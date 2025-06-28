@@ -81,4 +81,11 @@ export const API_ROUTES = {
     GET_BY_ID: "/viajes/:id",
     PUBLICO: "/viajes/publico",
   },
+  CLIENTES: {
+    GET_ALL: "/clientes",
+    GET_BY_ID: "/clientes/:id",
+    POST: "/clientes",
+    UPDATE: "/clientes/:id",
+    DELETE: "/clientes/:id",
+  },
 };
