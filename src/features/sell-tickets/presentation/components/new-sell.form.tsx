@@ -118,6 +118,7 @@ export function NuevaVentaForm() {
   const handleViajeSeleccionado = (viaje: any) => {
     setViajeSeleccionado(viaje);
     setViajeId(viaje.id);
+    setClienteAsientos([]);
     // Guardar ciudad origen y destino desde las paradas de la ruta
     const paradas = viaje.horarioRuta?.ruta?.paradas || [];
     if (paradas.length > 0) {

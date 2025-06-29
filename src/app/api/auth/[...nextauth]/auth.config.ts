@@ -6,6 +6,7 @@ import {
   getUserRoleFromTokenServer,
   getUserTenantIdFromTokenServer,
 } from "@/features/auth/services/jwt.utils.server";
+import jwt from "jsonwebtoken";
 
 declare module "next-auth" {
   interface JWT {
@@ -14,6 +15,7 @@ declare module "next-auth" {
     sub?: string;
     tenantId?: number;
     logoUrl?: string;
+    usuarioId?: number;
   }
   interface User {
     role?: string;
@@ -21,6 +23,7 @@ declare module "next-auth" {
     id?: string;
     tenantId?: number;
     logoUrl?: string;
+    usuarioId?: number;
   }
   interface Session {
     user: {
@@ -29,6 +32,7 @@ declare module "next-auth" {
       id?: string;
       tenantId?: number;
       logoUrl?: string;
+      usuarioId?: number;
     } & DefaultSession["user"];
   }
 }
@@ -105,14 +109,21 @@ export const authOptions: NextAuthOptions = {
           console.log("👤 Rol de usuario:", userRole);
           console.log("👤 Tenant de usuario:", userTenantId);
 
-          return {
+          console.log(
+            "ID numérico extraído del backend:",
+            testData?.usuario?.id
+          );
+          const userObj = {
             id: credentials.username,
             name: credentials.username,
             email: credentials.username,
             role: userRole,
             token: token,
             tenantId: userTenantId,
+            usuarioId: testData?.usuario?.id,
           };
+          console.log("Objeto retornado en authorize:", userObj);
+          return userObj;
         } catch (error: unknown) {
           console.error("❌ Error en authorize:", error);
           const authError = error as AuthError;
@@ -135,7 +146,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       console.log("=== JWT Callback ===");
       console.log("Token recibido:", token);
-      console.log("Usuario:", user);
+      console.log("Usuario recibido en JWT callback:", user);
       console.log("Cuenta:", account);
 
       if (user) {
@@ -143,20 +154,35 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = user.token;
         token.sub = user.id;
         token.tenantId = user.tenantId;
-        console.log("Token actualizado:", token);
+        token.usuarioId = user.usuarioId;
+        console.log("Token actualizado (primer login):", token);
       }
+
+      if (token.accessToken) {
+        try {
+          const decoded = jwt.decode(String(token.accessToken));
+          if (decoded && typeof decoded === "object" && decoded.id) {
+            token.usuarioId = decoded.id;
+            console.log("usuarioId extraído del accessToken:", decoded.id);
+          }
+        } catch (e) {
+          console.error("Error decodificando accessToken:", e);
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       console.log("=== Session Callback ===");
       console.log("Session recibida:", session);
-      console.log("Token recibido:", token);
+      console.log("Token recibido en session callback:", token);
 
       if (token && session.user) {
         session.user.role = token.role as string | undefined;
         session.user.accessToken = token.accessToken as string | undefined;
         session.user.id = token.sub as string | undefined;
         session.user.tenantId = token.tenantId as number | undefined;
+        session.user.usuarioId = token.usuarioId as number | undefined;
         console.log("Session actualizada:", session);
       }
       return session;
