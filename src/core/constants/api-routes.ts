@@ -80,5 +80,9 @@ export const API_ROUTES = {
     PISOS: "/pisos-bus",
     ASIENTOS: "/asientos",
     ASIENTOS_MASIVO: "/asientos/masivo"
+  },
+  BUS_TEMPLATES: {
+    FLOOR_TEMPLATE: "/plantilla-pisos",
+    GET_SEATS: "/ubicacion-asiento-plantillas",
   }
 };
