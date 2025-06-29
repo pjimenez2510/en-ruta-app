@@ -93,16 +93,17 @@ export function RutaDetail({ rutaId }: RutaDetailProps) {
               <label className="text-sm font-medium text-muted-foreground">Nombre</label>
               <p className="text-sm font-medium">{ruta.nombre}</p>
             </div>
-            
             <Separator />
-            
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Tipo de Ruta Bus</label>
+              <p className="text-sm">{ruta.tipoRutaBus?.nombre}</p>
+            </div>
+            <Separator />
             <div>
               <label className="text-sm font-medium text-muted-foreground">Descripción</label>
               <p className="text-sm">{ruta.descripcion}</p>
             </div>
-            
             <Separator />
-            
             <div>
               <label className="text-sm font-medium text-muted-foreground">Estado</label>
               <div className="mt-1">

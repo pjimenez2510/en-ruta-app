@@ -24,6 +24,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useRutaForm } from "../hooks/use-ruta-form";
 import { useFindAllResolucionesAntQuery } from "@/features/resolution";
+import { useFindAllTiposRutaBusQuery } from "@/features/tipos-ruta-bus";
 import type { Ruta } from "../interfaces/ruta.interface";
 
 interface RutaFormProps {
@@ -33,6 +34,7 @@ interface RutaFormProps {
 export function RutaForm({ ruta }: RutaFormProps) {
   const { form, onSubmit, isSubmitting, isEditing } = useRutaForm(ruta);
   const { data: resoluciones = [], isLoading: isLoadingResoluciones } = useFindAllResolucionesAntQuery();
+  const { data: tiposRutaBus = [], isLoading: isLoadingTiposRutaBus } = useFindAllTiposRutaBusQuery();
 
   return (
     <Form {...form}>
@@ -96,6 +98,51 @@ export function RutaForm({ ruta }: RutaFormProps) {
               </Select>
               <FormDescription>
                 Seleccione la resolución ANT que ampara esta ruta
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tipoRutaBusId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Ruta Bus</FormLabel>
+              <Select
+                onValueChange={(value) => field.onChange(parseInt(value))}
+                value={field.value?.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo de ruta bus" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {isLoadingTiposRutaBus ? (
+                    <SelectItem value="loading" disabled>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Cargando tipos de ruta bus...
+                    </SelectItem>
+                  ) : tiposRutaBus.length === 0 ? (
+                    <SelectItem value="no-data" disabled>
+                      No hay tipos de ruta bus disponibles
+                    </SelectItem>
+                  ) : (
+                    tiposRutaBus.map((tipo) => (
+                      <SelectItem
+                        key={tipo.id}
+                        value={tipo.id.toString()}
+                      >
+                        {tipo.nombre}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Seleccione el tipo de ruta bus
               </FormDescription>
               <FormMessage />
             </FormItem>
