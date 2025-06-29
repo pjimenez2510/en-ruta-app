@@ -24,7 +24,6 @@ import { useCrearCliente } from "@/features/sell-tickets/hooks/use-crear-cliente
 import { useSRIData } from "@/features/sell-tickets/hooks/use-sri-data";
 import { useValidarDocumento } from "@/features/sell-tickets/hooks/use-validar-documento";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Cliente } from "@/features/sell-tickets/interfaces/cliente.interface";
 
 interface ClienteAdaptado {
   id: number;

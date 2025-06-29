@@ -4,6 +4,7 @@ import {
   ResponseAPI,
 } from "@/core/interfaces/api.interface";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
+import { getSession } from "next-auth/react";
 
 interface AxiosConfig {
   baseURL: string;
@@ -47,20 +48,44 @@ class AxiosClient {
       async (config: CustomInternalAxiosRequestConfig) => {
         if (config?.skipAuth) return config;
 
-        const token =
-          typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        console.log("=== Auth Interceptor ===");
-        console.log("Token exists:", !!token);
-        console.log("Token value:", token?.substring(0, 20) + "...");
+        // Solo en el cliente
+        if (typeof window !== "undefined") {
+          try {
+            // Primero intentar obtener el token de localStorage
+            let token: string | null = localStorage.getItem("token");
 
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-          console.log(
-            "Authorization header:",
-            config.headers.Authorization?.substring(0, 30) + "..."
-          );
-        } else {
-          console.warn("No token found in localStorage");
+            // Si no hay token en localStorage, intentar obtenerlo de la sesión
+            if (!token) {
+              const session = await getSession();
+              const sessionToken = session?.user?.accessToken;
+
+              // Si se obtiene el token de la sesión, guardarlo en localStorage
+              if (sessionToken) {
+                localStorage.setItem("token", sessionToken);
+                token = sessionToken;
+                console.log("Token guardado en localStorage desde la sesión");
+              }
+            }
+
+            console.log("=== Auth Interceptor ===");
+            console.log("Token exists:", !!token);
+            console.log(
+              "Token value:",
+              token ? token.substring(0, 20) + "..." : "undefined"
+            );
+
+            if (token) {
+              config.headers.Authorization = `Bearer ${token}`;
+              console.log(
+                "Authorization header:",
+                config.headers.Authorization?.substring(0, 30) + "..."
+              );
+            } else {
+              console.warn("No token found in localStorage or session");
+            }
+          } catch (error) {
+            console.error("Error getting session:", error);
+          }
         }
 
         return config;
@@ -154,10 +179,9 @@ class AxiosClient {
 
   put<T, R = AxiosResponse<ResponseAPI<T>>, D = unknown>(
     url: string,
-    data?: D,
     config?: RequestConfig<D>
   ): Promise<R> {
-    return this.axiosInstance.put(url, data, config);
+    return this.axiosInstance.put(url, config);
   }
 
   patch<T, R = AxiosResponse<ResponseAPI<T>>, D = unknown>(

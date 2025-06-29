@@ -18,9 +18,7 @@ import {
   Ticket,
   Calendar,
   Clock,
-  CheckCircle,
   Bus,
-  Briefcase,
   Armchair,
   Banknote,
 } from "lucide-react";
@@ -80,7 +78,7 @@ export function NuevaVentaForm() {
   const [modalCrearCliente, setModalCrearCliente] = useState(false);
   const [asientoParaCliente, setAsientoParaCliente] = useState<any>(null);
 
-  const [secondaryColor, setSecondaryColor] = useState<string>("");
+  const [, setSecondaryColor] = useState<string>("");
   const [secondaryContrast, setSecondaryContrast] = useState<"white" | "black">(
     "white"
   );
@@ -428,7 +426,7 @@ export function NuevaVentaForm() {
               ) : (
                 <div className="space-y-4">
                   <div className="grid gap-3">
-                    {clienteAsientos.map((clienteAsiento, index) => (
+                    {clienteAsientos.map((clienteAsiento) => (
                       <div
                         key={clienteAsiento.id}
                         className="p-4 border rounded-lg bg-white"
@@ -588,7 +586,7 @@ export function NuevaVentaForm() {
                   Asientos y Clientes ({clienteAsientos.length})
                 </h4>
                 <div className="text-sm text-muted-foreground space-y-2">
-                  {clienteAsientos.map((clienteAsiento, index) => (
+                  {clienteAsientos.map((clienteAsiento) => (
                     <div key={clienteAsiento.id} className="space-y-1">
                       <div className="flex justify-between">
                         <span>Asiento {clienteAsiento.asiento?.numero}</span>

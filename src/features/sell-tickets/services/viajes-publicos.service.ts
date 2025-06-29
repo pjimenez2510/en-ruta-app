@@ -13,7 +13,7 @@ export interface ViajePublicoParams {
 export const viajesPublicosService = {
   getViajesPublicos: async (params?: ViajePublicoParams) => {
     try {
-      let finalParams = { ...params };
+      const finalParams = { ...params };
       if (!finalParams.cooperativaId) {
         // Intentar obtener el tenantId de la sesión
         const session = await getSession();

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Download, Eye, CheckCircle, XCircle, Clock, Ticket, UserCheck, UserX, QrCode } from "lucide-react"
+import { Search, Download, Eye, CheckCircle, XCircle, Clock, UserCheck, UserX, QrCode } from "lucide-react"
 
 const boletos = [
   {
@@ -95,7 +95,6 @@ const boletos = [
 export function BoletosManagement() {
   const [busqueda, setBusqueda] = useState("")
   const [filtroEstado, setFiltroEstado] = useState("todos")
-  const [filtroViaje, setFiltroViaje] = useState("todos")
 
   const boletosFiltrados = boletos.filter((boleto) => {
     const coincideBusqueda =

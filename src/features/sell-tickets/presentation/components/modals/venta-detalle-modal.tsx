@@ -5,8 +5,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useVentaById } from "@/features/sell-tickets/hooks/use-venta-by-id";
-import { VentaDetalle } from "@/features/sell-tickets/interfaces/venta-detalle.interface";
+
 import { Badge } from "@/components/ui/badge";
+import { Parada, Ruta } from "@/features/sell-tickets/interfaces/viaje-publico.interface";
 
 interface VentaDetalleModalProps {
   ventaDetalleId: number | null;
@@ -71,8 +72,8 @@ export function VentaDetalleModal({
                 </div>
                 <div>
                   <b>Paradas:</b>{" "}
-                  {(ventaDetalle.viaje?.horarioRuta?.ruta as any)?.paradas
-                    ?.map((p: any) => p.ciudad?.nombre)
+                  {(ventaDetalle.viaje?.horarioRuta?.ruta as Ruta)?.paradas
+                    ?.map((p: Parada) => p.ciudad?.nombre)
                     .filter(Boolean)
                     .join(" → ")}
                 </div>

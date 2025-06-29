@@ -65,6 +65,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 
+
 export function VentasManagement() {
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
@@ -172,8 +173,10 @@ export function VentasManagement() {
     try {
       await confirmarVentaMutation.mutateAsync(ventaId);
       toast.success("Venta confirmada correctamente");
-    } catch (error: any) {
-      toast.error("Error al confirmar venta: " + (error?.message || ""));
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error("Error al confirmar venta: " + errorMessage);
     }
   };
 
@@ -181,8 +184,10 @@ export function VentasManagement() {
     try {
       await rechazarVentaMutation.mutateAsync(ventaId);
       toast.success("Venta rechazada correctamente");
-    } catch (error: any) {
-      toast.error("Error al rechazar venta: " + (error?.message || ""));
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error("Error al rechazar venta: " + errorMessage);
     }
   };
 
@@ -190,8 +195,10 @@ export function VentasManagement() {
     try {
       await cancelarVentaMutation.mutateAsync(ventaId);
       toast.success("Venta cancelada correctamente");
-    } catch (error: any) {
-      toast.error("Error al cancelar venta: " + (error?.message || ""));
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error("Error al cancelar venta: " + errorMessage);
     }
   };
 
@@ -199,8 +206,10 @@ export function VentasManagement() {
     try {
       await verificarVentaMutation.mutateAsync(ventaId);
       toast.success("Venta puesta en verificación correctamente");
-    } catch (error: any) {
-      toast.error("Error al verificar venta: " + (error?.message || ""));
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error("Error al verificar venta: " + errorMessage);
     }
   };
 

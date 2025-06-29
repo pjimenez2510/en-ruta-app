@@ -87,8 +87,7 @@ export function SeleccionarAsientosModal({
   viaje,
   onAsientosSeleccionados,
   clienteAsientosActuales,
-  onBuscarCliente,
-  onClienteAsignado,
+  onBuscarCliente
 }: SeleccionarAsientosModalProps) {
   // Obtener ids necesarios del viaje
   const busId = viaje?.bus?.id;
