@@ -46,7 +46,7 @@ const RHFInput: React.FC<FormInputProps> = ({
             type={type}
             placeholder={placeholder}
             disabled={disabled}
-            value={field.value || ""}
+            value={field?.value || ""}
           />
         )}
       />

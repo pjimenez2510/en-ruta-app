@@ -95,6 +95,13 @@ export function AdminSidebar() {
       icon: Settings,
       description: "Configuración del sistema",
     },
+
+    {
+      title: "Clientes",
+      path: "/main/admin/clientes",
+      icon: Settings,
+      description: "Configuración del sistema",
+    },
   ];
 
   return (

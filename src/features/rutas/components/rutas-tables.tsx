@@ -140,6 +140,7 @@ export function RutasTable() {
             <TableRow>
               <TableHead className="text-center">Nombre</TableHead>
               <TableHead className="text-center">Descripción</TableHead>
+              <TableHead className="text-center">Tipo de Ruta Bus</TableHead>
               <TableHead className="text-center">Resolución ANT</TableHead>
               <TableHead className="text-center">Cooperativa</TableHead>
               <TableHead className="text-center">Estado</TableHead>
@@ -166,6 +167,9 @@ export function RutasTable() {
                     <div className="truncate mx-auto text-center px-2 py-2" title={ruta.descripcion} style={{maxWidth: '180px'}}>
                       {ruta.descripcion}
                     </div>
+                  </TableCell>
+                  <TableCell className="text-center align-middle">
+                    {ruta.tipoRutaBus?.nombre}
                   </TableCell>
                   <TableCell className="text-center align-middle">
                     <div className="space-y-1">
