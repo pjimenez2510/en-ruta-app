@@ -23,6 +23,16 @@ export const API_ROUTES = {
     UPDATE: "/clientes/:id",
     DELETE: "/clientes/:id",
   },
+  CONFIGURACION_DESCUENTOS: {
+    GET_ALL: "/configuracion-descuentos",
+    CREATE: "/configuracion-descuentos",
+    GET_BY_ID: "/configuracion-descuentos/:id",
+    UPDATE: "/configuracion-descuentos/:id",
+    DELETE: "/configuracion-descuentos/:id",
+    ACTIVAR: "/configuracion-descuentos/:id/activar",
+    DESACTIVAR: "/configuracion-descuentos/:id/desactivar",
+    GET_BY_TIPO: "/configuracion-descuentos/tipo/:tipo",
+  },
   TENANTS: {
     GET_ALL: "/tenants",
     POST: "/tenants",

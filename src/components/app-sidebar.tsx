@@ -78,6 +78,11 @@ const menuItems: MenuItem[] = [
     path: "/main/clientes",
     icon: PersonStanding,
   },
+  {
+    title: "Configuración de descuentos",
+    path: "/main/configuracion-descuentos",
+    icon: PersonStanding,
+  },
 ];
 
 export function AppSidebar() {
