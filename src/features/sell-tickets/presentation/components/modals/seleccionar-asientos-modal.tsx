@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Armchair, Check, BedDouble } from "lucide-react";
+import { Armchair, Check, BedDouble, User, X } from "lucide-react";
 import { useBusDisponibilidad } from "@/features/sell-tickets/hooks/use-bus-disponibilidad";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
 import React from "react";
@@ -18,13 +18,16 @@ import {
   PisoDisponibilidad,
   AsientoDisponibilidad,
 } from "@/features/sell-tickets/interfaces/bus-disponibilidad.interface";
+import { ClienteAsiento } from "@/features/sell-tickets/interfaces/venta.interface";
 
 interface SeleccionarAsientosModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   viaje: any;
-  onAsientosSeleccionados: (asientos: any[]) => void;
-  asientosActuales: any[];
+  onAsientosSeleccionados: (clienteAsientos: ClienteAsiento[]) => void;
+  clienteAsientosActuales: ClienteAsiento[];
+  onBuscarCliente: (asiento: any) => void;
+  onClienteAsignado?: (cliente: any, asientoId: number) => void;
 }
 
 // Función para determinar el color de icono según el fondo
@@ -47,7 +50,9 @@ export function SeleccionarAsientosModal({
   onOpenChange,
   viaje,
   onAsientosSeleccionados,
-  asientosActuales,
+  clienteAsientosActuales,
+  onBuscarCliente,
+  onClienteAsignado,
 }: SeleccionarAsientosModalProps) {
   // Obtener ids necesarios del viaje
   const busId = viaje?.bus?.id;
@@ -65,14 +70,15 @@ export function SeleccionarAsientosModal({
     ciudadDestinoId,
   });
 
-  // Estado de piso activo y asientos seleccionados
+  // Estado de piso activo y cliente-asientos seleccionados
   const [pisoActivo, setPisoActivo] = useState(1);
-  const [asientosSeleccionados, setAsientosSeleccionados] =
-    useState<any[]>(asientosActuales);
+  const [clienteAsientos, setClienteAsientos] = useState<ClienteAsiento[]>(
+    clienteAsientosActuales || []
+  );
 
   useEffect(() => {
-    setAsientosSeleccionados(asientosActuales);
-  }, [asientosActuales]);
+    setClienteAsientos(clienteAsientosActuales || []);
+  }, [clienteAsientosActuales]);
 
   if (!viaje) {
     return null;
@@ -90,41 +96,107 @@ export function SeleccionarAsientosModal({
 
   const toggleAsiento = (asiento: any) => {
     if (!asiento.disponible) return;
-    const yaSeleccionado = asientosSeleccionados.find(
-      (a) => a.id === asiento.id
+
+    const asientoSeleccionado = clienteAsientos.find(
+      (ca) => ca.asiento?.id === asiento.id
     );
-    if (yaSeleccionado) {
-      setAsientosSeleccionados(
-        asientosSeleccionados.filter((a) => a.id !== asiento.id)
+
+    if (asientoSeleccionado) {
+      // Si ya está seleccionado, lo removemos
+      setClienteAsientos(
+        clienteAsientos.filter((ca) => ca.asiento?.id !== asiento.id)
       );
     } else {
-      setAsientosSeleccionados([
-        ...asientosSeleccionados,
-        {
-          id: asiento.id,
-          numero: asiento.numero,
-          tipo: asiento.tipo.nombre,
-          precio: Number(asiento.precio),
-        },
-      ]);
+      // Si no está seleccionado, abrimos el modal de buscar cliente
+      onBuscarCliente({
+        id: asiento.id,
+        numero: asiento.numero,
+        tipo: asiento.tipo.nombre,
+        precio: Number(asiento.precio),
+      });
     }
   };
 
+  const asignarClienteAAsiento = (asiento: any, cliente: any) => {
+    const nuevoClienteAsiento: ClienteAsiento = {
+      id: `${asiento.id}-${Date.now()}`, // ID único para el formulario
+      cliente: {
+        id: cliente.id,
+        nombre: cliente.nombre,
+        documento: cliente.documento,
+        email: cliente.email,
+        telefono: cliente.telefono,
+      },
+      asiento: {
+        id: asiento.id,
+        numero: asiento.numero,
+        tipo: asiento.tipo.nombre,
+        precio: Number(asiento.precio),
+      },
+    };
+
+    setClienteAsientos([...clienteAsientos, nuevoClienteAsiento]);
+  };
+
+  // Función para manejar cuando se asigna un cliente desde el modal de buscar cliente
+  const handleClienteAsignado = (cliente: any, asientoId: number) => {
+    // Buscar el asiento correspondiente
+    const asiento = asientosPorPiso.find((a) => a.id === asientoId);
+    if (!asiento) return;
+
+    // Crear el nuevo cliente-asiento
+    const nuevoClienteAsiento: ClienteAsiento = {
+      id: `${asientoId}-${Date.now()}`,
+      cliente: {
+        id: cliente.id,
+        nombre: cliente.nombre,
+        documento: cliente.documento,
+        email: cliente.email,
+        telefono: cliente.telefono,
+      },
+      asiento: {
+        id: asiento.id,
+        numero: asiento.numero,
+        tipo: asiento.tipo.nombre,
+        precio: Number(asiento.precio),
+      },
+    };
+
+    // Agregar al estado
+    setClienteAsientos((prev) => [...prev, nuevoClienteAsiento]);
+
+    // Notificar al componente padre
+    if (onClienteAsignado) {
+      onClienteAsignado(cliente, asientoId);
+    }
+  };
+
+  const removerClienteAsiento = (asientoId: number) => {
+    if (!clienteAsientos) return;
+    setClienteAsientos(
+      clienteAsientos.filter((ca) => ca.asiento?.id !== asientoId)
+    );
+  };
+
   const confirmarSeleccion = () => {
-    onAsientosSeleccionados(asientosSeleccionados);
+    onAsientosSeleccionados(clienteAsientos || []);
     onOpenChange(false);
   };
 
   const calcularTotal = () => {
-    return asientosSeleccionados.reduce(
-      (total, asiento) => total + asiento.precio,
+    if (!clienteAsientos) return 0;
+    return clienteAsientos.reduce(
+      (total, ca) => total + (ca.asiento?.precio || 0),
       0
     );
   };
 
   const getEstadoAsiento = (asiento: any) => {
     if (!asiento.disponible) return "ocupado";
-    if (asientosSeleccionados.find((a) => a.id === asiento.id))
+    if (
+      clienteAsientos &&
+      clienteAsientos.find((ca) => ca.asiento?.id === asiento.id)
+    )
       return "seleccionado";
     return "disponible";
   };
@@ -147,14 +219,14 @@ export function SeleccionarAsientosModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Armchair className="h-5 w-5" />
-            Seleccionar Asientos
+            Seleccionar Asientos y Clientes
           </DialogTitle>
           <DialogDescription>
             {viaje
               ? `${viaje.horarioRuta?.ruta?.nombre} - ${
                   viaje.fecha?.split("T")[0]
                 } ${viaje.horarioRuta?.horaSalida}`
-              : "Seleccione los asientos deseados"}
+              : "Seleccione los asientos y asigne clientes"}
           </DialogDescription>
         </DialogHeader>
 
@@ -324,21 +396,48 @@ export function SeleccionarAsientosModal({
             </div>
 
             {/* Resumen de Selección */}
-            {asientosSeleccionados.length > 0 && (
+            {clienteAsientos && clienteAsientos.length > 0 && (
               <div className="border rounded-lg p-4 bg-[#006D8B]/5">
                 <h4 className="font-medium mb-3">
-                  Asientos Seleccionados ({asientosSeleccionados.length})
+                  Asientos y Clientes Seleccionados ({clienteAsientos.length})
                 </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
-                  {asientosSeleccionados.map((asiento) => (
+                <div className="space-y-3 mb-4">
+                  {clienteAsientos.map((clienteAsiento) => (
                     <div
-                      key={asiento.id}
-                      className="flex items-center justify-between text-sm"
+                      key={clienteAsiento.id}
+                      className="flex items-center justify-between p-3 border rounded-lg bg-white"
                     >
-                      <span>
-                        {asiento.numero} - {asiento.tipo}
-                      </span>
-                      <span className="font-medium">${asiento.precio}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <Armchair className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">
+                            {clienteAsiento.asiento?.numero} -{" "}
+                            {clienteAsiento.asiento?.tipo}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            ${clienteAsiento.asiento?.precio}
+                          </span>
+                        </div>
+                        <Separator orientation="vertical" className="h-6" />
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">
+                            {clienteAsiento.cliente?.nombre}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {clienteAsiento.cliente?.documento}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          removerClienteAsiento(clienteAsiento.asiento?.id || 0)
+                        }
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -359,9 +458,9 @@ export function SeleccionarAsientosModal({
               </Button>
               <Button
                 onClick={confirmarSeleccion}
-                disabled={asientosSeleccionados.length === 0}
+                disabled={!clienteAsientos || clienteAsientos.length === 0}
               >
-                Confirmar Selección ({asientosSeleccionados.length})
+                Confirmar Selección ({clienteAsientos?.length || 0})
               </Button>
             </div>
           </div>

@@ -97,5 +97,10 @@ export const API_ROUTES = {
     UPDATE: "/metodos-pago/:id",
     DELETE: "/metodos-pago/:id",
   },
-  
+  VENTAS: {
+    POST: "/ventas",
+    GET_ALL: "/ventas",
+    GET_BY_ID: "/ventas/:id",
+    UPDATE: "/ventas/:id"
+  },
 };

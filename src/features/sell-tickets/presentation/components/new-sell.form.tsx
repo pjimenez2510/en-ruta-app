@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMetodosPago } from "@/features/sell-tickets/hooks/use-metodos-pago";
+import { ClienteAsiento } from "@/features/sell-tickets/interfaces/venta.interface";
 
 function getCssVariableValue(variableName: string) {
   if (typeof window === "undefined") return "";
@@ -60,8 +61,7 @@ function getContrastYIQ(hexcolor: string) {
 export function NuevaVentaForm() {
   const [paso, setPaso] = useState(1);
   const [viajeSeleccionado, setViajeSeleccionado] = useState<any>(null);
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
-  const [asientosSeleccionados, setAsientosSeleccionados] = useState<any[]>([]);
+  const [clienteAsientos, setClienteAsientos] = useState<ClienteAsiento[]>([]);
   const [metodoPago, setMetodoPago] = useState("");
 
   // Estados de IDs para el POST final
@@ -69,14 +69,13 @@ export function NuevaVentaForm() {
   const [ciudadOrigenId, setCiudadOrigenId] = useState<number | null>(null);
   const [ciudadDestinoId, setCiudadDestinoId] = useState<number | null>(null);
   const [metodoPagoId, setMetodoPagoId] = useState<number | null>(null);
-  const [clienteId, setClienteId] = useState<number | null>(null);
-  const [asientosIds, setAsientosIds] = useState<number[]>([]);
 
   // Estados de modales
   const [modalViaje, setModalViaje] = useState(false);
   const [modalCliente, setModalCliente] = useState(false);
   const [modalAsientos, setModalAsientos] = useState(false);
   const [modalCrearCliente, setModalCrearCliente] = useState(false);
+  const [asientoParaCliente, setAsientoParaCliente] = useState<any>(null);
 
   const [secondaryColor, setSecondaryColor] = useState<string>("");
   const [secondaryContrast, setSecondaryContrast] = useState<"white" | "black">(
@@ -106,9 +105,9 @@ export function NuevaVentaForm() {
   }, []);
 
   const calcularTotal = () => {
-    if (!viajeSeleccionado || !asientosSeleccionados.length) return 0;
-    return asientosSeleccionados.reduce(
-      (total, asiento) => total + asiento.precio,
+    if (!viajeSeleccionado || !clienteAsientos.length) return 0;
+    return clienteAsientos.reduce(
+      (total, ca) => total + (ca.asiento?.precio || 0),
       0
     );
   };
@@ -127,14 +126,72 @@ export function NuevaVentaForm() {
     }
   };
 
-  const handleClienteSeleccionado = (cliente: any) => {
-    setClienteSeleccionado(cliente);
-    setClienteId(cliente.id);
+  const handleClienteSeleccionado = (cliente: any, asientoId: number) => {
+    // Buscar el asiento correspondiente
+    const asiento = clienteAsientos.find(
+      (ca) => ca.asiento?.id === asientoId
+    )?.asiento;
+    if (!asiento) return;
+
+    // Actualizar el cliente para ese asiento
+    setClienteAsientos((prev) =>
+      prev.map((ca) => (ca.asiento?.id === asientoId ? { ...ca, cliente } : ca))
+    );
   };
 
-  const handleAsientosSeleccionados = (asientos: any[]) => {
-    setAsientosSeleccionados(asientos);
-    setAsientosIds(asientos.map((a) => a.id));
+  const handleAsientosSeleccionados = (
+    nuevosClienteAsientos: ClienteAsiento[]
+  ) => {
+    setClienteAsientos(nuevosClienteAsientos);
+  };
+
+  const handleBuscarCliente = (asiento: any) => {
+    setAsientoParaCliente(asiento);
+    setModalCliente(true);
+  };
+
+  const handleCrearCliente = (asientoId: number) => {
+    setModalCliente(false);
+    setModalCrearCliente(true);
+  };
+
+  const handleClienteCreado = (cliente: any) => {
+    if (asientoParaCliente) {
+      // Agregar el nuevo cliente-asiento
+      const nuevoClienteAsiento: ClienteAsiento = {
+        id: `${asientoParaCliente.id}-${Date.now()}`,
+        cliente,
+        asiento: asientoParaCliente,
+      };
+      setClienteAsientos((prev) => [...prev, nuevoClienteAsiento]);
+    }
+    setModalCrearCliente(false);
+    setAsientoParaCliente(null);
+  };
+
+  // Función para manejar cuando se asigna un cliente desde el modal de asientos
+  const handleClienteAsignado = (cliente: any, asientoId: number) => {
+    // Buscar si ya existe un cliente-asiento para ese asiento
+    const existeClienteAsiento = clienteAsientos.find(
+      (ca) => ca.asiento?.id === asientoId
+    );
+
+    if (existeClienteAsiento) {
+      // Actualizar el cliente existente
+      setClienteAsientos((prev) =>
+        prev.map((ca) =>
+          ca.asiento?.id === asientoId ? { ...ca, cliente } : ca
+        )
+      );
+    } else {
+      // Crear nuevo cliente-asiento
+      const nuevoClienteAsiento: ClienteAsiento = {
+        id: `${asientoId}-${Date.now()}`,
+        cliente,
+        asiento: asientoParaCliente, // Usar el asiento que está en el estado
+      };
+      setClienteAsientos((prev) => [...prev, nuevoClienteAsiento]);
+    }
   };
 
   useEffect(() => {
@@ -146,18 +203,18 @@ export function NuevaVentaForm() {
   }, [metodoPago]);
 
   const procesarVenta = () => {
+    const boletos = clienteAsientos.map((ca) => ({
+      clienteId: ca.cliente?.id || 0,
+      asientoId: ca.asiento?.id || 0,
+    }));
+
     const data = {
       viajeId,
       ciudadOrigenId,
       ciudadDestinoId,
       metodoPagoId,
-      // oficinistaId: ... (debería venir del usuario logueado)
-      boletos: [
-        {
-          clienteId,
-          asientoId: asientosIds[0], // Si hay varios asientos, puedes mapearlos
-        },
-      ],
+      oficinistaId: 1, // TODO: Obtener del usuario logueado
+      boletos,
     };
     console.log("Procesando venta:", data);
     // Aquí iría la lógica para procesar la venta
@@ -168,10 +225,8 @@ export function NuevaVentaForm() {
       case 1:
         return viajeSeleccionado !== null;
       case 2:
-        return clienteSeleccionado !== null;
+        return clienteAsientos.length > 0;
       case 3:
-        return asientosSeleccionados.length > 0;
-      case 4:
         return metodoPago !== "";
       default:
         return false;
@@ -191,7 +246,7 @@ export function NuevaVentaForm() {
                 className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 z-0"
                 style={{ transform: "translateY(-50%)" }}
               />
-              {[1, 2, 3, 4].map((numeroStep) => {
+              {[1, 2, 3].map((numeroStep) => {
                 const isActive = numeroStep === paso;
                 const isCompleted = numeroStep < paso;
                 let iconColor = "text-gray-500";
@@ -204,9 +259,8 @@ export function NuevaVentaForm() {
                 };
                 let IconComponent = null;
                 if (numeroStep === 1) IconComponent = Bus;
-                if (numeroStep === 2) IconComponent = Briefcase;
-                if (numeroStep === 3) IconComponent = Armchair;
-                if (numeroStep === 4) IconComponent = Banknote;
+                if (numeroStep === 2) IconComponent = Armchair;
+                if (numeroStep === 3) IconComponent = Banknote;
                 return (
                   <div
                     key={numeroStep}
@@ -226,10 +280,9 @@ export function NuevaVentaForm() {
                 );
               })}
             </div>
-            <div className="grid grid-cols-4 mt-2 text-xs text-muted-foreground text-center">
+            <div className="grid grid-cols-3 mt-2 text-xs text-muted-foreground text-center">
               <span>Viaje</span>
-              <span>Cliente</span>
-              <span>Asientos</span>
+              <span>Asientos y Clientes</span>
               <span>Pago</span>
             </div>
           </CardContent>
@@ -305,81 +358,20 @@ export function NuevaVentaForm() {
           </Card>
         )}
 
-        {/* Paso 2: Selección de Cliente */}
+        {/* Paso 2: Selección de Asientos y Clientes */}
         {paso === 2 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Paso 2: Seleccionar Cliente
-              </CardTitle>
-              <CardDescription>
-                Busque el cliente o cree uno nuevo
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {!clienteSeleccionado ? (
-                <div className="text-center py-8">
-                  <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground mb-4">
-                    No ha seleccionado ningún cliente
-                  </p>
-                  <div className="flex gap-2 justify-center">
-                    <Button onClick={() => setModalCliente(true)}>
-                      Buscar Cliente
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setModalCrearCliente(true)}
-                    >
-                      Crear Cliente
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-4 border rounded-lg bg-[#006D8B]/5 border-[#006D8B]">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">
-                      {clienteSeleccionado.nombre}
-                    </h4>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p>Documento: {clienteSeleccionado.documento}</p>
-                      <p>Email: {clienteSeleccionado.email}</p>
-                      <p>Teléfono: {clienteSeleccionado.telefono}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <Button variant="outline" onClick={() => setPaso(1)}>
-                      Anterior
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setModalCliente(true)}
-                    >
-                      Cambiar Cliente
-                    </Button>
-                    <Button onClick={() => setPaso(3)}>Continuar</Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Paso 3: Selección de Asientos */}
-        {paso === 3 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
                 <Ticket className="h-5 w-5" />
-                Paso 3: Seleccionar Asientos
+                Paso 2: Seleccionar Asientos y Clientes
               </CardTitle>
               <CardDescription>
-                Elija los asientos para los boletos
+                Elija los asientos y asigne clientes a cada uno
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {asientosSeleccionados.length === 0 ? (
+              {clienteAsientos.length === 0 ? (
                 <div className="text-center py-8">
                   <Ticket className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground mb-4">
@@ -391,35 +383,65 @@ export function NuevaVentaForm() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="grid gap-2">
-                    {asientosSeleccionados.map((asiento, index) => (
+                  <div className="grid gap-3">
+                    {clienteAsientos.map((clienteAsiento, index) => (
                       <div
-                        key={index}
-                        className="p-3 border rounded-lg flex items-center justify-between"
+                        key={clienteAsiento.id}
+                        className="p-4 border rounded-lg bg-white"
                       >
-                        <div className="flex items-center gap-3">
-                          <Badge variant="secondary">
-                            Asiento {asiento.numero}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {asiento.tipo}
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary">
+                                Asiento {clienteAsiento.asiento?.numero}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {clienteAsiento.asiento?.tipo}
+                              </span>
+                              <span className="font-medium">
+                                ${clienteAsiento.asiento?.precio}
+                              </span>
+                            </div>
+                            <Separator orientation="vertical" className="h-6" />
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <span className="font-medium">
+                                {clienteAsiento.cliente?.nombre ||
+                                  "Sin cliente"}
+                              </span>
+                              {clienteAsiento.cliente?.documento && (
+                                <span className="text-sm text-muted-foreground">
+                                  {clienteAsiento.cliente.documento}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {!clienteAsiento.cliente && (
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setAsientoParaCliente(clienteAsiento.asiento);
+                                setModalCliente(true);
+                              }}
+                            >
+                              Asignar Cliente
+                            </Button>
+                          )}
                         </div>
-                        <span className="font-medium">${asiento.precio}</span>
                       </div>
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setPaso(2)}>
+                    <Button variant="outline" onClick={() => setPaso(1)}>
                       Anterior
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => setModalAsientos(true)}
                     >
-                      Cambiar Asientos
+                      Agregar Más Asientos
                     </Button>
-                    <Button onClick={() => setPaso(4)}>Continuar</Button>
+                    <Button onClick={() => setPaso(3)}>Continuar</Button>
                   </div>
                 </div>
               )}
@@ -427,13 +449,13 @@ export function NuevaVentaForm() {
           </Card>
         )}
 
-        {/* Paso 4: Método de Pago */}
-        {paso === 4 && (
+        {/* Paso 3: Método de Pago */}
+        {paso === 3 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
-                Paso 4: Método de Pago
+                Paso 3: Método de Pago
               </CardTitle>
               <CardDescription>Seleccione el método de pago</CardDescription>
             </CardHeader>
@@ -477,7 +499,7 @@ export function NuevaVentaForm() {
               </Select>
 
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setPaso(3)}>
+                <Button variant="outline" onClick={() => setPaso(2)}>
                   Anterior
                 </Button>
                 <Button
@@ -514,26 +536,24 @@ export function NuevaVentaForm() {
               </div>
             )}
 
-            {clienteSeleccionado && (
-              <div className="space-y-2">
-                <h4 className="font-medium">Cliente</h4>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <p>{clienteSeleccionado.nombre}</p>
-                  <p>{clienteSeleccionado.documento}</p>
-                </div>
-              </div>
-            )}
-
-            {asientosSeleccionados.length > 0 && (
+            {clienteAsientos.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium">
-                  Asientos ({asientosSeleccionados.length})
+                  Asientos y Clientes ({clienteAsientos.length})
                 </h4>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  {asientosSeleccionados.map((asiento, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span>Asiento {asiento.numero}</span>
-                      <span>${asiento.precio}</span>
+                <div className="text-sm text-muted-foreground space-y-2">
+                  {clienteAsientos.map((clienteAsiento, index) => (
+                    <div key={clienteAsiento.id} className="space-y-1">
+                      <div className="flex justify-between">
+                        <span>Asiento {clienteAsiento.asiento?.numero}</span>
+                        <span>${clienteAsiento.asiento?.precio}</span>
+                      </div>
+                      {clienteAsiento.cliente && (
+                        <div className="text-xs text-muted-foreground">
+                          {clienteAsiento.cliente.nombre} -{" "}
+                          {clienteAsiento.cliente.documento}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -562,11 +582,18 @@ export function NuevaVentaForm() {
       <BuscarClienteModal
         open={modalCliente}
         onOpenChange={setModalCliente}
-        onClienteSeleccionado={handleClienteSeleccionado}
-        onCrearCliente={() => {
-          setModalCliente(false);
-          setModalCrearCliente(true);
+        onClienteSeleccionado={(cliente, asientoId) => {
+          // Llamar a la función del modal de asientos
+          if (modalAsientos) {
+            // Si estamos en el modal de asientos, usar handleClienteAsignado
+            handleClienteAsignado(cliente, asientoId);
+          } else {
+            // Si estamos en el paso 2 del formulario, usar handleClienteSeleccionado
+            handleClienteSeleccionado(cliente, asientoId);
+          }
         }}
+        onCrearCliente={handleCrearCliente}
+        asientoSeleccionado={asientoParaCliente}
       />
 
       <SeleccionarAsientosModal
@@ -574,16 +601,15 @@ export function NuevaVentaForm() {
         onOpenChange={setModalAsientos}
         viaje={viajeSeleccionado}
         onAsientosSeleccionados={handleAsientosSeleccionados}
-        asientosActuales={asientosSeleccionados}
+        clienteAsientosActuales={clienteAsientos}
+        onBuscarCliente={handleBuscarCliente}
+        onClienteAsignado={handleClienteAsignado}
       />
 
       <CrearClienteModal
         open={modalCrearCliente}
         onOpenChange={setModalCrearCliente}
-        onClienteCreado={(cliente) => {
-          setClienteSeleccionado(cliente);
-          setModalCrearCliente(false);
-        }}
+        onClienteCreado={handleClienteCreado}
       />
     </div>
   );

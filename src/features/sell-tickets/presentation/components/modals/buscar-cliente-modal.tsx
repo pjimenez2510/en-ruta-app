@@ -12,41 +12,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Search, User, Plus, UserPlus } from "lucide-react";
+import { Search, User, Plus, UserPlus, X } from "lucide-react";
 import { getClientesPorCedula } from "@/features/sell-tickets/services/clientes.service";
-
-const clientesDisponibles = [
-  {
-    id: 1,
-    nombre: "María González",
-    documento: "1712345678",
-    email: "maria.gonzalez@email.com",
-    telefono: "+593987654321",
-    esDiscapacitado: false,
-  },
-  {
-    id: 2,
-    nombre: "Carlos Mendoza",
-    documento: "1798765432",
-    email: "carlos.mendoza@email.com",
-    telefono: "+593912345678",
-    esDiscapacitado: true,
-  },
-  {
-    id: 3,
-    nombre: "Ana Rodríguez",
-    documento: "1756789012",
-    email: "ana.rodriguez@email.com",
-    telefono: "+593923456789",
-    esDiscapacitado: false,
-  },
-];
 
 interface BuscarClienteModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onClienteSeleccionado: (cliente: any) => void;
-  onCrearCliente: () => void;
+  onClienteSeleccionado: (cliente: any, asientoId: number) => void;
+  onCrearCliente: (asientoId: number) => void;
+  asientoSeleccionado: {
+    id: number;
+    numero: string;
+    tipo: string;
+    precio: number;
+  } | null;
 }
 
 // Función para calcular la edad a partir de la fecha de nacimiento
@@ -73,6 +52,7 @@ export function BuscarClienteModal({
   onOpenChange,
   onClienteSeleccionado,
   onCrearCliente,
+  asientoSeleccionado,
 }: BuscarClienteModalProps) {
   const [cedula, setCedula] = useState("");
   const [buscando, setBuscando] = useState(false);
@@ -106,13 +86,17 @@ export function BuscarClienteModal({
   };
 
   const seleccionarCliente = (cliente: any) => {
-    onClienteSeleccionado(cliente);
+    if (!asientoSeleccionado) return;
+    onClienteSeleccionado(cliente, asientoSeleccionado.id);
     onOpenChange(false);
     setCedula("");
+    setClientes([]);
+    setError(null);
   };
 
   const handleCrearCliente = () => {
-    onCrearCliente();
+    if (!asientoSeleccionado) return;
+    onCrearCliente(asientoSeleccionado.id);
   };
 
   return (
@@ -124,11 +108,35 @@ export function BuscarClienteModal({
             Buscar Cliente
           </DialogTitle>
           <DialogDescription>
-            Busque por cédula o nombre del cliente
+            {asientoSeleccionado
+              ? `Seleccione un cliente para el asiento ${asientoSeleccionado.numero}`
+              : "Busque por cédula o nombre del cliente"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Información del asiento */}
+          {asientoSeleccionado && (
+            <div className="p-4 border rounded-lg bg-blue-50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Asiento Seleccionado</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {asientoSeleccionado.numero} - {asientoSeleccionado.tipo} -
+                    ${asientoSeleccionado.precio}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onOpenChange(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Búsqueda */}
           <div className="space-y-4">
             <div className="space-y-2">
