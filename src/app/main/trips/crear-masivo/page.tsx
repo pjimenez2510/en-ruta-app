@@ -15,10 +15,8 @@ interface FormValues {
 
 export default function CrearViajeMasivoPage() {
   const router = useRouter();
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState<any[] | null>(null);
-  const [success, setSuccess] = useState("");
+  const [preview, setPreview] = useState<unknown[] | null>(null);
   const [executing, setExecuting] = useState(false);
 
   const methods = useForm<FormValues>({
@@ -28,8 +26,6 @@ export default function CrearViajeMasivoPage() {
   const { handleSubmit, watch, setError: setFormError } = methods;
 
   const handlePreview = async (values: FormValues) => {
-    setError("");
-    setSuccess("");
     setPreview(null);
     if (!values.fechaInicio || !values.fechaFin) {
       setFormError("fechaInicio", { type: "manual", message: "Campo requerido" });
@@ -59,7 +55,7 @@ export default function CrearViajeMasivoPage() {
         toast.error(data.message || "Error al previsualizar viajes");
       }
     } catch (err) {
-      toast.error("Error de red o del servidor");
+      toast.error("Error de red o del servidor" + (err instanceof Error ? ": " + err.message : ""));
     } finally {
       setLoading(false);
     }
@@ -67,8 +63,6 @@ export default function CrearViajeMasivoPage() {
 
   const handleEjecutar = async () => {
     setExecuting(true);
-    setError("");
-    setSuccess("");
     try {
       const session = await getSession();
       const token = session?.user?.accessToken;
@@ -88,12 +82,14 @@ export default function CrearViajeMasivoPage() {
       if (res.ok && data.data) {
         toast.success("¡Viajes generados exitosamente!");
         setPreview(null);
-        setTimeout(() => router.push("/main/trips"), 1200);
+        setTimeout(() => {
+          window.location.href = "/main/trips";
+        }, 1200);
       } else {
         toast.error(data.message || "Error al crear viajes");
       }
     } catch (err) {
-      toast.error("Error de red o del servidor");
+      toast.error("Error de red o del servidor" + (err instanceof Error ? ": " + err.message : ""));
     } finally {
       setExecuting(false);
     }
@@ -143,20 +139,29 @@ export default function CrearViajeMasivoPage() {
                 </tr>
               </thead>
               <tbody>
-                {preview.map((viaje, idx) => (
-                  <tr key={idx} className="border-b hover:bg-accent/30">
-                    <td className="px-2 py-2 text-center">{format(new Date(viaje.fecha), "dd/MM/yyyy")}</td>
-                    <td className="px-2 py-2 text-center">{viaje.horarioRuta?.horaSalida}</td>
-                    <td className="px-2 py-2 text-center">{viaje.horarioRuta?.ruta?.nombre}</td>
-                    <td className="px-2 py-2 text-center">{viaje.bus ? `${viaje.bus.numero} (${viaje.bus.placa})` : "-"}</td>
-                    <td className="px-2 py-2 text-center">{viaje.capacidadTotal}</td>
-                    <td className="px-2 py-2 text-center">
-                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                        {viaje.estado}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {preview.map((viaje, idx) => {
+                  const v = viaje as {
+                    fecha: string;
+                    horarioRuta?: { horaSalida?: string; ruta?: { nombre?: string } };
+                    bus?: { numero?: number; placa?: string };
+                    capacidadTotal?: number;
+                    estado?: string;
+                  };
+                  return (
+                    <tr key={idx} className="border-b hover:bg-accent/30">
+                      <td className="px-2 py-2 text-center">{format(new Date(v.fecha), "dd/MM/yyyy")}</td>
+                      <td className="px-2 py-2 text-center">{v.horarioRuta?.horaSalida}</td>
+                      <td className="px-2 py-2 text-center">{v.horarioRuta?.ruta?.nombre}</td>
+                      <td className="px-2 py-2 text-center">{v.bus ? `${v.bus.numero} (${v.bus.placa})` : "-"}</td>
+                      <td className="px-2 py-2 text-center">{v.capacidadTotal}</td>
+                      <td className="px-2 py-2 text-center">
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                          {v.estado}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

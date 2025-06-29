@@ -19,9 +19,10 @@ import { es } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { TripForm } from "../components/trip-form";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Edit, Trash2, Eye, Plus } from "lucide-react";
+import { MoreVertical, Trash2, Eye, Plus } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import { toZonedTime } from "date-fns-tz";
 
 export const TripsTable = () => {
   const { trips, isLoading, isFetching, createTrip, updateTrip, deleteTrip, filters } = useTrips();
@@ -132,7 +133,7 @@ export const TripsTable = () => {
               {trips.map((trip) => (
                 <TableRow key={trip.id} className="hover:bg-accent/30 transition-colors align-middle">
                   <TableCell className="text-center align-middle">
-                    {format(new Date(trip.fecha), "PP", { locale: es })}
+                    {format(toZonedTime(trip.fecha, "UTC"), "PP", { locale: es })}
                   </TableCell>
                   <TableCell className="text-center align-middle">{trip.horarioRuta.horaSalida}</TableCell>
                   <TableCell className="text-center align-middle max-w-[160px] truncate" title={trip.horarioRuta.ruta.nombre}>
