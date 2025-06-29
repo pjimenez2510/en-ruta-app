@@ -3,6 +3,15 @@ import { crearCliente } from "../services/clientes.service";
 import { CrearClienteData } from "../interfaces/cliente.interface";
 import { toast } from "sonner";
 
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string | string[];
+    };
+  };
+  message?: string;
+}
+
 export function useCrearCliente() {
   const queryClient = useQueryClient();
 
@@ -13,7 +22,7 @@ export function useCrearCliente() {
       queryClient.invalidateQueries({ queryKey: ["clientes"] });
       return data;
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       // Manejar errores del backend
       if (error?.response?.data?.error) {
         const backendError = error.response.data.error;

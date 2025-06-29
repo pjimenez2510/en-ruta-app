@@ -14,7 +14,6 @@ import {
   Ticket,
   CircleDollarSign,
   TicketPlus,
-  Tickets,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect, useState } from "react";

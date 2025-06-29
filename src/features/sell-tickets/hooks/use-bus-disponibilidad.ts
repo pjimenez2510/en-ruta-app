@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getBusDisponibilidad } from "../services/bus-disponibilidad.service";
-import { BusDisponibilidadResponse } from "../interfaces/bus-disponibilidad.interface";
+import { BusDisponibilidad } from "../interfaces/bus-disponibilidad.interface";
 
 export function useBusDisponibilidad(params: {
   id: number;
@@ -8,17 +8,16 @@ export function useBusDisponibilidad(params: {
   ciudadOrigenId: number;
   ciudadDestinoId: number;
 }) {
-  const { data, isLoading, error, refetch } =
-    useQuery<BusDisponibilidadResponse>({
-      queryKey: ["bus-disponibilidad", params],
-      queryFn: () => getBusDisponibilidad(params),
-      enabled: Boolean(
-        params.id &&
-          params.viajeId &&
-          params.ciudadOrigenId &&
-          params.ciudadDestinoId
-      ),
-    });
+  const { data, isLoading, error, refetch } = useQuery<BusDisponibilidad>({
+    queryKey: ["bus-disponibilidad", params],
+    queryFn: () => getBusDisponibilidad(params),
+    enabled: Boolean(
+      params.id &&
+        params.viajeId &&
+        params.ciudadOrigenId &&
+        params.ciudadDestinoId
+    ),
+  });
 
   return {
     data,

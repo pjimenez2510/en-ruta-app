@@ -4,6 +4,15 @@ import { crearVenta } from "../services/ventas.service";
 import { CrearVentaData } from "../interfaces/venta.interface";
 import { toast } from "sonner";
 
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string | string[];
+    };
+  };
+  message?: string;
+}
+
 export function useCrearVenta() {
   const queryClient = useQueryClient();
 
@@ -17,9 +26,10 @@ export function useCrearVenta() {
       console.log("[useCrearVenta] Session obtenida:", session);
       const rol = session?.user?.role;
       const usuarioId = session?.user?.usuarioId;
-      
 
-      let ventaDataWithOficinista: any;
+      let ventaDataWithOficinista:
+        | CrearVentaData
+        | Omit<CrearVentaData, "oficinistaId">;
       console.log(rol === "OFICINISTA");
       if (rol === "OFICINISTA") {
         if (!usuarioId) {
@@ -42,14 +52,14 @@ export function useCrearVenta() {
         "[useCrearVenta] Datos finales enviados al servicio:",
         ventaDataWithOficinista
       );
-      return crearVenta(ventaDataWithOficinista);
+      return crearVenta(ventaDataWithOficinista as CrearVentaData);
     },
     onSuccess: (data) => {
       toast.success("Venta procesada exitosamente");
       queryClient.invalidateQueries({ queryKey: ["ventas"] });
       return data;
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       // Manejar errores del backend
       if (error?.response?.data?.error) {
         const backendError = error.response.data.error;

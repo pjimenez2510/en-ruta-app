@@ -3,7 +3,6 @@ import type { DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { loginService } from "@/features/auth/services/auth.service";
 import {
-  getUserRoleFromTokenServer,
   getUserTenantIdFromTokenServer,
 } from "@/features/auth/services/jwt.utils.server";
 import jwt from "jsonwebtoken";
