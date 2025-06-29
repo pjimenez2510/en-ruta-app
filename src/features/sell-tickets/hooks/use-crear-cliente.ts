@@ -13,8 +13,22 @@ export function useCrearCliente() {
       queryClient.invalidateQueries({ queryKey: ["clientes"] });
       return data;
     },
-    onError: (error) => {
-      toast.error("Error al crear el cliente");
+    onError: (error: any) => {
+      // Manejar errores del backend
+      if (error?.response?.data?.error) {
+        const backendError = error.response.data.error;
+        if (Array.isArray(backendError)) {
+          // Si es un array de errores, mostrar el primero
+          toast.error(backendError[0]);
+        } else {
+          // Si es un string
+          toast.error(backendError);
+        }
+      } else if (error?.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Error al crear el cliente");
+      }
       console.error("Error creating cliente:", error);
     },
   });

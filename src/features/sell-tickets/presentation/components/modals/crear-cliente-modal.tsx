@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,15 +19,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserPlus, Search } from "lucide-react";
+import { UserPlus, Search, AlertTriangle } from "lucide-react";
 import { useCrearCliente } from "@/features/sell-tickets/hooks/use-crear-cliente";
 import { useSRIData } from "@/features/sell-tickets/hooks/use-sri-data";
+import { useValidarDocumento } from "@/features/sell-tickets/hooks/use-validar-documento";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CrearClienteModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onClienteCreado: (cliente: any) => void;
 }
+
+// Funciones de validación
+const validarTelefono = (telefono: string): boolean => {
+  // Permite + al inicio y solo números después
+  const regex = /^\+?[0-9]+$/;
+  return regex.test(telefono) && telefono.length >= 10;
+};
+
+const validarEmail = (email: string): boolean => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
+const validarPorcentaje = (porcentaje: string): boolean => {
+  const num = parseFloat(porcentaje);
+  return !isNaN(num) && num >= 0 && num <= 100;
+};
 
 export function CrearClienteModal({
   open,
@@ -46,14 +65,64 @@ export function CrearClienteModal({
     porcentajeDiscapacidad: "",
   });
 
+  const [errores, setErrores] = useState<Record<string, string>>({});
+
   const crearClienteMutation = useCrearCliente();
   const sriDataMutation = useSRIData();
+  const validacionDocumento = useValidarDocumento(formData.numeroDocumento);
+
+  // Verificar si ya existe un cliente con ese documento
+  const clienteExistente =
+    validacionDocumento.data && validacionDocumento.data.length > 0
+      ? validacionDocumento.data[0]
+      : null;
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    // Validar el campo inmediatamente cuando cambia
+    const error = validarCampo(field, value);
+    setErrores((prev) => ({
+      ...prev,
+      [field]: error,
+    }));
+  };
+
+  const validarCampo = (field: string, value: string): string => {
+    switch (field) {
+      case "numeroDocumento":
+        if (!value) return "El número de documento es requerido";
+        if (value.length < 10)
+          return "El documento debe tener al menos 10 dígitos";
+        if (clienteExistente)
+          return "Ya existe un cliente con este número de documento";
+        return "";
+
+      case "telefono":
+        if (!value) return "El teléfono es requerido";
+        if (!validarTelefono(value))
+          return "El teléfono debe tener al menos 10 dígitos y solo puede contener números y + al inicio";
+        return "";
+
+      case "email":
+        if (!value) return "El email es requerido";
+        if (!validarEmail(value))
+          return "El email debe tener un formato válido";
+        return "";
+
+      case "porcentajeDiscapacidad":
+        if (formData.esDiscapacitado && !value)
+          return "El porcentaje es requerido cuando hay discapacidad";
+        if (value && !validarPorcentaje(value))
+          return "El porcentaje debe estar entre 0 y 100";
+        return "";
+
+      default:
+        return "";
+    }
   };
 
   const buscarEnSRI = async () => {
@@ -82,6 +151,29 @@ export function CrearClienteModal({
   };
 
   const crearCliente = async () => {
+    // Validar todos los campos antes de enviar
+    const nuevosErrores: Record<string, string> = {};
+
+    const camposAValidar = ["numeroDocumento", "telefono", "email"];
+    if (formData.esDiscapacitado) {
+      camposAValidar.push("porcentajeDiscapacidad");
+    }
+
+    camposAValidar.forEach((campo) => {
+      const error = validarCampo(
+        campo,
+        formData[campo as keyof typeof formData] as string
+      );
+      if (error) {
+        nuevosErrores[campo] = error;
+      }
+    });
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErrores(nuevosErrores);
+      return;
+    }
+
     const clienteData = {
       nombres: formData.nombres,
       apellidos: formData.apellidos,
@@ -111,6 +203,7 @@ export function CrearClienteModal({
 
       onClienteCreado(clienteAdaptado);
 
+      // Limpiar formulario y errores
       setFormData({
         nombres: "",
         apellidos: "",
@@ -122,19 +215,28 @@ export function CrearClienteModal({
         esDiscapacitado: false,
         porcentajeDiscapacidad: "",
       });
+      setErrores({});
     } catch (error) {
       console.error("Error al crear cliente:", error);
     }
   };
 
   const esFormularioValido = () => {
-    return (
+    // Verificar que todos los campos requeridos estén llenos
+    const camposRequeridos =
       formData.nombres &&
       formData.apellidos &&
       formData.numeroDocumento &&
       formData.telefono &&
-      formData.email
-    );
+      formData.email;
+
+    // Verificar que no haya errores activos
+    const sinErrores = Object.values(errores).every((error) => error === "");
+
+    // Verificar que no haya cliente existente
+    const sinClienteExistente = !clienteExistente;
+
+    return camposRequeridos && sinErrores && sinClienteExistente;
   };
 
   return (
@@ -151,6 +253,20 @@ export function CrearClienteModal({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Alerta de cliente existente */}
+          {clienteExistente && (
+            <Alert className="border-orange-200 bg-orange-50">
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-orange-800">
+                Ya existe un cliente con el número de documento{" "}
+                {formData.numeroDocumento}:{" "}
+                <strong>
+                  {clienteExistente.nombres} {clienteExistente.apellidos}
+                </strong>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Información Personal */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Información Personal</h3>
@@ -211,6 +327,7 @@ export function CrearClienteModal({
                         handleInputChange("numeroDocumento", value);
                       }
                     }}
+                    className={errores.numeroDocumento ? "border-red-500" : ""}
                   />
                   {formData.tipoDocumento === "CEDULA" && (
                     <Button
@@ -227,6 +344,11 @@ export function CrearClienteModal({
                     </Button>
                   )}
                 </div>
+                {errores.numeroDocumento && (
+                  <p className="text-sm text-red-500">
+                    {errores.numeroDocumento}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -254,10 +376,18 @@ export function CrearClienteModal({
                   id="telefono"
                   placeholder="Ej: +593987654321"
                   value={formData.telefono}
-                  onChange={(e) =>
-                    handleInputChange("telefono", e.target.value)
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Permitir solo + al inicio y números
+                    if (value === "" || /^\+?[0-9]*$/.test(value)) {
+                      handleInputChange("telefono", value);
+                    }
+                  }}
+                  className={errores.telefono ? "border-red-500" : ""}
                 />
+                {errores.telefono && (
+                  <p className="text-sm text-red-500">{errores.telefono}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -268,7 +398,11 @@ export function CrearClienteModal({
                   placeholder="Ej: cliente@email.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
+                  className={errores.email ? "border-red-500" : ""}
                 />
+                {errores.email && (
+                  <p className="text-sm text-red-500">{errores.email}</p>
+                )}
               </div>
             </div>
           </div>
@@ -293,7 +427,7 @@ export function CrearClienteModal({
             {formData.esDiscapacitado && (
               <div className="space-y-2">
                 <Label htmlFor="porcentajeDiscapacidad">
-                  Porcentaje de Discapacidad (%)
+                  Porcentaje de Discapacidad (%) *
                 </Label>
                 <Input
                   id="porcentajeDiscapacidad"
@@ -303,10 +437,22 @@ export function CrearClienteModal({
                   step="0.1"
                   placeholder="Ej: 30.5"
                   value={formData.porcentajeDiscapacidad}
-                  onChange={(e) =>
-                    handleInputChange("porcentajeDiscapacidad", e.target.value)
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Permitir solo números y punto decimal
+                    if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
+                      handleInputChange("porcentajeDiscapacidad", value);
+                    }
+                  }}
+                  className={
+                    errores.porcentajeDiscapacidad ? "border-red-500" : ""
                   }
                 />
+                {errores.porcentajeDiscapacidad && (
+                  <p className="text-sm text-red-500">
+                    {errores.porcentajeDiscapacidad}
+                  </p>
+                )}
               </div>
             )}
           </div>
