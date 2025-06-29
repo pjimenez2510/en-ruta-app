@@ -4,7 +4,11 @@ import { ResponseAPI } from "@/core/interfaces/api.interface";
 import {
   Cliente,
   CrearClienteData,
+  SRIResponse,
 } from "@/features/sell-tickets/interfaces/cliente.interface";
+
+const SRI_API_URL =
+  "https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion";
 
 export async function getClientesPorCedula(
   numeroDocumento: string
@@ -25,4 +29,19 @@ export async function crearCliente(
     clienteData
   );
   return data.data;
+}
+
+export async function fetchSRIData(cedula: string): Promise<string> {
+  try {
+    const response = await fetch(`${SRI_API_URL}/${cedula}`);
+    const data: SRIResponse = await response.json();
+
+    if (!data.contribuyente?.nombreComercial) {
+      throw new Error("No se encontró información para esta cédula");
+    }
+
+    return data.contribuyente.nombreComercial;
+  } catch (error) {
+    throw new Error("Error al buscar la información: " + error);
+  }
 }

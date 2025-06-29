@@ -25,3 +25,9 @@ export interface CrearClienteData {
   esDiscapacitado: boolean;
   porcentajeDiscapacidad?: number;
 }
+
+export interface SRIResponse {
+  contribuyente?: {
+    nombreComercial: string;
+  };
+}

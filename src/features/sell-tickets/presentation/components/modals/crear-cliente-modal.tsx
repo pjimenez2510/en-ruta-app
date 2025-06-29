@@ -19,8 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Search } from "lucide-react";
 import { useCrearCliente } from "@/features/sell-tickets/hooks/use-crear-cliente";
+import { useSRIData } from "@/features/sell-tickets/hooks/use-sri-data";
 
 interface CrearClienteModalProps {
   open: boolean;
@@ -46,12 +47,38 @@ export function CrearClienteModal({
   });
 
   const crearClienteMutation = useCrearCliente();
+  const sriDataMutation = useSRIData();
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const buscarEnSRI = async () => {
+    if (!formData.numeroDocumento || formData.tipoDocumento !== "CEDULA") {
+      return;
+    }
+
+    try {
+      const nombreCompleto = await sriDataMutation.mutateAsync(
+        formData.numeroDocumento
+      );
+
+      // Extraer nombres y apellidos del nombre comercial (igual que en usuarios)
+      const partes = nombreCompleto.split(" ");
+      const apellidos = partes.slice(0, 2).join(" ");
+      const nombres = partes.slice(2).join(" ");
+
+      setFormData((prev) => ({
+        ...prev,
+        nombres,
+        apellidos,
+      }));
+    } catch (error) {
+      console.error("Error al buscar en SRI:", error);
+    }
   };
 
   const crearCliente = async () => {
@@ -173,14 +200,33 @@ export function CrearClienteModal({
 
               <div className="space-y-2">
                 <Label htmlFor="numeroDocumento">Número de Documento *</Label>
-                <Input
-                  id="numeroDocumento"
-                  placeholder="Ej: 1712345678"
-                  value={formData.numeroDocumento}
-                  onChange={(e) =>
-                    handleInputChange("numeroDocumento", e.target.value)
-                  }
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="numeroDocumento"
+                    placeholder="Ej: 1712345678"
+                    value={formData.numeroDocumento}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      if (value.length <= 13) {
+                        handleInputChange("numeroDocumento", value);
+                      }
+                    }}
+                  />
+                  {formData.tipoDocumento === "CEDULA" && (
+                    <Button
+                      type="button"
+                      size="icon"
+                      onClick={buscarEnSRI}
+                      disabled={
+                        (formData.numeroDocumento.length !== 10 &&
+                          formData.numeroDocumento.length !== 13) ||
+                        sriDataMutation.isPending
+                      }
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
