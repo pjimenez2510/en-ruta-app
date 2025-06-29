@@ -4,6 +4,7 @@ import {
   ResponseAPI,
 } from "@/core/interfaces/api.interface";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
+import { toast } from "sonner";
 
 interface AxiosConfig {
   baseURL: string;
@@ -74,6 +75,12 @@ class AxiosClient {
         return response;
       },
       (error) => {
+        const mensaje = error.response.data.message;
+        const errors: string[] | string | undefined = error.response.data.error;
+        if (window !== undefined) {
+          toast.error(mensaje, { description: errors });
+        }
+
         return Promise.reject(error);
       }
     );
