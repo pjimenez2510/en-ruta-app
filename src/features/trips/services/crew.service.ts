@@ -11,7 +11,7 @@ export const CrewService = {
     try {
       const api = await createAuthApi();
       console.log('Fetching schedules...');
-      const response = await api.get('https://en-ruta-api.onrender.com/horarios-ruta');
+      const response = await api.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/horarios-ruta`);
       console.log('Raw API response:', response);
       
       // Handle both array responses and data-wrapped responses
@@ -30,7 +30,7 @@ export const CrewService = {
     try {
       console.log('Fetching buses...');
       const api = await createAuthApi();
-      const response = await api.get('https://en-ruta-api.onrender.com/buses');
+      const response = await api.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/buses`);
       console.log('Raw bus response:', response);
       
       // Handle the wrapped data response
