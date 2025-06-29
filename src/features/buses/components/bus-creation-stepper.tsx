@@ -15,7 +15,8 @@ import { useBusModels } from "../hooks/use-bus-models";
 import { useSeatTypes } from "../hooks/use-seat-types";
 import { useFloorConfiguration } from "../hooks/use-floor-configuration";
 import { useSeatDragDrop } from "../hooks/use-seat-drag-drop";
-import { Armchair, Loader2 } from "lucide-react";
+import { useBusTemplate } from "@/features/bus-templates/hooks/use-bus-template";
+import { Armchair, Loader2, FileText, RotateCcw } from "lucide-react";
 import { DndContext, useSensor, useSensors, PointerSensor, DragOverlay, DragStartEvent, DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { useDraggable } from "@dnd-kit/core";
 import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
@@ -39,6 +40,7 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const [templateApplied, setTemplateApplied] = useState(false);
   const [busInfo, setBusInfo] = useState<BusFormValues & { totalAsientos: number }>(() => {
     if (initialData) {
       return {
@@ -64,16 +66,32 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
 
   const { busModels } = useBusModels();
   const { seatTypes: availableSeatTypes } = useSeatTypes();
+  const { templates, loading: loadingTemplates, fetchTemplatesByBusModel } = useBusTemplate();
   
   const { 
     floorConfigs, 
     setFloorConfigs, 
     floorDimensions, 
     updateFloorDimensions, 
-    reorderSeatNumbers 
+    reorderSeatNumbers,
+    resetToDefault
   } = useFloorConfiguration({ busInfo, busModels, initialData });
 
-  const { onDragEnd } = useSeatDragDrop({ floorConfigs, setFloorConfigs, reorderSeatNumbers });
+  const { onDragEnd } = useSeatDragDrop({ setFloorConfigs, reorderSeatNumbers });
+
+  // Cargar plantillas cuando cambia el modelo de bus
+  React.useEffect(() => {
+    if (busInfo.modeloBusId > 0) {
+      console.log("Cargando plantillas para modelo:", busInfo.modeloBusId);
+      fetchTemplatesByBusModel(busInfo.modeloBusId);
+    }
+  }, [busInfo.modeloBusId, fetchTemplatesByBusModel]);
+
+  // Log para depuración
+  React.useEffect(() => {
+    console.log("Templates cargadas:", templates);
+    console.log("Loading templates:", loadingTemplates);
+  }, [templates, loadingTemplates]);
 
   // Agregar sensores para el drag and drop
   const sensors = useSensors(
@@ -143,6 +161,44 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
 
   const activeSeatType = getActiveSeatType();
 
+  const handleApplyAllTemplates = () => {
+    if (!templates.length || !availableSeatTypes.length) return;
+    const defaultSeatType = availableSeatTypes[0];
+
+    // Aplica cada plantilla a su piso correspondiente
+    setFloorConfigs(
+      templates.map(template => ({
+        pisoBusId: 0,
+        numeroPiso: template.numeroPiso,
+        leftColumns: Math.ceil(template.columnas / 2),
+        rightColumns: Math.floor(template.columnas / 2),
+        rows: template.filas,
+        asientos: (template.seats || []).map(seat => ({
+          numero: `${seat.fila}-${seat.columna}`,
+          fila: seat.fila,
+          columna: seat.columna,
+          tipoId: defaultSeatType.id,
+          estado: 'DISPONIBLE'
+        }))
+      }))
+    );
+
+    // Actualiza dimensiones de cada piso
+    templates.forEach(template => {
+      updateFloorDimensions(template.numeroPiso, 'rows', template.filas);
+      updateFloorDimensions(template.numeroPiso, 'leftColumns', Math.ceil(template.columnas / 2));
+      updateFloorDimensions(template.numeroPiso, 'rightColumns', Math.floor(template.columnas / 2));
+    });
+
+    setTemplateApplied(true);
+  };
+
+  const handleRemoveTemplate = () => {
+    // Resetear a la configuración predeterminada
+    resetToDefault();
+    setTemplateApplied(false);
+  };
+
   return (
     <div className="space-y-6">
       {step === 1 && (
@@ -186,6 +242,38 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                     </Button>
                   </div>
                 </div>
+
+                {/* Selector de Plantillas */}
+                {busInfo.modeloBusId > 0 && templates.length > 0 && (
+                  <Card className="p-4 mb-6">
+                    <div className="flex items-center gap-4">
+                      <FileText className="h-5 w-5 text-gray-600" />
+                      <Label className="text-sm font-medium">Plantilla disponible para este modelo:</Label>
+                      {!templateApplied ? (
+                        <Button
+                          onClick={handleApplyAllTemplates}
+                          disabled={loadingTemplates}
+                          variant="default"
+                        >
+                          Utilizar plantilla
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={handleRemoveTemplate}
+                          variant="outline"
+                          className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                        >
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          Quitar plantilla
+                        </Button>
+                      )}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {templates.map(t => <div key={t.id}>Piso {t.numeroPiso}: {t.descripcion}</div>)}
+                    </div>
+                      <div className="mt-1 text-xs text-gray-500"> Toma en cuenta que puedes modificar la plantilla luego de aplicarla.</div>
+                  </Card>
+                )}
                 
                 <div className="space-y-8">
                   {floorConfigs.map((floor) => (
@@ -193,50 +281,141 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium">Piso {floor.numeroPiso}</h3>
                         <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <Label className="min-w-[60px]">Filas</Label>
-                            <Input
-                              type="number"
-                              min={3}
-                              max={12}
-                              value={floorDimensions[floor.numeroPiso]?.rows || 3}
-                              onChange={(e) => {
-                                const value = parseInt(e.target.value) || 3;
-                                updateFloorDimensions(floor.numeroPiso, 'rows', value);
-                              }}
-                              className="w-20"
-                            />
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Label className="min-w-[60px]">Col. Izq.</Label>
-                            <Input
-                              type="number"
-                              min={1}
-                              max={2}
-                              value={floorDimensions[floor.numeroPiso]?.leftColumns || 2}
-                              onChange={(e) => {
-                                const value = parseInt(e.target.value) || 2;
-                                updateFloorDimensions(floor.numeroPiso, 'leftColumns', value);
-                              }}
-                              className="w-20"
-                            />
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Label className="min-w-[60px]">Col. Der.</Label>
-                            <Input
-                              type="number"
-                              min={1}
-                              max={2}
-                              value={floorDimensions[floor.numeroPiso]?.rightColumns || 2}
-                              onChange={(e) => {
-                                const value = parseInt(e.target.value) || 2;
-                                updateFloorDimensions(floor.numeroPiso, 'rightColumns', value);
-                              }}
-                              className="w-20"
-                            />
-                          </div>
+                          {templateApplied ? (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <Label className="min-w-[60px]">Filas</Label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={12}
+                                  value={floorDimensions[floor.numeroPiso]?.rows || 3}
+                                  onChange={(e) => {
+                                    let value = parseInt(e.target.value) || 1;
+                                    if (value > 12) value = 12;
+                                    if (value < 1) value = 1;
+                                    // Impedir reducir si hay asientos en la(s) fila(s) a eliminar
+                                    const currentRows = floorDimensions[floor.numeroPiso]?.rows || 3;
+                                    if (value < currentRows) {
+                                      const minRowWithSeat = Math.max(...(floor.asientos.map(s => s.fila)));
+                                      if (minRowWithSeat > value) {
+                                        return;
+                                      }
+                                    }
+                                    updateFloorDimensions(floor.numeroPiso, 'rows', value);
+                                  }}
+                                  className="w-20"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Label className="min-w-[60px]">Columnas</Label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={4}
+                                  value={(floorDimensions[floor.numeroPiso]?.leftColumns || 2) + (floorDimensions[floor.numeroPiso]?.rightColumns || 2)}
+                                  onChange={(e) => {
+                                    let value = parseInt(e.target.value) || 1;
+                                    if (value > 4) value = 4;
+                                    if (value < 1) value = 1;
+                                    // Impedir reducir si hay asientos en la(s) columna(s) a eliminar
+                                    const currentCols = (floorDimensions[floor.numeroPiso]?.leftColumns || 2) + (floorDimensions[floor.numeroPiso]?.rightColumns || 2);
+                                    if (value < currentCols) {
+                                      const minColWithSeat = Math.max(...(floor.asientos.map(s => s.columna)));
+                                      if (minColWithSeat > value) {
+                                        return;
+                                      }
+                                    }
+                                    // Repartir columnas equitativamente
+                                    const left = Math.floor(value / 2);
+                                    const right = value - left;
+                                    updateFloorDimensions(floor.numeroPiso, 'leftColumns', left);
+                                    updateFloorDimensions(floor.numeroPiso, 'rightColumns', right);
+                                  }}
+                                  className="w-20"
+                                />
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <Label className="min-w-[60px]">Filas</Label>
+                                <Input
+                                  type="number"
+                                  min={3}
+                                  max={12}
+                                  value={floorDimensions[floor.numeroPiso]?.rows || 3}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 3;
+                                    const currentRows = floorDimensions[floor.numeroPiso]?.rows || 3;
+                                    if (value < currentRows) {
+                                      const minRowWithSeat = Math.max(...(floor.asientos.map(s => s.fila)));
+                                      if (minRowWithSeat > value) {
+                                        return;
+                                      }
+                                    }
+                                    updateFloorDimensions(floor.numeroPiso, 'rows', value);
+                                  }}
+                                  className="w-20"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Label className="min-w-[60px]">Col. Izq.</Label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={2}
+                                  value={floorDimensions[floor.numeroPiso]?.leftColumns || 2}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 2;
+                                    const currentLeft = floorDimensions[floor.numeroPiso]?.leftColumns || 2;
+                                    const pasilloCol = value + 1;
+                                    if (value < currentLeft) {
+                                      // No permitir si hay asientos en la columna del pasillo
+                                      const hasSeatInPasillo = floor.asientos.some(s => s.columna === pasilloCol);
+                                      if (hasSeatInPasillo) {
+                                        return;
+                                      }
+                                      const minColWithSeat = Math.min(...(floor.asientos.filter(s => s.columna <= currentLeft).map(s => s.columna)));
+                                      if (minColWithSeat < value + 1) {
+                                        return;
+                                      }
+                                    }
+                                    updateFloorDimensions(floor.numeroPiso, 'leftColumns', value);
+                                  }}
+                                  className="w-20"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Label className="min-w-[60px]">Col. Der.</Label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={2}
+                                  value={floorDimensions[floor.numeroPiso]?.rightColumns || 2}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 2;
+                                    const currentRight = floorDimensions[floor.numeroPiso]?.rightColumns || 2;
+                                    const leftColumns = floorDimensions[floor.numeroPiso]?.leftColumns || 2;
+                                    const pasilloCol = leftColumns + 1;
+                                    if (value < currentRight) {
+                                      // No permitir si hay asientos en la columna del pasillo
+                                      const hasSeatInPasillo = floor.asientos.some(s => s.columna === pasilloCol);
+                                      if (hasSeatInPasillo) {
+                                        return;
+                                      }
+                                      const minColWithSeat = Math.max(...(floor.asientos.filter(s => s.columna > leftColumns + 1).map(s => s.columna)));
+                                      if (minColWithSeat > leftColumns + value + 1) {
+                                        return;
+                                      }
+                                    }
+                                    updateFloorDimensions(floor.numeroPiso, 'rightColumns', value);
+                                  }}
+                                  className="w-20"
+                                />
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
 
@@ -245,6 +424,7 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
                           floorConfig={floor}
                           seatTypes={availableSeatTypes}
                           disabled={false}
+                          templateApplied={templateApplied}
                         />
                       </div>
                     </div>
