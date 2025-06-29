@@ -4,6 +4,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBusModels } from "../hooks/use-bus-models";
+import { useTipoRutaBus } from "../hooks/use-tipo-ruta-bus";
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ interface FormFieldsProps {
 
 export const FormFields = ({ control, onImageChange, initialImageUrl, isEdit }: FormFieldsProps) => {
     const { busModels, loading } = useBusModels();
+    const { tiposRuta, loading: loadingTiposRuta } = useTipoRutaBus();
     const [previewUrl, setPreviewUrl] = useState<string | null>(initialImageUrl || null);
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
@@ -148,6 +150,43 @@ export const FormFields = ({ control, onImageChange, initialImageUrl, isEdit }: 
                         )}
                     />
                 )}
+
+                <FormField
+                    control={control}
+                    name="tipoRutaBusId"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>
+                                Tipo de Ruta <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                                <Select 
+                                    onValueChange={(value) => field.onChange(parseInt(value))} 
+                                    value={field.value ? field.value.toString() : undefined}
+                                    disabled={loadingTiposRuta}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione el tipo de ruta" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tiposRuta.length > 0 ? (
+                                            tiposRuta.map((tipo) => (
+                                                <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                                                    {tipo.nombre}
+                                                </SelectItem>
+                                            ))
+                                        ) : (
+                                            <SelectItem value="0" disabled>
+                                                No existen tipos de ruta
+                                            </SelectItem>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <FormField
                     control={control}
