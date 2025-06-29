@@ -60,7 +60,7 @@ export const useSeatGridRenderer = () => {
     };
   };
 
-  const renderSeatIcon = (seatType: SeatType | undefined, className: string = "h-4 w-4") => {
+  const renderSeatIcon = (seatType: SeatType | undefined, className: string = "h-6 w-6") => {
     if (seatType?.icono && AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS]) {
       const IconComponent = AVAILABLE_ICONS[seatType.icono as keyof typeof AVAILABLE_ICONS];
       return (
@@ -91,7 +91,7 @@ export const useSeatGridRenderer = () => {
     } = {}
   ) => {
     const {
-      seatSize = "h-12 w-12",
+      seatSize = "h-16 w-16",
       interactive = false,
       onSeatClick,
       selectedSeatType,
@@ -132,42 +132,34 @@ export const useSeatGridRenderer = () => {
               showSeatNumbers
             )
           );
+        } else if (col === config.posicionPasillo) {
+          // Mostrar SIEMPRE el diseño visual de pasillo en la columna del pasillo
+          rowCells.push(
+            <div
+              key={`pasillo-${fila}-${col}`}
+              className={cn(
+                "w-8 h-16 bg-gray-100 rounded-md flex items-center justify-center border border-dashed border-gray-200"
+              )}
+            >
+              <span className="text-xs text-gray-500 rotate-90 select-none">Pasillo</span>
+            </div>
+          );
         } else {
-          // Verificar si esta posición debería ser un pasillo
-          const esColumnaVacia = !floor.asientos.some(a => a.columna === col);
-          const hayAsientosAntes = floor.asientos.some(a => a.columna < col);
-          const hayAsientosDespues = floor.asientos.some(a => a.columna > col);
-          
-          if (esColumnaVacia && hayAsientosAntes && hayAsientosDespues) {
-            // Renderizar pasillo
-            rowCells.push(
-              <div
-                key={`pasillo-${fila}-${col}`}
-                className={cn(
-                  seatSize,
-                  "rounded-lg border border-dashed bg-gray-100 flex items-center justify-center"
-                )}
-              >
-                <span className="text-xs text-gray-500">Pasillo</span>
-              </div>
-            );
-          } else {
-            // Renderizar espacio vacío
-            rowCells.push(
-              <div
-                key={`empty-${fila}-${col}`}
-                className={cn(
-                  seatSize,
-                  "rounded-lg border border-dashed border-gray-200 flex items-center justify-center"
-                )}
-              />
-            );
-          }
+          // Renderizar espacio vacío
+          rowCells.push(
+            <div
+              key={`empty-${fila}-${col}`}
+              className={cn(
+                seatSize,
+                "rounded-lg border border-dashed border-gray-200 flex items-center justify-center"
+              )}
+            />
+          );
         }
       }
 
       grid.push(
-        <div key={`row-${fila}`} className="flex gap-2">
+        <div key={`row-${fila}`} className="flex gap-2 justify-center">
           {rowCells}
         </div>
       );
@@ -206,10 +198,12 @@ export const useSeatGridRenderer = () => {
         key={`seat-${key}`}
         className={cn(
           seatSize,
-          "rounded-lg border",
+          "rounded-lg border flex flex-col items-center justify-center transition-all",
+          "bg-white",
           interactive ? "cursor-pointer hover:bg-gray-50" : "",
           isSelected ? "border-blue-500" : "border-gray-200"
         )}
+        style={asiento ? { borderColor: seatType?.color || 'gray' } : undefined}
         onClick={(event) => {
           if (interactive && onSeatClick) {
             event.stopPropagation();
@@ -217,10 +211,10 @@ export const useSeatGridRenderer = () => {
           }
         }}
       >
-        <div className="h-full w-full flex flex-col items-center justify-center gap-1">
+        <div className="h-full w-full flex flex-col items-center justify-center">
           {renderSeatIcon(seatType)}
           {showSeatNumbers && (
-            <span className="text-xs font-medium">{asiento.numero}</span>
+            <span className="text-xs font-medium mt-1">{asiento.numero}</span>
           )}
         </div>
       </div>

@@ -78,7 +78,7 @@ export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate, onLoadCompl
           },
           seatTypes,
           {
-            seatSize: "h-12 w-12",
+            seatSize: "h-16 w-16",
             interactive: false,
             showSeatNumbers: true
           }
