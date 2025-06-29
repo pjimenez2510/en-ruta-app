@@ -16,6 +16,13 @@ export const API_ROUTES = {
     UPDATE_PROFILE: "/user/profile",
     CHANGE_PASSWORD: "/user/change-password",
   },
+  CLIENTES: {
+    GET_ALL: "/clientes",
+    CREATE: "/clientes",
+    GET_BY_ID: "/clientes/:id",
+    UPDATE: "/clientes/:id",
+    DELETE: "/clientes/:id",
+  },
   TENANTS: {
     GET_ALL: "/tenants",
     POST: "/tenants",
