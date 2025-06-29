@@ -10,6 +10,9 @@ export const rutaSchema = z.object({
   resolucionId: z
     .number()
     .min(1, "Debe seleccionar una resolución"),
+  tipoRutaBusId: z
+    .number()
+    .min(1, "Debe seleccionar un tipo de ruta bus"),
   descripcion: z
     .string()
     .min(1, "La descripción es requerida")
@@ -22,6 +25,7 @@ export type RutaSchema = z.infer<typeof rutaSchema>;
 export const rutaFilterSchema = z.object({
   nombre: z.string().optional(),
   resolucionId: z.number().optional(),
+  tipoRutaBusId: z.number().optional(),
   activo: z.boolean().optional(),
   descripcion: z.string().optional(),
 });

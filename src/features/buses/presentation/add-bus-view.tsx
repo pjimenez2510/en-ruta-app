@@ -5,31 +5,10 @@ import { useBuses } from '@/features/buses/hooks/use-buses';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { BusCreationData } from '@/features/buses/interfaces/seat-config';
-import { useSession } from 'next-auth/react';
-import { useEffect } from 'react';
-
+  
 export const AddBusView = () => {
   const { createBus } = useBuses();
   const router = useRouter();
-  const { data: session, status } = useSession();
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/login');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null;
-  }
 
   const handleSubmit = async (data: BusCreationData) => {
     try {

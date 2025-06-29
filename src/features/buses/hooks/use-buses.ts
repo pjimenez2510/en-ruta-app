@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { BusService } from '../services/bus.service';
-import { useSession } from 'next-auth/react';
 import { Bus } from '../interfaces/bus.interface';
 import { BusCreationData } from '../interfaces/seat-config';
 import { toast } from 'sonner';
 import { SeatUpdate } from '../interfaces/seat.interface';
+import { useSession } from 'next-auth/react';
 
 // Cache global para buses
 let busesCache: Bus[] = [];
@@ -17,11 +17,29 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 const busDetailsCache: { [key: string]: { bus: Bus, timestamp: number } } = {};
 
 export const useBuses = () => {
-    const { data: session } = useSession();
-    const token = session?.user?.accessToken;
     const [buses, setBuses] = useState<Bus[]>(busesCache);
     const [loading, setLoading] = useState(!busesCache.length);
     const [error, setError] = useState<string | null>(null);
+    const { data: session } = useSession();
+    const token = session?.user?.accessToken || "";
+
+    // Limpiar el caché cuando cambia la sesión (token)
+    useEffect(() => {
+        if (!token) {
+            // Si no hay token, solo limpia el cache y el estado, pero NO intentes fetch
+            busesCache = [];
+            lastFetch = 0;
+            setBuses([]);
+            setLoading(false);
+            return;
+        }
+        busesCache = [];
+        lastFetch = 0;
+        setBuses([]);
+        setLoading(true);
+        fetchBuses(true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]);
 
     const fetchBuses = useCallback(async (force = false) => {
         // Si hay datos en caché y no ha pasado el tiempo de expiración, usar caché
@@ -31,15 +49,9 @@ export const useBuses = () => {
             return;
         }
 
-        if (!token) {
-            setError('No hay una sesión activa');
-            setLoading(false);
-            return;
-        }
-
         try {
             setLoading(true);
-            const data = await BusService.getAll(token);
+            const data = await BusService.getAll();
             if (Array.isArray(data)) {
                 busesCache = data;
                 lastFetch = Date.now();
@@ -59,13 +71,9 @@ export const useBuses = () => {
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, []);
 
     const getBusById = useCallback(async (id: string) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         // Verificar caché de detalles
         const cachedBus = busDetailsCache[id];
         if (cachedBus && Date.now() - cachedBus.timestamp < CACHE_DURATION) {
@@ -73,7 +81,7 @@ export const useBuses = () => {
         }
 
         try {
-            const bus = await BusService.getById(id, token);
+            const bus = await BusService.getById(id);
             if (!bus) {
                 throw new Error('No se encontró el bus');
             }
@@ -92,15 +100,11 @@ export const useBuses = () => {
             });
             throw error;
         }
-    }, [token]);
+    }, []);
 
     const createBus = async (data: BusCreationData) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            const newBus = await BusService.create(data, token);
+            const newBus = await BusService.create(data);
             if (newBus) {
                 await fetchBuses(true); // Forzar actualización del caché
                 toast.success('Bus creado exitosamente', {
@@ -119,12 +123,8 @@ export const useBuses = () => {
     };
 
     const updateBus = async (id: string, data: Partial<Bus>) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            const updatedBus = await BusService.update(id, data, token);
+            const updatedBus = await BusService.update(id, data);
             if (updatedBus) {
                 // Actualizar ambos cachés
                 delete busDetailsCache[id];
@@ -158,12 +158,8 @@ export const useBuses = () => {
             }>;
         }>
     ) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.updateSeats(busId, seats, token);
+            await BusService.updateSeats(busId, seats);
             // Invalidar caché de detalles para este bus
             delete busDetailsCache[busId];
 
@@ -190,12 +186,8 @@ export const useBuses = () => {
     };
 
     const updateSingleSeat = async (seatId: number, seatData: SeatUpdate) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.updateSingleSeat(seatId, seatData, token);
+            await BusService.updateSingleSeat(seatId, seatData);
 
             // Limpiar todo el caché de detalles
             Object.keys(busDetailsCache).forEach(key => {
@@ -220,12 +212,8 @@ export const useBuses = () => {
     };
 
     const setBusMantenimiento = async (id: string) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.setMantenimiento(id, token);
+            await BusService.setMantenimiento(id);
             setBuses(prevBuses =>
                 prevBuses.map(bus =>
                     bus.id === id ? { ...bus, estado: "MANTENIMIENTO" } : bus
@@ -247,12 +235,8 @@ export const useBuses = () => {
     };
 
     const setBusActivo = async (id: string) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.setActivo(id, token);
+            await BusService.setActivo(id);
             setBuses(prevBuses =>
                 prevBuses.map(bus =>
                     bus.id === id ? { ...bus, estado: "ACTIVO" } : bus
@@ -274,12 +258,8 @@ export const useBuses = () => {
     };
 
     const setBusRetirado = async (id: string) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.setRetirado(id, token);
+            await BusService.setRetirado(id);
             setBuses(prevBuses =>
                 prevBuses.map(bus =>
                     bus.id === id ? { ...bus, estado: "RETIRADO" } : bus
@@ -299,14 +279,6 @@ export const useBuses = () => {
             throw error;
         }
     };
-
-    useEffect(() => {
-        if (token) {
-            fetchBuses();
-        } else {
-            setLoading(false);
-        }
-    }, [fetchBuses, token]);
 
     return {
         buses,

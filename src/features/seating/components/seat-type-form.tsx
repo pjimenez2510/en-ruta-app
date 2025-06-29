@@ -19,10 +19,8 @@ interface SeatTypeFormProps {
 export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormProps) => {
   const { form } = useSeatTypeForm(initialData) as { form: UseFormReturn<SeatTypeFormValues> };
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isValid } = form.formState;
 
-  const isValid = form.formState.isValid;
-
-  // Función handleSubmit simplificada sin SubmitHandler
   const handleSubmit = async (values: SeatTypeFormValues) => {
     try {
       setIsSubmitting(true);

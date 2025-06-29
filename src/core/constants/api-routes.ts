@@ -11,10 +11,27 @@ export const API_ROUTES = {
     REFRESH_TOKEN: "/auth/refresh-token",
     FORGOT_PASSWORD: "/auth/forgot-password",
     RESET_PASSWORD: "/auth/reset-password",
-  },  ER: {
+  }, ER: {
     PROFILE: "/user/profile",
     UPDATE_PROFILE: "/user/profile",
     CHANGE_PASSWORD: "/user/change-password",
+  },
+  CLIENTES: {
+    GET_ALL: "/clientes",
+    CREATE: "/clientes",
+    GET_BY_ID: "/clientes/:id",
+    UPDATE: "/clientes/:id",
+    DELETE: "/clientes/:id",
+  },
+  CONFIGURACION_DESCUENTOS: {
+    GET_ALL: "/configuracion-descuentos",
+    CREATE: "/configuracion-descuentos",
+    GET_BY_ID: "/configuracion-descuentos/:id",
+    UPDATE: "/configuracion-descuentos/:id",
+    DELETE: "/configuracion-descuentos/:id",
+    ACTIVAR: "/configuracion-descuentos/:id/activar",
+    DESACTIVAR: "/configuracion-descuentos/:id/desactivar",
+    GET_BY_TIPO: "/configuracion-descuentos/tipo/:tipo",
   },
   TENANTS: {
     GET_ALL: "/tenants",
@@ -44,7 +61,15 @@ export const API_ROUTES = {
     UPDATE: "/rutas/:id",
     DELETE: "/rutas/:id",
     GET_BY_TENANT: "/rutas/tenant/:tenantId",
-  },  HORARIOS: {
+  },
+  TIPOS_RUTA_BUS: {
+    GET_ALL: "/tipos-ruta-bus",
+    CREATE: "/tipos-ruta-bus",
+    GET_BY_ID: "/tipos-ruta-bus/:id",
+    UPDATE: "/tipos-ruta-bus/:id",
+    DELETE: "/tipos-ruta-bus/:id",
+  },
+  HORARIOS: {
     GET_ALL: "/horarios-ruta",
     CREATE: "/horarios-ruta",
     GET_BY_ID: "/horarios-ruta/:id",
@@ -74,4 +99,20 @@ export const API_ROUTES = {
     DELETE: "/usuario-tenant/:id",
     POST_PERSONAL_INFO: "/usuario-tenant/:id/asignar-info-personal",
   },
+  BUSES: {
+    BASE: "/buses",
+    MODELOS: "/modelos-bus",
+    PISOS: "/pisos-bus",
+    ASIENTOS: "/asientos",
+    ASIENTOS_MASIVO: "/asientos/masivo"
+  },
+  DASHBOARD: {
+    METRICAS_GENERALES: "/dashboard/metricas-generales",
+    METRICAS_FINANCIERAS: "/dashboard/metricas-financieras",
+    VIAJES_RECIENTES: "/dashboard/viajes-recientes",
+    BOLETOS_RECIENTES: "/dashboard/boletos-recientes",
+    OCUPACION_POR_TIPO_RUTA: "/dashboard/ocupacion-por-tipo-ruta",
+    ESTADISTICAS_POR_DIA: "/dashboard/estadisticas-por-dia",
+    RESUMEN_COMPLETO: "/dashboard/resumen-completo",
+  }
 };
