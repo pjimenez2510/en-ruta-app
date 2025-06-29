@@ -16,6 +16,23 @@ export const API_ROUTES = {
     UPDATE_PROFILE: "/user/profile",
     CHANGE_PASSWORD: "/user/change-password",
   },
+  CLIENTES: {
+    GET_ALL: "/clientes",
+    CREATE: "/clientes",
+    GET_BY_ID: "/clientes/:id",
+    UPDATE: "/clientes/:id",
+    DELETE: "/clientes/:id",
+  },
+  CONFIGURACION_DESCUENTOS: {
+    GET_ALL: "/configuracion-descuentos",
+    CREATE: "/configuracion-descuentos",
+    GET_BY_ID: "/configuracion-descuentos/:id",
+    UPDATE: "/configuracion-descuentos/:id",
+    DELETE: "/configuracion-descuentos/:id",
+    ACTIVAR: "/configuracion-descuentos/:id/activar",
+    DESACTIVAR: "/configuracion-descuentos/:id/desactivar",
+    GET_BY_TIPO: "/configuracion-descuentos/tipo/:tipo",
+  },
   TENANTS: {
     GET_ALL: "/tenants",
     POST: "/tenants",
@@ -44,7 +61,15 @@ export const API_ROUTES = {
     UPDATE: "/rutas/:id",
     DELETE: "/rutas/:id",
     GET_BY_TENANT: "/rutas/tenant/:tenantId",
-  }, HORARIOS: {
+  },
+  TIPOS_RUTA_BUS: {
+    GET_ALL: "/tipos-ruta-bus",
+    CREATE: "/tipos-ruta-bus",
+    GET_BY_ID: "/tipos-ruta-bus/:id",
+    UPDATE: "/tipos-ruta-bus/:id",
+    DELETE: "/tipos-ruta-bus/:id",
+  },
+  HORARIOS: {
     GET_ALL: "/horarios-ruta",
     CREATE: "/horarios-ruta",
     GET_BY_ID: "/horarios-ruta/:id",

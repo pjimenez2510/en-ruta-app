@@ -11,6 +11,9 @@ import {
   FileText,
   Map,
   Plus,
+  PersonStanding,
+  BanknoteArrowDown,
+  Route,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect, useState } from "react";
@@ -69,9 +72,24 @@ const menuItems: MenuItem[] = [
   },
 
   { title: "Resoluciones", path: "/main/resolution", icon: FileText },
-  { title: "Rutas", path: "/main/routes", icon: Map},
-	{ title: "Viajes", path: "/main/trips", icon: List },
+  { title: "Rutas", path: "/main/routes", icon: Map },
+  { title: "Viajes", path: "/main/trips", icon: List },
   { title: "Configuración", path: "/main/configuration", icon: Settings },
+  {
+    title: "Clientes",
+    path: "/main/clientes",
+    icon: PersonStanding,
+  },
+  {
+    title: "Configuración de descuentos",
+    path: "/main/configuracion-descuentos",
+    icon: BanknoteArrowDown,
+  },
+  {
+    title: "Tipos de rutas-buses",
+    path: "/main/tipos-ruta-bus",
+    icon: Route,
+  },
 ];
 
 export function AppSidebar() {
