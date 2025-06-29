@@ -33,3 +33,27 @@ export async function getVentaById(id: number): Promise<VentaDetalle> {
   const { data } = await client.get(url);
   return data.data as VentaDetalle;
 }
+
+export async function confirmarVenta(id: number): Promise<void> {
+  const client = AxiosClient.getInstance();
+  const url = API_ROUTES.VENTAS.CONFIRMAR.replace(":id", id.toString());
+  await client.patch(url);
+}
+
+export async function cancelarVenta(id: number): Promise<void> {
+  const client = AxiosClient.getInstance();
+  const url = API_ROUTES.VENTAS.CANCELAR.replace(":id", id.toString());
+  await client.patch(url);
+}
+
+export async function verificarVenta(id: number): Promise<void> {
+  const client = AxiosClient.getInstance();
+  const url = API_ROUTES.VENTAS.VERIFICAR.replace(":id", id.toString());
+  await client.patch(url);
+}
+
+export async function rechazarVenta(id: number): Promise<void> {
+  const client = AxiosClient.getInstance();
+  const url = API_ROUTES.VENTAS.RECHAZAR.replace(":id", id.toString());
+  await client.patch(url);
+}

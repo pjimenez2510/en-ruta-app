@@ -42,6 +42,7 @@ import {
   AlertCircle,
   CalendarIcon,
   Plus,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -49,6 +50,19 @@ import Link from "next/link";
 import { useVentas } from "@/features/sell-tickets/hooks/use-ventas";
 import { VentaLista } from "@/features/sell-tickets/interfaces/venta-lista.interface";
 import { VentaDetalleModal } from "./modals/venta-detalle-modal";
+import {
+  useConfirmarVentaMutation,
+  useRechazarVentaMutation,
+  useCancelarVentaMutation,
+  useVerificarVentaMutation,
+} from "@/features/sell-tickets/hooks/use-ventas";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function VentasManagement() {
   const [busqueda, setBusqueda] = useState("");
@@ -131,14 +145,45 @@ export function VentasManagement() {
     }
   };
 
-  const confirmarVenta = (ventaId: number) => {
-    console.log("Confirmar venta:", ventaId);
-    // Aquí iría la lógica para confirmar la venta
+  const confirmarVentaMutation = useConfirmarVentaMutation();
+  const rechazarVentaMutation = useRechazarVentaMutation();
+  const cancelarVentaMutation = useCancelarVentaMutation();
+  const verificarVentaMutation = useVerificarVentaMutation();
+
+  const confirmarVenta = async (ventaId: number) => {
+    try {
+      await confirmarVentaMutation.mutateAsync(ventaId);
+      toast.success("Venta confirmada correctamente");
+    } catch (error: any) {
+      toast.error("Error al confirmar venta: " + (error?.message || ""));
+    }
   };
 
-  const rechazarVenta = (ventaId: number) => {
-    console.log("Rechazar venta:", ventaId);
-    // Aquí iría la lógica para rechazar la venta
+  const rechazarVenta = async (ventaId: number) => {
+    try {
+      await rechazarVentaMutation.mutateAsync(ventaId);
+      toast.success("Venta rechazada correctamente");
+    } catch (error: any) {
+      toast.error("Error al rechazar venta: " + (error?.message || ""));
+    }
+  };
+
+  const cancelarVenta = async (ventaId: number) => {
+    try {
+      await cancelarVentaMutation.mutateAsync(ventaId);
+      toast.success("Venta cancelada correctamente");
+    } catch (error: any) {
+      toast.error("Error al cancelar venta: " + (error?.message || ""));
+    }
+  };
+
+  const verificarVenta = async (ventaId: number) => {
+    try {
+      await verificarVentaMutation.mutateAsync(ventaId);
+      toast.success("Venta puesta en verificación correctamente");
+    } catch (error: any) {
+      toast.error("Error al verificar venta: " + (error?.message || ""));
+    }
   };
 
   return (
@@ -284,24 +329,68 @@ export function VentasManagement() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {venta.estado === "PENDIENTE" && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <span className="sr-only">Acciones</span>
+                                <svg
+                                  width="20"
+                                  height="20"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    cx="5"
+                                    cy="12"
+                                    r="2"
+                                    fill="currentColor"
+                                  />
+                                  <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="2"
+                                    fill="currentColor"
+                                  />
+                                  <circle
+                                    cx="19"
+                                    cy="12"
+                                    r="2"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
                                 onClick={() => confirmarVenta(venta.id)}
+                                disabled={confirmarVentaMutation.isPending}
                               >
-                                <CheckCircle className="h-4 w-4 text-green-600" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />{" "}
+                                Confirmar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
                                 onClick={() => rechazarVenta(venta.id)}
+                                disabled={rechazarVentaMutation.isPending}
                               >
-                                <XCircle className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </>
-                          )}
+                                <XCircle className="w-4 h-4 mr-2 text-red-600" />{" "}
+                                Rechazar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => cancelarVenta(venta.id)}
+                                disabled={cancelarVentaMutation.isPending}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2 text-orange-600" />{" "}
+                                Cancelar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => verificarVenta(venta.id)}
+                                disabled={verificarVentaMutation.isPending}
+                              >
+                                <AlertCircle className="w-4 h-4 mr-2 text-yellow-600" />{" "}
+                                Verificar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>

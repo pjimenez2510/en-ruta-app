@@ -101,6 +101,10 @@ export const API_ROUTES = {
     POST: "/ventas",
     GET_ALL: "/ventas",
     GET_BY_ID: "/ventas/:id",
-    UPDATE: "/ventas/:id"
+    UPDATE: "/ventas/:id",
+    CONFIRMAR: "/ventas/:id/confirmar",
+    CANCELAR: "/ventas/:id/cancelar",
+    VERIFICAR: "/ventas/:id/verificar",
+    RECHAZAR: "/ventas/:id/rechazar",
   },
 };
