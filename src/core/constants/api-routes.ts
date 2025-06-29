@@ -80,5 +80,14 @@ export const API_ROUTES = {
     PISOS: "/pisos-bus",
     ASIENTOS: "/asientos",
     ASIENTOS_MASIVO: "/asientos/masivo"
+  },
+  DASHBOARD: {
+    METRICAS_GENERALES: "/dashboard/metricas-generales",
+    METRICAS_FINANCIERAS: "/dashboard/metricas-financieras",
+    VIAJES_RECIENTES: "/dashboard/viajes-recientes",
+    BOLETOS_RECIENTES: "/dashboard/boletos-recientes",
+    OCUPACION_POR_TIPO_RUTA: "/dashboard/ocupacion-por-tipo-ruta",
+    ESTADISTICAS_POR_DIA: "/dashboard/estadisticas-por-dia",
+    RESUMEN_COMPLETO: "/dashboard/resumen-completo",
   }
 };

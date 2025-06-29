@@ -1,5 +1,6 @@
 // app/main/routes/page.tsx
-import { RutasTable } from "@/features/rutas";
+
+import { RutasTable } from "@/features/rutas/components/rutas-tables";
 
 export default function RoutesPage() {
   return (
