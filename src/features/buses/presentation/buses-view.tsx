@@ -2,33 +2,33 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useBuses } from "../hooks/use-buses";
 import { BusTable } from "../components/bus-table";
-import { BusDetailsModal } from "../components/bus-details-modal";
-import { toast } from "sonner";
-import { Bus } from "../interfaces/bus.interface";
-import { useRouter } from "next/navigation";
 import { BusFilters } from "../components/bus-filters";
+import { Bus } from "../interfaces/bus.interface";
+import { toast } from "sonner";
+import { BusDetailsModal } from "../components/bus-details-modal";
+
+interface Filters {
+  numero?: string;
+  placa?: string;
+  estado?: string;
+  modeloBusId?: number;
+  anioFabricacion?: number;
+}
 
 export const BusesView = () => {
-  const {
-    buses,
-    loading,
-    error,
-    setBusMantenimiento,
-    setBusActivo,
-    setBusRetirado,
-    getBusById
-  } = useBuses();
-
   const router = useRouter();
+  const { buses, loading, setBusMantenimiento, setBusActivo, setBusRetirado } = useBuses();
   const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
-  const [filters, setFilters] = useState<BusFilters>({});
+  const [isViewingDetails, setIsViewingDetails] = useState(false);
+  const [filters, setFilters] = useState<Filters>({});
 
   const filteredBuses = useMemo(() => {
+    if (!buses) return [];
     return buses.filter(bus => {
       const matchNumero = !filters.numero || bus.numero.toString().includes(filters.numero);
       const matchPlaca = !filters.placa || bus.placa.toLowerCase().includes(filters.placa.toLowerCase());
@@ -43,71 +43,60 @@ export const BusesView = () => {
   const handleSetMantenimiento = async (id: string) => {
     try {
       await setBusMantenimiento(id);
-      toast.success("Estado del bus cambiado a Mantenimiento");
-    } catch {
-      toast.error("No se pudo cambiar el estado del bus a Mantenimiento");
+      toast.success("Bus puesto en mantenimiento");
+    } catch (error) {
+      console.error("Error al poner en mantenimiento:", error);
+      toast.error("Error al poner el bus en mantenimiento");
     }
   };
 
   const handleSetActivo = async (id: string) => {
     try {
       await setBusActivo(id);
-    } catch {
-      console.error("Error al cambiar el estado del bus a Activo");
+      toast.success("Bus activado");
+    } catch (error) {
+      console.error("Error al activar:", error);
+      toast.error("Error al activar el bus");
     }
   };
 
   const handleSetRetirado = async (id: string) => {
     try {
       await setBusRetirado(id);
-    } catch {
-      console.error("Error al cambiar el estado del bus a Retirado");
+      toast.success("Bus retirado");
+    } catch (error) {
+      console.error("Error al retirar:", error);
+      toast.error("Error al retirar el bus");
     }
-  };
-
-  const openCreateDialog = () => {
-    router.push('/main/buses/add');
-  };
-
-  const handleEdit = (bus: Bus) => {
-    router.push(`/main/buses/edit/${bus.id}`);
   };
 
   const handleViewDetails = async (bus: Bus) => {
     try {
-      setIsLoadingDetails(true);
-      const busDetails = await getBusById(bus.id);
-      if (busDetails) {
-        setSelectedBus(busDetails);
-        setIsDetailsModalOpen(true);
-      } else {
-        toast.error("No se pudieron cargar los detalles del bus");
-      }
+      setIsViewingDetails(true);
+      setSelectedBus(bus);
+      setIsDetailsModalOpen(true);
     } catch (error) {
-      console.error("Error al cargar los detalles del bus:", error);
+      console.error("Error al cargar detalles:", error);
       toast.error("Error al cargar los detalles del bus");
-    } finally {
-      setIsLoadingDetails(false);
+      setIsViewingDetails(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedBus(null);
+    setIsViewingDetails(false);
+  };
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  const handleAddBus = () => {
+    router.push("/main/buses/add");
+  };
 
   return (
-    <div className="container mx-auto py-6 p-16">
+    <div className="container mx-auto py-6 w-8/10">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gestión de Buses</h1>
-        <Button onClick={openCreateDialog}>
+        <Button onClick={handleAddBus}>
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Bus
         </Button>
@@ -115,26 +104,33 @@ export const BusesView = () => {
 
       <BusFilters onFiltersChange={setFilters} />
 
-      <div className="bg-white rounded-lg shadow">
-        <BusTable
-          buses={filteredBuses}
-          onEdit={handleEdit}
-          onSetMantenimiento={handleSetMantenimiento}
-          onSetActivo={handleSetActivo}
-          onSetRetirado={handleSetRetirado}
-          onViewDetails={handleViewDetails}
-          isLoadingDetails={isLoadingDetails}
-        />
-      </div>
+      {loading ? (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <>
+          <BusTable
+            buses={filteredBuses}
+            onEdit={(bus) => router.push(`/main/buses/edit/${bus.id}`)}
+            onSetMantenimiento={handleSetMantenimiento}
+            onSetActivo={handleSetActivo}
+            onSetRetirado={handleSetRetirado}
+            onViewDetails={handleViewDetails}
+            isLoadingDetails={isViewingDetails}
+            isFiltered={Object.keys(filters).length > 0}
+            onClearFilters={() => setFilters({})}
+            onAddBus={handleAddBus}
+          />
 
-      <BusDetailsModal
-        bus={selectedBus}
-        isOpen={isDetailsModalOpen}
-        onClose={() => {
-          setIsDetailsModalOpen(false);
-          setSelectedBus(null);
-        }}
-      />
+          <BusDetailsModal
+            bus={selectedBus}
+            isOpen={isDetailsModalOpen}
+            onClose={handleCloseDetailsModal}
+            onLoadComplete={() => setIsViewingDetails(false)}
+          />
+        </>
+      )}
     </div>
   );
 }; 

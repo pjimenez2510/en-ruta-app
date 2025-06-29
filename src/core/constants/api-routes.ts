@@ -11,7 +11,7 @@ export const API_ROUTES = {
     REFRESH_TOKEN: "/auth/refresh-token",
     FORGOT_PASSWORD: "/auth/forgot-password",
     RESET_PASSWORD: "/auth/reset-password",
-  },  ER: {
+  }, ER: {
     PROFILE: "/user/profile",
     UPDATE_PROFILE: "/user/profile",
     CHANGE_PASSWORD: "/user/change-password",
@@ -44,7 +44,7 @@ export const API_ROUTES = {
     UPDATE: "/rutas/:id",
     DELETE: "/rutas/:id",
     GET_BY_TENANT: "/rutas/tenant/:tenantId",
-  },  HORARIOS: {
+  }, HORARIOS: {
     GET_ALL: "/horarios-ruta",
     CREATE: "/horarios-ruta",
     GET_BY_ID: "/horarios-ruta/:id",
@@ -74,4 +74,20 @@ export const API_ROUTES = {
     DELETE: "/usuario-tenant/:id",
     POST_PERSONAL_INFO: "/usuario-tenant/:id/asignar-info-personal",
   },
+  BUSES: {
+    BASE: "/buses",
+    MODELOS: "/modelos-bus",
+    PISOS: "/pisos-bus",
+    ASIENTOS: "/asientos",
+    ASIENTOS_MASIVO: "/asientos/masivo"
+  },
+  DASHBOARD: {
+    METRICAS_GENERALES: "/dashboard/metricas-generales",
+    METRICAS_FINANCIERAS: "/dashboard/metricas-financieras",
+    VIAJES_RECIENTES: "/dashboard/viajes-recientes",
+    BOLETOS_RECIENTES: "/dashboard/boletos-recientes",
+    OCUPACION_POR_TIPO_RUTA: "/dashboard/ocupacion-por-tipo-ruta",
+    ESTADISTICAS_POR_DIA: "/dashboard/estadisticas-por-dia",
+    RESUMEN_COMPLETO: "/dashboard/resumen-completo",
+  }
 };

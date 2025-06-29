@@ -47,7 +47,7 @@ export const FormFields = ({ control, onImageChange, initialImageUrl, isEdit }: 
                     name="fotoUrl"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Foto del Bus</FormLabel>
+                            <FormLabel>Foto del Bus <span className="text-red-500">*</span></FormLabel>
                             <FormControl>
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-4">
@@ -132,7 +132,7 @@ export const FormFields = ({ control, onImageChange, initialImageUrl, isEdit }: 
                                             {busModels.length > 0 ? (
                                                 busModels.map((model) => (
                                                     <SelectItem key={model.id} value={model.id.toString()}>
-                                                        {model.marca} - {model.modelo}
+                                                        {model.marca} - {model.modelo} ({model.numeroPisos} piso(s))
                                                     </SelectItem>
                                                 ))
                                             ) : (
