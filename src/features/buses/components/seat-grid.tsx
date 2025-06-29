@@ -2,34 +2,8 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { Armchair, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BusSeat } from "../interfaces/seat-config";
-import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
-
-interface FloorConfig {
-  pisoBusId: number;
-  numeroPiso: number;
-  leftColumns: number;
-  rightColumns: number;
-  rows: number;
-  asientos: BusSeat[];
-  posicionPasillo?: number;
-}
-
-interface SeatGridProps {
-  floorConfig: FloorConfig;
-  seatTypes: SeatType[];
-  disabled?: boolean;
-  templateApplied?: boolean;
-}
-
-interface SeatCellProps {
-  row: number;
-  col: number;
-  floorConfig: FloorConfig;
-  seatTypes: SeatType[];
-  disabled: boolean;
-}
+import { SeatCellProps, SeatGridProps } from "../interfaces/bus-auxiliar.interface";
 
 const SeatCell = React.memo(({ row, col, floorConfig, seatTypes, disabled }: SeatCellProps) => {
   const droppableId = `${floorConfig.numeroPiso}-${row}-${col}`;

@@ -45,6 +45,7 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
     if (initialData) {
       return {
         modeloBusId: initialData.modeloBusId,
+        tipoRutaBusId: initialData.tipoRutaBusId,
         numero: initialData.numero,
         placa: initialData.placa,
         anioFabricacion: initialData.anioFabricacion,
@@ -55,6 +56,7 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
     }
     return {
       modeloBusId: 0,
+      tipoRutaBusId: 0,
       numero: 0,
       placa: "",
       anioFabricacion: new Date().getFullYear(),

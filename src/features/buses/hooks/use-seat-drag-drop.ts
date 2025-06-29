@@ -1,26 +1,10 @@
 import { DragEndEvent } from "@dnd-kit/core";
 import { BusSeat } from "../interfaces/seat-config";
-
-interface FloorConfig {
-  pisoBusId: number;
-  numeroPiso: number;
-  leftColumns: number;
-  rightColumns: number;
-  rows: number;
-  asientos: BusSeat[];
-  posicionPasillo?: number;
-}
+import { FloorConfig, SourceInfo } from "../interfaces/bus-auxiliar.interface";
 
 interface UseSeatDragDropProps {
   setFloorConfigs: React.Dispatch<React.SetStateAction<FloorConfig[]>>;
   reorderSeatNumbers: (seats: BusSeat[]) => BusSeat[];
-}
-
-interface SourceInfo {
-  typeId?: number;
-  floor?: number;
-  row?: number;
-  col?: number;
 }
 
 export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeatDragDropProps) => {

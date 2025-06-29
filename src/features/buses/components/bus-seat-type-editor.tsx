@@ -18,21 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface FloorConfig {
-  pisoBusId: number;
-  numeroPiso: number;
-  leftColumns: number;
-  rightColumns: number;
-  rows: number;
-  asientos: BusSeat[];
-  posicionPasillo?: number;
-}
-
-interface Position {
-  x: number;
-  y: number;
-}
+import { FloorConfig, Position } from "../interfaces/bus-auxiliar.interface";
 
 interface BusSeatTypeEditorProps {
   initialSeats: Array<{

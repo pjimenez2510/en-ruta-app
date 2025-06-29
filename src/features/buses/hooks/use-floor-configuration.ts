@@ -1,31 +1,6 @@
 import { useState, useEffect } from "react";
 import { BusSeat } from "../interfaces/seat-config";
-import { BusFormValues } from "../interfaces/form-schema";
-import { BusModel } from "../interfaces/bus-model.interface";
-
-interface FloorConfig {
-  pisoBusId: number;
-  numeroPiso: number;
-  leftColumns: number;
-  rightColumns: number;
-  rows: number;
-  asientos: BusSeat[];
-  posicionPasillo?: number;
-}
-
-interface UseFloorConfigurationProps {
-  busInfo: BusFormValues & { totalAsientos: number };
-  busModels: BusModel[];
-  initialData?: BusFormValues & {
-    totalAsientos?: number;
-    pisos?: Array<{
-      id: number;
-      busId: number;
-      numeroPiso: number;
-      asientos: BusSeat[];
-    }>;
-  };
-}
+import { FloorConfig, UseFloorConfigurationProps } from "../interfaces/bus-auxiliar.interface";
 
 export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFloorConfigurationProps) => {
   const [floorConfigs, setFloorConfigs] = useState<FloorConfig[]>([]);

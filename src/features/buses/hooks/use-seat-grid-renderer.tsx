@@ -4,18 +4,7 @@ import { cn } from "@/lib/utils";
 import { BusSeat } from "../interfaces/seat-config";
 import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
-
-interface FloorData {
-  numeroPiso: number;
-  asientos: BusSeat[];
-}
-
-interface SeatGridConfig {
-  maxFila: number;
-  posicionPasillo: number;
-  leftColumns: number;
-  rightColumns: number;
-}
+import { FloorData, SeatGridConfig } from "../interfaces/bus-auxiliar.interface";
 
 export const useSeatGridRenderer = () => {
   const calculateGridConfig = (asientos: BusSeat[]): SeatGridConfig => {

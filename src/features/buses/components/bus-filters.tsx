@@ -15,25 +15,18 @@ import { X } from "lucide-react";
 import { useBusModels } from "../hooks/use-bus-models";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-
-interface BusFilters {
-  numero?: string;
-  placa?: string;
-  estado?: string;
-  modeloBusId?: number;
-  anioFabricacion?: number;
-}
+import { BusFilter } from "../interfaces/bus-auxiliar.interface";
 
 interface BusFiltersProps {
-  onFiltersChange: (filters: BusFilters) => void;
+  onFiltersChange: (filters: BusFilter) => void;
 }
 
 export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
   const { busModels } = useBusModels();
-  const [filters, setFilters] = useState<BusFilters>({});
+  const [filters, setFilters] = useState<BusFilter>({});
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
-  const handleFilterChange = (key: keyof BusFilters, value: string | number | null) => {
+  const handleFilterChange = (key: keyof BusFilter, value: string | number | null) => {
     const newFilters = { ...filters };
     
     if (value === null || value === "") {
