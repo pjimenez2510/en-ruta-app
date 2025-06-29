@@ -61,7 +61,15 @@ export const API_ROUTES = {
     UPDATE: "/rutas/:id",
     DELETE: "/rutas/:id",
     GET_BY_TENANT: "/rutas/tenant/:tenantId",
-  }, HORARIOS: {
+  },
+  TIPOS_RUTA_BUS: {
+    GET_ALL: "/tipos-ruta-bus",
+    CREATE: "/tipos-ruta-bus",
+    GET_BY_ID: "/tipos-ruta-bus/:id",
+    UPDATE: "/tipos-ruta-bus/:id",
+    DELETE: "/tipos-ruta-bus/:id",
+  },
+  HORARIOS: {
     GET_ALL: "/horarios-ruta",
     CREATE: "/horarios-ruta",
     GET_BY_ID: "/horarios-ruta/:id",
