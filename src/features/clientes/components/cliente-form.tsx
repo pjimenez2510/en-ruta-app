@@ -41,10 +41,7 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
               <FormItem>
                 <FormLabel>Nombres</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Ej: Juan Carlos"
-                    {...field}
-                  />
+                  <Input placeholder="Ej: Juan Carlos" {...field} />
                 </FormControl>
                 <FormDescription>
                   Ingrese los nombres del cliente
@@ -61,10 +58,7 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
               <FormItem>
                 <FormLabel>Apellidos</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Ej: Pérez González"
-                    {...field}
-                  />
+                  <Input placeholder="Ej: Pérez González" {...field} />
                 </FormControl>
                 <FormDescription>
                   Ingrese los apellidos del cliente
@@ -83,10 +77,7 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
               <FormItem>
                 <FormLabel>Teléfono</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Ej: 0990862306"
-                    {...field}
-                  />
+                  <Input placeholder="Ej: 0990862306" {...field} />
                 </FormControl>
                 <FormDescription>
                   Ingrese el número de teléfono (10 dígitos)
@@ -109,9 +100,7 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
                     {...field}
                   />
                 </FormControl>
-                <FormDescription>
-                  Ingrese el correo electrónico
-                </FormDescription>
+                <FormDescription>Ingrese el correo electrónico</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -152,10 +141,7 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
               <FormItem>
                 <FormLabel>Número de Documento</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Ej: 2101031025"
-                    {...field}
-                  />
+                  <Input placeholder="Ej: 2101031025" {...field} />
                 </FormControl>
                 <FormDescription>
                   Ingrese el número de documento de identidad
@@ -173,10 +159,7 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
             <FormItem>
               <FormLabel>Fecha de Nacimiento</FormLabel>
               <FormControl>
-                <Input
-                  type="date"
-                  {...field}
-                />
+                <Input type="date" {...field} />
               </FormControl>
               <FormDescription>
                 Seleccione la fecha de nacimiento
@@ -198,9 +181,7 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>
-                  Cliente con Discapacidad
-                </FormLabel>
+                <FormLabel>Cliente con Discapacidad</FormLabel>
                 <FormDescription>
                   Marque esta opción si el cliente tiene alguna discapacidad
                 </FormDescription>
@@ -223,7 +204,12 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
                     max="100"
                     placeholder="Ej: 50"
                     {...field}
-                    onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                    value={field?.value?.toString() ?? ''} 
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value ? Number(e.target.value) : null
+                      )
+                    }
                   />
                 </FormControl>
                 <FormDescription>
@@ -236,8 +222,8 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
         )}
 
         <div className="flex justify-end space-x-4">
-          <Button 
-            type="button" 
+          <Button
+            type="button"
             variant="outline"
             onClick={() => window.history.back()}
           >
@@ -251,4 +237,4 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
       </form>
     </Form>
   );
-} 
+}

@@ -20,7 +20,7 @@ export const clienteSchema = z.object({
     .min(1, "El email es requerido")
     .email("El email debe tener un formato válido"),
   esDiscapacitado: z.boolean().optional(),
-  porcentajeDiscapacidad: z
+  porcentajeDiscapacidad: z.coerce
     .number()
     .min(0, "El porcentaje debe ser mayor o igual a 0")
     .max(100, "El porcentaje debe ser menor o igual a 100")
@@ -58,4 +58,4 @@ export const clienteFilterSchema = z.object({
   activo: z.boolean().optional(),
 });
 
-export type ClienteFilterSchema = z.infer<typeof clienteFilterSchema>; 
+export type ClienteFilterSchema = z.infer<typeof clienteFilterSchema>;

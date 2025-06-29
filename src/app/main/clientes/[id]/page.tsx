@@ -1,13 +1,15 @@
 import { ClienteDetail } from "@/features/clientes";
-
 interface ClienteDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function ClienteDetailPage({ params }: ClienteDetailPageProps) {
-  const clienteId = parseInt(params.id, 10);
+export default async function ClienteDetailPage({
+  params,
+}: ClienteDetailPageProps) {
+  const param = await params;
+  const clienteId = parseInt(param.id, 10);
 
   if (isNaN(clienteId)) {
     return (
@@ -18,4 +20,4 @@ export default function ClienteDetailPage({ params }: ClienteDetailPageProps) {
   }
 
   return <ClienteDetail clienteId={clienteId} />;
-} 
+}

@@ -3,15 +3,18 @@
 import { ClienteForm } from "@/features/clientes";
 import { useFindClienteByIdQuery } from "@/features/clientes";
 import { Loader2 } from "lucide-react";
+import { use } from "react";
 
 interface EditarClientePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EditarClientePage({ params }: EditarClientePageProps) {
-  const clienteId = parseInt(params.id, 10);
+  const param = use(params)
+
+  const clienteId = parseInt(param.id, 10);
   const { data: cliente, isLoading, error } = useFindClienteByIdQuery(clienteId);
 
   if (isNaN(clienteId)) {

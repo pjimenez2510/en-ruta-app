@@ -30,7 +30,7 @@ export const useClienteForm = (cliente?: Cliente): UseClienteFormReturn => {
       telefono: cliente?.telefono || "",
       email: cliente?.email || "",
       esDiscapacitado: cliente?.esDiscapacitado || false,
-      porcentajeDiscapacidad: cliente?.porcentajeDiscapacidad || null,
+      porcentajeDiscapacidad: cliente?.porcentajeDiscapacidad || undefined,
       numeroDocumento: cliente?.numeroDocumento || "",
       tipoDocumento: cliente?.tipoDocumento || "CEDULA",
       fechaNacimiento: cliente?.fechaNacimiento || "",
