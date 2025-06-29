@@ -104,14 +104,17 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          const userRole = getUserRoleFromTokenServer(token);
+          const userRole =
+            testData?.data?.usuario?.tenants?.[0]?.rol ||
+            testData?.data?.usuario?.tipoUsuario ||
+            null;
           const userTenantId = getUserTenantIdFromTokenServer(token);
           console.log("👤 Rol de usuario:", userRole);
           console.log("👤 Tenant de usuario:", userTenantId);
 
           console.log(
             "ID numérico extraído del backend:",
-            testData?.usuario?.id
+            testData?.data?.usuario?.id
           );
           const userObj = {
             id: credentials.username,
@@ -120,7 +123,7 @@ export const authOptions: NextAuthOptions = {
             role: userRole,
             token: token,
             tenantId: userTenantId,
-            usuarioId: testData?.usuario?.id,
+            usuarioId: testData?.data?.usuario?.id,
           };
           console.log("Objeto retornado en authorize:", userObj);
           return userObj;

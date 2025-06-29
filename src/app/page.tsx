@@ -11,9 +11,13 @@ export default function HomePage() {
 
   // Redirigir a dashboard cooperativa si corresponde
   useEffect(() => {
-    if (userRole === undefined) {
+    if (!userRole) return;
+    if (userRole === "ADMIN_SISTEMA") router.replace("/main/admin/dashboard");
+    else if (userRole === "ADMIN_COOPERATIVA")
       router.replace("/main/dashboard");
-    }
+    else if (userRole === "OFICINISTA") router.replace("/main/tickets/sell");
+    else if (userRole === "CLIENTE") router.replace("/cliente/dashboard");
+    else router.replace("/unauthorized");
   }, [userRole, router]);
 
   const handleLogout = () => {
@@ -21,7 +25,7 @@ export default function HomePage() {
     router.push("/login");
   };
 
-  if (userRole === undefined) return null;
+  if (!userRole) return null;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">

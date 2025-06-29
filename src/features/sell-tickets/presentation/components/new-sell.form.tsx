@@ -40,6 +40,7 @@ import { useMetodosPago } from "@/features/sell-tickets/hooks/use-metodos-pago";
 import { useCrearVenta } from "@/features/sell-tickets/hooks/use-crear-venta";
 import { ClienteAsiento } from "@/features/sell-tickets/interfaces/venta.interface";
 import { toast } from "sonner";
+import { confirmarVenta } from "@/features/sell-tickets/services/ventas.service";
 
 function getCssVariableValue(variableName: string) {
   if (typeof window === "undefined") return "";
@@ -239,7 +240,13 @@ export function NuevaVentaForm() {
     };
 
     try {
-      await crearVentaMutation.mutateAsync(ventaData);
+      const ventaCreada = await crearVentaMutation.mutateAsync(ventaData);
+      if (ventaCreada && ventaCreada.id) {
+        await confirmarVenta(ventaCreada.id);
+        toast.success("Venta creada y confirmada correctamente");
+      } else {
+        toast.success("Venta creada correctamente");
+      }
 
       // Limpiar el formulario después de una venta exitosa
       setViajeSeleccionado(null);

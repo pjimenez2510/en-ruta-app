@@ -44,7 +44,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";
 import { useVentas } from "@/features/sell-tickets/hooks/use-ventas";
@@ -63,19 +63,37 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 
 export function VentasManagement() {
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
-  const [filtroFecha, setFiltroFecha] = useState<Date>();
+  const [modoRango, setModoRango] = useState(false);
+  const [filtroFecha, setFiltroFecha] = useState<Date>(() => new Date());
+  const [filtroRangoFecha, setFiltroRangoFecha] = useState<{
+    from?: Date;
+    to?: Date;
+  }>(() => ({ from: new Date(), to: undefined }));
   const [ventaDetalleId, setVentaDetalleId] = useState<number | null>(null);
 
   // Hook de datos reales
-  const { data: ventasRaw = [], isLoading } = useVentas({
-    fechaVenta: filtroFecha
-      ? filtroFecha.toISOString().split("T")[0]
-      : undefined,
-  });
+  const ventasParams = modoRango
+    ? filtroRangoFecha.from &&
+      filtroRangoFecha.to &&
+      filtroRangoFecha.from &&
+      filtroRangoFecha.to &&
+      filtroRangoFecha.from !== filtroRangoFecha.to
+      ? {
+          fechaVentaDesde: filtroRangoFecha.from.toISOString().split("T")[0],
+          fechaVentaHasta: filtroRangoFecha.to?.toISOString().split("T")[0],
+        }
+      : filtroRangoFecha.from
+      ? { fechaVenta: filtroRangoFecha.from.toISOString().split("T")[0] }
+      : {}
+    : filtroFecha
+    ? { fechaVenta: filtroFecha.toISOString().split("T")[0] }
+    : {};
+  const { data: ventasRaw = [], isLoading } = useVentas(ventasParams);
 
   // Transformar los datos reales a la estructura de la tabla
   const ventas = ventasRaw.map((venta: VentaLista) => ({
@@ -231,22 +249,80 @@ export function VentasManagement() {
               </SelectContent>
             </Select>
 
+            {/* Toggle de rango de fechas */}
+            <div className="flex items-center gap-2">
+              <Switch
+                id="modo-rango"
+                checked={modoRango}
+                onCheckedChange={setModoRango}
+              />
+              <label
+                htmlFor="modo-rango"
+                className="text-xs text-muted-foreground select-none cursor-pointer"
+              >
+                Filtrar por rango de fechas
+              </label>
+            </div>
+
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-48">
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto truncate text-left"
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filtroFecha
+                  {modoRango
+                    ? filtroRangoFecha.from &&
+                      filtroRangoFecha.to &&
+                      !isSameDay(filtroRangoFecha.from, filtroRangoFecha.to)
+                      ? `${format(filtroRangoFecha.from, "PPP", {
+                          locale: es,
+                        })} - ${format(filtroRangoFecha.to!, "PPP", {
+                          locale: es,
+                        })}`
+                      : filtroRangoFecha.from
+                      ? format(filtroRangoFecha.from, "PPP", { locale: es })
+                      : "Fecha"
+                    : filtroFecha
                     ? format(filtroFecha, "PPP", { locale: es })
                     : "Fecha"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={filtroFecha}
-                  onSelect={setFiltroFecha}
-                  initialFocus
-                />
+                <div className="min-w-[260px] max-w-full sm:min-w-[400px]">
+                  {modoRango ? (
+                    <Calendar
+                      mode="range"
+                      selected={
+                        filtroRangoFecha.from
+                          ? (filtroRangoFecha as { from: Date; to?: Date })
+                          : { from: new Date(), to: undefined }
+                      }
+                      onSelect={(range) => {
+                        if (range && range.from) {
+                          if (range.to && isSameDay(range.from, range.to)) {
+                            setFiltroRangoFecha({
+                              from: range.from,
+                              to: undefined,
+                            });
+                          } else {
+                            setFiltroRangoFecha(range);
+                          }
+                        }
+                      }}
+                      initialFocus
+                      numberOfMonths={2}
+                    />
+                  ) : (
+                    <Calendar
+                      mode="single"
+                      selected={filtroFecha}
+                      onSelect={(date) => date && setFiltroFecha(date)}
+                      initialFocus
+                      numberOfMonths={1}
+                    />
+                  )}
+                </div>
               </PopoverContent>
             </Popover>
 
