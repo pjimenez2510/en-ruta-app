@@ -19,6 +19,7 @@ export const API_ROUTES = {
   CLIENTES: {
     GET_ALL: "/clientes",
     CREATE: "/clientes",
+    POST: "/clientes",
     GET_BY_ID: "/clientes/:id",
     UPDATE: "/clientes/:id",
     DELETE: "/clientes/:id",
