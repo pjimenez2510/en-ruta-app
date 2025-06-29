@@ -97,4 +97,5 @@ export const API_ROUTES = {
     UPDATE: "/metodos-pago/:id",
     DELETE: "/metodos-pago/:id",
   },
+  
 };

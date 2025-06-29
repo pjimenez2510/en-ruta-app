@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserPlus } from "lucide-react";
+import { useCrearCliente } from "@/features/sell-tickets/hooks/use-crear-cliente";
 
 interface CrearClienteModalProps {
   open: boolean;
@@ -44,7 +45,7 @@ export function CrearClienteModal({
     porcentajeDiscapacidad: "",
   });
 
-  const [guardando, setGuardando] = useState(false);
+  const crearClienteMutation = useCrearCliente();
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({
@@ -54,21 +55,35 @@ export function CrearClienteModal({
   };
 
   const crearCliente = async () => {
-    setGuardando(true);
+    const clienteData = {
+      nombres: formData.nombres,
+      apellidos: formData.apellidos,
+      tipoDocumento: formData.tipoDocumento,
+      numeroDocumento: formData.numeroDocumento,
+      telefono: formData.telefono,
+      email: formData.email,
+      fechaNacimiento: formData.fechaNacimiento || undefined,
+      esDiscapacitado: formData.esDiscapacitado,
+      porcentajeDiscapacidad: formData.porcentajeDiscapacidad
+        ? parseFloat(formData.porcentajeDiscapacidad)
+        : undefined,
+    };
 
-    // Simular creación del cliente
-    setTimeout(() => {
-      const nuevoCliente = {
-        id: Date.now(),
-        nombre: `${formData.nombres} ${formData.apellidos}`,
-        documento: formData.numeroDocumento,
-        ...formData,
+    try {
+      const nuevoCliente = await crearClienteMutation.mutateAsync(clienteData);
+
+      const clienteAdaptado = {
+        id: nuevoCliente.id,
+        nombre: `${nuevoCliente.nombres} ${nuevoCliente.apellidos}`,
+        documento: nuevoCliente.numeroDocumento,
+        email: nuevoCliente.email,
+        telefono: nuevoCliente.telefono,
+        esDiscapacitado: nuevoCliente.esDiscapacitado,
+        fechaNacimiento: nuevoCliente.fechaNacimiento,
       };
 
-      onClienteCreado(nuevoCliente);
-      setGuardando(false);
+      onClienteCreado(clienteAdaptado);
 
-      // Limpiar formulario
       setFormData({
         nombres: "",
         apellidos: "",
@@ -80,7 +95,9 @@ export function CrearClienteModal({
         esDiscapacitado: false,
         porcentajeDiscapacidad: "",
       });
-    }, 1000);
+    } catch (error) {
+      console.error("Error al crear cliente:", error);
+    }
   };
 
   const esFormularioValido = () => {
@@ -150,7 +167,6 @@ export function CrearClienteModal({
                   <SelectContent>
                     <SelectItem value="CEDULA">Cédula</SelectItem>
                     <SelectItem value="PASAPORTE">Pasaporte</SelectItem>
-                    <SelectItem value="NIT">NIT</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -238,7 +254,8 @@ export function CrearClienteModal({
                   type="number"
                   min="0"
                   max="100"
-                  placeholder="Ej: 30"
+                  step="0.1"
+                  placeholder="Ej: 30.5"
                   value={formData.porcentajeDiscapacidad}
                   onChange={(e) =>
                     handleInputChange("porcentajeDiscapacidad", e.target.value)
@@ -255,9 +272,9 @@ export function CrearClienteModal({
             </Button>
             <Button
               onClick={crearCliente}
-              disabled={!esFormularioValido() || guardando}
+              disabled={!esFormularioValido() || crearClienteMutation.isPending}
             >
-              {guardando ? "Creando..." : "Crear Cliente"}
+              {crearClienteMutation.isPending ? "Creando..." : "Crear Cliente"}
             </Button>
           </div>
         </div>
