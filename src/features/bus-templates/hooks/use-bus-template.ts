@@ -7,13 +7,29 @@ import { FloorTemplate } from '../interfaces/bus-template.interface';
 import { SeatTemplate } from '../interfaces/seat-template.interface';
 import { toast } from 'sonner';
 
-// Cache para plantillas
+// Cache global para plantillas
 let templatesCache: FloorTemplate[] = [];
 let lastFetch = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
-// Cache para asientos por plantilla
+// Cache para asientos de plantillas
 const seatsCache: { [key: number]: { seats: SeatTemplate[], timestamp: number } } = {};
+
+// Sistema de notificación centralizada
+let connectionErrorShown = false;
+const showConnectionError = () => {
+    if (!connectionErrorShown) {
+        connectionErrorShown = true;
+        toast.error('Error de conexión', {
+            description: 'No se pudo conectar con el servidor. Verifique su conexión e intente nuevamente.',
+            duration: 5000,
+        });
+        // Resetear después de 10 segundos para permitir futuras notificaciones
+        setTimeout(() => {
+            connectionErrorShown = false;
+        }, 10000);
+    }
+};
 
 export const useBusTemplate = () => {
     const [templates, setTemplates] = useState<FloorTemplate[]>(templatesCache);
@@ -63,9 +79,8 @@ export const useBusTemplate = () => {
             return seats;
         } catch (error) {
             console.error("Error fetching seats by template:", error);
-            toast.error('Error al cargar los asientos de la plantilla', {
-                description: 'No se pudieron obtener los asientos de la plantilla. Por favor, intente nuevamente.'
-            });
+            // Mostrar notificación centralizada de error de conexión
+            showConnectionError();
             throw error;
         } finally {
             setLoadingSeats(prev => ({ ...prev, [plantillaPisoId]: false }));
@@ -114,9 +129,8 @@ export const useBusTemplate = () => {
         } catch (error) {
             console.error("Error fetching templates by bus model:", error);
             setError('Error al cargar las plantillas del modelo de bus');
-            toast.error('Error al cargar las plantillas', {
-                description: 'No se pudieron obtener las plantillas del modelo de bus. Por favor, intente nuevamente.'
-            });
+            // Mostrar notificación centralizada de error de conexión
+            showConnectionError();
         } finally {
             setLoading(false);
         }
@@ -148,9 +162,8 @@ export const useBusTemplate = () => {
         } catch (error) {
             console.error("Error fetching templates:", error);
             setError('Error al cargar las plantillas de buses');
-            toast.error('Error al cargar las plantillas', {
-                description: 'No se pudieron obtener las plantillas de buses. Por favor, intente nuevamente.'
-            });
+            // Mostrar notificación centralizada de error de conexión
+            showConnectionError();
         } finally {
             setLoading(false);
         }
@@ -161,17 +174,15 @@ export const useBusTemplate = () => {
         try {
             setLoading(true);
             setError(null);
-
-            // Obtener plantillas
-            let templatesData: FloorTemplate[];
-            if (modeloBusId) {
-                templatesData = await BusTemplateService.getByBusModel(modeloBusId);
-            } else {
-                templatesData = await BusTemplateService.getAll();
-            }
+            const templatesData = modeloBusId
+                ? await BusTemplateService.getByBusModel(modeloBusId)
+                : await BusTemplateService.getAll();
 
             if (!Array.isArray(templatesData)) {
-                throw new Error('Error en el formato de datos recibidos');
+                console.error("Los datos recibidos no son un array:", templatesData);
+                setTemplates([]);
+                setError('Error en el formato de datos recibidos');
+                return;
             }
 
             // Cargar asientos para cada plantilla
@@ -194,19 +205,11 @@ export const useBusTemplate = () => {
             );
 
             setTemplates(templatesWithSeats);
-
-            // Actualizar caché si no es por modelo específico
-            if (!modeloBusId) {
-                templatesCache = templatesWithSeats;
-                lastFetch = Date.now();
-            }
-
         } catch (error) {
             console.error("Error fetching templates with seats:", error);
             setError('Error al cargar las plantillas con asientos');
-            toast.error('Error al cargar las plantillas', {
-                description: 'No se pudieron obtener las plantillas con sus asientos. Por favor, intente nuevamente.'
-            });
+            // Mostrar notificación centralizada de error de conexión
+            showConnectionError();
         } finally {
             setLoading(false);
         }
