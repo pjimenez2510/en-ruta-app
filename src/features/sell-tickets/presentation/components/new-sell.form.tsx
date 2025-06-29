@@ -275,7 +275,7 @@ export function NuevaVentaForm() {
         {/* Indicador de Pasos */}
         <Card>
           <CardContent className="pt-6">
-            <div className="relative grid grid-cols-4 items-center">
+            <div className="relative grid grid-cols-3 items-center">
               {/* Línea de fondo */}
               <div
                 className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 z-0"
@@ -284,13 +284,19 @@ export function NuevaVentaForm() {
               {[1, 2, 3].map((numeroStep) => {
                 const isActive = numeroStep === paso;
                 const isCompleted = numeroStep < paso;
-                let iconColor = "text-gray-500";
-                if (isActive || isCompleted) {
+                let bgColor = "bg-white border-gray-300";
+                let iconColor = "text-gray-400";
+                if (isActive) {
+                  bgColor = "bg-secondary border-secondary shadow-lg";
+                  iconColor =
+                    secondaryContrast === "white" ? "text-white" : "text-black";
+                } else if (isCompleted) {
+                  bgColor = "bg-secondary/80 border-secondary/80";
                   iconColor =
                     secondaryContrast === "white" ? "text-white" : "text-black";
                 }
                 const iconProps = {
-                  className: `w-6 h-6 ${iconColor}`,
+                  className: `w-7 h-7 ${iconColor}`,
                 };
                 let IconComponent = null;
                 if (numeroStep === 1) IconComponent = Bus;
@@ -302,12 +308,7 @@ export function NuevaVentaForm() {
                     className="flex flex-col items-center relative z-10 bg-transparent"
                   >
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200
-                        ${
-                          isActive || isCompleted
-                            ? "bg-secondary border-secondary shadow-lg"
-                            : "bg-white border-gray-300"
-                        }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-200 ${bgColor}`}
                     >
                       {IconComponent && <IconComponent {...iconProps} />}
                     </div>
