@@ -2,15 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { BusModelService } from '../services/bus-model.service';
-
-interface BusModel {
-    id: number;
-    marca: string;
-    modelo: string;
-    tipoChasis: string;
-    tipoCarroceria: string;
-    numeroPisos: number;
-}
+import { BusModel } from '../interfaces/bus-model.interface';
 
 // Cache global para modelos de buses
 let busModelsCache: BusModel[] = [];

@@ -1,9 +1,5 @@
+import { ValidationResponse } from "../interfaces/bus-auxiliar.interface";
 import { BusService } from "../services/bus.service";
-
-interface ValidationResponse {
-    exists: boolean;
-    field: "numero" | "placa" | null;
-}
 
 export const useBusValidation = () => {
     const validateBusExists = async (

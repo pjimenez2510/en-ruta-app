@@ -2,33 +2,8 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { Armchair, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BusSeat } from "../interfaces/seat-config";
-import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
-
-interface FloorConfig {
-  pisoBusId: number;
-  numeroPiso: number;
-  leftColumns: number;
-  rightColumns: number;
-  rows: number;
-  asientos: BusSeat[];
-  posicionPasillo?: number;
-}
-
-interface SeatGridProps {
-  floorConfig: FloorConfig;
-  seatTypes: SeatType[];
-  disabled?: boolean;
-}
-
-interface SeatCellProps {
-  row: number;
-  col: number;
-  floorConfig: FloorConfig;
-  seatTypes: SeatType[];
-  disabled: boolean;
-}
+import { SeatCellProps, SeatGridProps } from "../interfaces/bus-auxiliar.interface";
 
 const SeatCell = React.memo(({ row, col, floorConfig, seatTypes, disabled }: SeatCellProps) => {
   const droppableId = `${floorConfig.numeroPiso}-${row}-${col}`;
@@ -97,14 +72,40 @@ const SeatCell = React.memo(({ row, col, floorConfig, seatTypes, disabled }: Sea
 
 SeatCell.displayName = 'SeatCell';
 
-export const SeatGrid = ({ floorConfig, seatTypes, disabled = false }: SeatGridProps) => {
-  const renderRow = (rowIndex: number) => {
+export const SeatGrid = ({ floorConfig, seatTypes, disabled = false, templateApplied = false }: SeatGridProps) => {
+  // MODO PLANTILLA: cuadrícula simple sin pasillo
+  if (templateApplied) {
+    const maxRow = floorConfig.rows;
+    const maxCol = (floorConfig.leftColumns || 2) + (floorConfig.rightColumns || 2);
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: maxRow }, (_, i) => (
+          <div key={i} className="flex gap-2 justify-center items-center">
+            {Array.from({ length: maxCol }, (_, j) => (
+              <div key={j} className="w-16">
+                <SeatCell
+                  row={i + 1}
+                  col={j + 1}
+                  floorConfig={floorConfig}
+                  seatTypes={seatTypes}
+                  disabled={disabled}
+                />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // MODO TRADICIONAL: layout clásico con pasillo SIEMPRE
+  const renderBasicRow = (rowIndex: number) => {
     const isLastRow = rowIndex === floorConfig.rows;
     const leftSeats = Array.from({ length: floorConfig.leftColumns }, (_, i) => (
       <div key={`left-${i}`} className="w-16">
         <SeatCell
           row={rowIndex}
-          col={i}
+          col={i + 1}
           floorConfig={floorConfig}
           seatTypes={seatTypes}
           disabled={disabled}
@@ -116,7 +117,7 @@ export const SeatGrid = ({ floorConfig, seatTypes, disabled = false }: SeatGridP
       <div key={`right-${i}`} className="w-16">
         <SeatCell
           row={rowIndex}
-          col={i + floorConfig.leftColumns + 1}
+          col={i + floorConfig.leftColumns + 2}
           floorConfig={floorConfig}
           seatTypes={seatTypes}
           disabled={disabled}
@@ -131,7 +132,7 @@ export const SeatGrid = ({ floorConfig, seatTypes, disabled = false }: SeatGridP
           <div className="w-16">
             <SeatCell
               row={rowIndex}
-              col={floorConfig.leftColumns}
+              col={floorConfig.leftColumns + 1}
               floorConfig={floorConfig}
               seatTypes={seatTypes}
               disabled={disabled}
@@ -149,7 +150,7 @@ export const SeatGrid = ({ floorConfig, seatTypes, disabled = false }: SeatGridP
 
   return (
     <div className="space-y-4">
-      {Array.from({ length: floorConfig.rows }, (_, i) => renderRow(i + 1))}
+      {Array.from({ length: floorConfig.rows }, (_, i) => renderBasicRow(i + 1))}
     </div>
   );
 };

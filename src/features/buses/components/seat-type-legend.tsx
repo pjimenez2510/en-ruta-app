@@ -1,11 +1,7 @@
 import React from 'react';
-import { SeatType } from '@/features/seating/interfaces/seat-type.interface';
 import { AVAILABLE_ICONS } from '@/features/seating/constants/available-icons';
 import { Armchair } from 'lucide-react';
-
-interface SeatTypeLegendProps {
-  seatTypes: SeatType[];
-}
+import { SeatTypeLegendProps } from '../interfaces/bus-auxiliar.interface';
 
 export const SeatTypeLegend: React.FC<SeatTypeLegendProps> = ({ seatTypes }) => {
   return (

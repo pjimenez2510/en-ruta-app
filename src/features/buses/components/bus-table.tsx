@@ -47,7 +47,7 @@ export const BusTable = ({
   onClearFilters,
   onAddBus
 }: BusTableProps) => {
-  const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
+  const [loadingStates, setLoadingStates] = useState<{[key: string]: string}>({});
 
   if (!buses || buses.length === 0) {
     return (
@@ -58,12 +58,12 @@ export const BusTable = ({
     );
   }
 
-  const handleAction = async (action: () => Promise<void>, busId: string) => {
+  const handleAction = async (action: () => Promise<void>, busId: string, actionType: string) => {
     try {
-      setLoadingStates(prev => ({ ...prev, [busId]: true }));
+      setLoadingStates(prev => ({ ...prev, [busId]: actionType }));
       await action();
     } finally {
-      setLoadingStates(prev => ({ ...prev, [busId]: false }));
+      setLoadingStates(prev => ({ ...prev, [busId]: '' }));
     }
   };
 
@@ -81,19 +81,22 @@ export const BusTable = ({
     );
   };
 
+  const isBusLoading = (busId: string) => loadingStates[busId] !== undefined && loadingStates[busId] !== '';
+
   return (
     <div className="space-y-4">
       {buses.map((bus) => (
         <Card key={bus.id} className="p-4 hover:shadow-md transition-shadow">
-          <div className="flex gap-4">
-            <div className="relative h-[140px] w-[220px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative w-70 h-40 sm:h-[140px] sm:w-[220px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
               {bus.fotoUrl ? (
                 <Image
                   src={bus.fotoUrl}
                   alt={`Bus ${bus.numero}`}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 220px) 100vw, 220px"
+                  sizes="(max-width: 640px) 100vw, 220px"
+                  style={{ objectFit: 'cover' }}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
@@ -102,8 +105,8 @@ export const BusTable = ({
               )}
             </div>
 
-            <div className="flex-1 space-y-3">
-              <div className="flex items-start justify-between">
+            <div className="flex-1 space-y-3 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                 <div>
                   <h3 className="text-lg font-medium">Bus #{bus.numero}</h3>
                   <p className="text-sm text-gray-500">Placa: {bus.placa}</p>
@@ -115,10 +118,10 @@ export const BusTable = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleAction(() => onViewDetails(bus), bus.id)}
-                    disabled={loadingStates[bus.id] || isLoadingDetails}
+                    onClick={() => handleAction(() => onViewDetails(bus), bus.id, 'details')}
+                    disabled={isBusLoading(bus.id) || isLoadingDetails}
                   >
-                    {loadingStates[bus.id] || isLoadingDetails ? (
+                    {loadingStates[bus.id] === 'details' || isLoadingDetails ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       'Ver detalles'
@@ -127,42 +130,57 @@ export const BusTable = ({
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" disabled={isBusLoading(bus.id)}>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => onEdit(bus)}>
+                      <DropdownMenuItem 
+                        onClick={() => onEdit(bus)}
+                        disabled={isBusLoading(bus.id)}
+                      >
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
                       {bus.estado === 'ACTIVO' && (
                         <DropdownMenuItem 
-                          onClick={() => handleAction(() => onSetMantenimiento(bus.id), bus.id)}
-                          disabled={loadingStates[bus.id]}
+                          onClick={() => handleAction(() => onSetMantenimiento(bus.id), bus.id, 'mantenimiento')}
+                          disabled={isBusLoading(bus.id)}
                         >
-                          <span className="mr-2">🔧</span>
+                          {loadingStates[bus.id] === 'mantenimiento' ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <span className="mr-2">🔧</span>
+                          )}
                           Poner en mantenimiento
                         </DropdownMenuItem>
                       )}
                       {bus.estado === 'MANTENIMIENTO' && (
                         <DropdownMenuItem 
-                          onClick={() => handleAction(() => onSetActivo(bus.id), bus.id)}
-                          disabled={loadingStates[bus.id]}
+                          onClick={() => handleAction(() => onSetActivo(bus.id), bus.id, 'activo')}
+                          disabled={isBusLoading(bus.id)}
                         >
-                          <span className="mr-2">✅</span>
+                          {loadingStates[bus.id] === 'activo' ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <span className="mr-2">✅</span>
+                          )}
                           Marcar como activo
                         </DropdownMenuItem>
                       )}
                       {bus.estado !== 'RETIRADO' && (
                         <DropdownMenuItem 
-                          onClick={() => handleAction(() => onSetRetirado(bus.id), bus.id)}
-                          disabled={loadingStates[bus.id]}
+                          onClick={() => handleAction(() => onSetRetirado(bus.id), bus.id, 'retirado')}
+                          disabled={isBusLoading(bus.id)}
                           className="text-destructive"
                         >
-                          <Ban className="mr-2 h-4 w-4" />
+                          {loadingStates[bus.id] === 'retirado' ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Ban className="mr-2 h-4 w-4" />
+                          )}
                           Retirar bus
                         </DropdownMenuItem>
                       )}
@@ -171,7 +189,7 @@ export const BusTable = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-gray-500">Modelo:</span>{" "}
                   <span className="font-medium">{bus.modeloBus.marca} - {bus.modeloBus.modelo}</span>

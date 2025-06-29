@@ -16,6 +16,22 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 // Cache para buses individuales
 const busDetailsCache: { [key: string]: { bus: Bus, timestamp: number } } = {};
 
+// Sistema de notificación centralizada
+let connectionErrorShown = false;
+const showConnectionError = () => {
+    if (!connectionErrorShown) {
+        connectionErrorShown = true;
+        toast.error('Error de conexión', {
+            description: 'No se pudo conectar con el servidor. Verifique su conexión e intente nuevamente.',
+            duration: 5000,
+        });
+        // Resetear después de 10 segundos para permitir futuras notificaciones
+        setTimeout(() => {
+            connectionErrorShown = false;
+        }, 10000);
+    }
+};
+
 export const useBuses = () => {
     const [buses, setBuses] = useState<Bus[]>(busesCache);
     const [loading, setLoading] = useState(!busesCache.length);
@@ -65,9 +81,8 @@ export const useBuses = () => {
         } catch (error) {
             console.error("Error fetching buses:", error);
             setError('Error al cargar los buses');
-            toast.error('Error al cargar los buses', {
-                description: 'No se pudieron obtener los datos de los buses. Por favor, intente nuevamente.'
-            });
+            // Mostrar notificación centralizada de error de conexión
+            showConnectionError();
         } finally {
             setLoading(false);
         }
@@ -95,9 +110,8 @@ export const useBuses = () => {
             return bus;
         } catch (error) {
             console.error("Error getting bus by id:", error);
-            toast.error('Error al obtener los detalles del bus', {
-                description: 'No se pudieron cargar los detalles del bus. Por favor, intente nuevamente.'
-            });
+            // Mostrar notificación centralizada de error de conexión
+            showConnectionError();
             throw error;
         }
     }, []);

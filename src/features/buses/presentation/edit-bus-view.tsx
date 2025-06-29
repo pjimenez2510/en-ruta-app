@@ -50,6 +50,7 @@ export const EditBusView = ({ busId }: EditBusViewProps) => {
 
       const updateData: Partial<Bus> = {
         modeloBusId: data.modeloBusId,
+        tipoRutaBusId: data.tipoRutaBusId,
         numero: data.numero,
         placa: data.placa,
         anioFabricacion: data.anioFabricacion,
@@ -93,6 +94,7 @@ export const EditBusView = ({ busId }: EditBusViewProps) => {
   const basicInfoData = {
     id: bus.id,
     modeloBusId: bus.modeloBus.id,
+    tipoRutaBusId: bus.tipoRutaBusId,
     numero: bus.numero,
     placa: bus.placa,
     anioFabricacion: bus.anioFabricacion,

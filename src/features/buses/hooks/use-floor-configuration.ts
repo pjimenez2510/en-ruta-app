@@ -1,31 +1,6 @@
 import { useState, useEffect } from "react";
 import { BusSeat } from "../interfaces/seat-config";
-import { BusFormValues } from "../interfaces/form-schema";
-import { BusModel } from "../interfaces/bus-model.interface";
-
-interface FloorConfig {
-  pisoBusId: number;
-  numeroPiso: number;
-  leftColumns: number;
-  rightColumns: number;
-  rows: number;
-  asientos: BusSeat[];
-  posicionPasillo?: number;
-}
-
-interface UseFloorConfigurationProps {
-  busInfo: BusFormValues & { totalAsientos: number };
-  busModels: BusModel[];
-  initialData?: BusFormValues & {
-    totalAsientos?: number;
-    pisos?: Array<{
-      id: number;
-      busId: number;
-      numeroPiso: number;
-      asientos: BusSeat[];
-    }>;
-  };
-}
+import { FloorConfig, UseFloorConfigurationProps } from "../interfaces/bus-auxiliar.interface";
 
 export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFloorConfigurationProps) => {
   const [floorConfigs, setFloorConfigs] = useState<FloorConfig[]>([]);
@@ -44,32 +19,36 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
         const configs = asientos.map(piso => {
           const maxFila = Math.max(...piso.asientos.map(a => a.fila));
           const todasLasColumnas = [...new Set(piso.asientos.map(a => a.columna))].sort((a, b) => a - b);
+          const minColumna = Math.min(...piso.asientos.map(a => a.columna));
+          const maxColumna = Math.max(...piso.asientos.map(a => a.columna));
 
-          // Encontrar posición del pasillo y columnas a cada lado
+          // Encontrar posición del pasillo basándose en gaps entre columnas
           let posicionPasillo = -1;
           let leftColumns = 0;
           let rightColumns = 0;
 
-          // Buscar el gap más grande entre columnas consecutivas (excluyendo la última fila)
-          const columnasExcluyendoUltimaFila = [...new Set(
-            piso.asientos
-              .filter(a => a.fila !== maxFila)
-              .map(a => a.columna)
-          )].sort((a, b) => a - b);
-
-          // Encontrar el gap más grande (que será el pasillo)
+          // Buscar el gap más grande entre columnas consecutivas
           let maxGap = 0;
-          for (let i = 0; i < columnasExcluyendoUltimaFila.length - 1; i++) {
-            const gap = columnasExcluyendoUltimaFila[i + 1] - columnasExcluyendoUltimaFila[i];
-            if (gap > maxGap) {
+          for (let i = 0; i < todasLasColumnas.length - 1; i++) {
+            const gap = todasLasColumnas[i + 1] - todasLasColumnas[i];
+            if (gap > maxGap && gap > 1) { // Solo considerar gaps significativos
               maxGap = gap;
-              posicionPasillo = columnasExcluyendoUltimaFila[i] + Math.floor(gap / 2);
+              posicionPasillo = todasLasColumnas[i] + Math.floor(gap / 2);
             }
           }
 
-          // Si no se encontró un gap claro, asumir que el pasillo está en el medio
-          if (posicionPasillo === -1) {
-            posicionPasillo = Math.floor(todasLasColumnas.length / 2);
+          // Si no se encontró un gap claro, calcular basándose en distribución
+          if (posicionPasillo === -1 || maxGap <= 1) {
+            const totalColumnas = todasLasColumnas.length;
+            const mitad = Math.floor(totalColumnas / 2);
+
+            if (mitad < todasLasColumnas.length && mitad > 0) {
+              // Poner el pasillo entre las columnas del medio
+              posicionPasillo = todasLasColumnas[mitad - 1] + 0.5;
+            } else {
+              // Fallback: poner en el medio del rango total
+              posicionPasillo = Math.floor((minColumna + maxColumna) / 2);
+            }
           }
 
           // Contar columnas a cada lado del pasillo
@@ -87,7 +66,7 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
             rightColumns,
             rows: maxFila,
             asientos: piso.asientos,
-            posicionPasillo
+            posicionPasillo: Math.floor(posicionPasillo)
           };
         });
 
@@ -196,11 +175,48 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
     }));
   };
 
+  const reorderSeatNumbersGlobal = (floorConfigs: FloorConfig[]): FloorConfig[] => {
+    let globalSeatNumber = 1;
+
+    return floorConfigs.map(floor => {
+      // Ordenar asientos del piso actual por fila y columna
+      const sortedSeats = [...floor.asientos].sort((a, b) => {
+        if (a.fila === b.fila) {
+          return a.columna - b.columna;
+        }
+        return a.fila - b.fila;
+      });
+
+      // Renumerar asientos del piso actual con números consecutivos globales
+      // Ejemplo: Piso 1 (25 asientos): 1-25, Piso 2 (30 asientos): 26-55
+      const renumberedSeats = sortedSeats.map(seat => ({
+        ...seat,
+        numero: `${globalSeatNumber++}`
+      }));
+
+      return {
+        ...floor,
+        asientos: renumberedSeats
+      };
+    });
+  };
+
+  const resetToDefault = () => {
+    if (busInfo.modeloBusId && busModels.length > 0) {
+      const selectedModel = busModels.find(model => model.id === busInfo.modeloBusId);
+      if (selectedModel) {
+        initializeFloorConfigs(selectedModel.numeroPisos);
+      }
+    }
+  };
+
   return {
     floorConfigs,
     setFloorConfigs,
     floorDimensions,
     updateFloorDimensions,
-    reorderSeatNumbers
+    reorderSeatNumbers,
+    reorderSeatNumbersGlobal,
+    resetToDefault
   };
 };

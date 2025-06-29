@@ -16,6 +16,7 @@ interface Filters {
   placa?: string;
   estado?: string;
   modeloBusId?: number;
+  tipoRutaBusId?: number;
   anioFabricacion?: number;
 }
 
@@ -34,9 +35,10 @@ export const BusesView = () => {
       const matchPlaca = !filters.placa || bus.placa.toLowerCase().includes(filters.placa.toLowerCase());
       const matchEstado = !filters.estado || filters.estado === "all" || bus.estado === filters.estado;
       const matchModelo = !filters.modeloBusId || bus.modeloBusId === filters.modeloBusId;
+      const matchTipoRuta = !filters.tipoRutaBusId || bus.tipoRutaBusId === filters.tipoRutaBusId;
       const matchAnio = !filters.anioFabricacion || bus.anioFabricacion === filters.anioFabricacion;
 
-      return matchNumero && matchPlaca && matchEstado && matchModelo && matchAnio;
+      return matchNumero && matchPlaca && matchEstado && matchModelo && matchTipoRuta && matchAnio;
     });
   }, [buses, filters]);
 
@@ -93,16 +95,20 @@ export const BusesView = () => {
   };
 
   return (
-    <div className="container mx-auto py-6 w-8/10">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto py-6 px-2 sm:px-4 lg:w-4/5 lg:max-w-[80vw]">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Gestión de Buses</h1>
-        <Button onClick={handleAddBus}>
+        <Button onClick={handleAddBus} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Bus
         </Button>
       </div>
 
-      <BusFilters onFiltersChange={setFilters} />
+      <div className="overflow-x-auto">
+        <div className="min-w-[340px]">
+          <BusFilters onFiltersChange={setFilters} />
+        </div>
+      </div>
 
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
@@ -110,18 +116,22 @@ export const BusesView = () => {
         </div>
       ) : (
         <>
-          <BusTable
-            buses={filteredBuses}
-            onEdit={(bus) => router.push(`/main/buses/edit/${bus.id}`)}
-            onSetMantenimiento={handleSetMantenimiento}
-            onSetActivo={handleSetActivo}
-            onSetRetirado={handleSetRetirado}
-            onViewDetails={handleViewDetails}
-            isLoadingDetails={isViewingDetails}
-            isFiltered={Object.keys(filters).length > 0}
-            onClearFilters={() => setFilters({})}
-            onAddBus={handleAddBus}
-          />
+          <div className="overflow-x-auto">
+            <div className="min-w-[600px]">
+              <BusTable
+                buses={filteredBuses}
+                onEdit={(bus) => router.push(`/main/buses/edit/${bus.id}`)}
+                onSetMantenimiento={handleSetMantenimiento}
+                onSetActivo={handleSetActivo}
+                onSetRetirado={handleSetRetirado}
+                onViewDetails={handleViewDetails}
+                isLoadingDetails={isViewingDetails}
+                isFiltered={Object.keys(filters).length > 0}
+                onClearFilters={() => setFilters({})}
+                onAddBus={handleAddBus}
+              />
+            </div>
+          </div>
 
           <BusDetailsModal
             bus={selectedBus}

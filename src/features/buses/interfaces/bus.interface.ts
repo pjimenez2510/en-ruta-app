@@ -4,6 +4,7 @@ export interface Bus {
     id: string;
     tenantId: string;
     modeloBusId: number;
+    tipoRutaBusId: number;
     numero: number;
     placa: string;
     anioFabricacion: number;
@@ -20,6 +21,10 @@ export interface Bus {
         tipoChasis: string;
         tipoCarroceria: string;
         numeroPisos: number;
+    };
+    tipoRutaBus?: {
+        id: number;
+        nombre: string;
     };
     pisos?: Array<{
         id: number;

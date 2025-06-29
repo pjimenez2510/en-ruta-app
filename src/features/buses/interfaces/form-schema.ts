@@ -19,6 +19,7 @@ export const busFormSchema = z.object({
         .min(1900, "El año de fabricación debe ser posterior a 1900")
         .max(currentYear + 1, `El año de fabricación no puede ser posterior a ${currentYear + 1}`),
     tipoCombustible: z.string().min(1, "Por favor, seleccione el tipo de combustible"),
+    tipoRutaBusId: z.coerce.number({ invalid_type_error: "Seleccione el tipo de ruta" }).min(1, "Por favor, seleccione un tipo de ruta"),
     fotoUrl: z.string({
         required_error: "Por favor, ingrese la imagen del bus"
     }).min(1, "Por favor, ingrese la imagen del bus"),
@@ -42,5 +43,9 @@ export interface BusFormData extends BusFormValues {
         tipoChasis: string;
         tipoCarroceria: string;
         numeroPisos: 2;
+    };
+    tipoRutaBus?: {
+        id: number;
+        nombre: string;
     };
 } 
