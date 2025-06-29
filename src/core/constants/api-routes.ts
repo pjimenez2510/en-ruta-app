@@ -106,6 +106,10 @@ export const API_ROUTES = {
     ASIENTOS: "/asientos",
     ASIENTOS_MASIVO: "/asientos/masivo"
   },
+  BUS_TEMPLATES: {
+    FLOOR_TEMPLATE: "/plantilla-pisos",
+    GET_SEATS: "/ubicacion-asiento-plantillas",
+  },
   DASHBOARD: {
     METRICAS_GENERALES: "/dashboard/metricas-generales",
     METRICAS_FINANCIERAS: "/dashboard/metricas-financieras",

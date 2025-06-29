@@ -1,27 +1,11 @@
 import React from "react";
 import { Armchair, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BusSeat } from "../interfaces/seat-config";
 import { SeatType } from "@/features/seating/interfaces/seat-type.interface";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
+import { FloorConfig, SeatGridSimpleProps } from "../interfaces/bus-auxiliar.interface";
 
-interface FloorConfig {
-  pisoBusId: number;
-  numeroPiso: number;
-  leftColumns: number;
-  rightColumns: number;
-  rows: number;
-  asientos: BusSeat[];
-  posicionPasillo?: number;
-}
-
-interface SeatGridProps {
-  floor: FloorConfig;
-  floorDimensions: {[key: number]: FloorConfig};
-  availableSeatTypes: SeatType[];
-}
-
-export const SeatGrid = ({ floor, floorDimensions, availableSeatTypes }: SeatGridProps) => {
+export const SeatGrid = ({ floor, floorDimensions, availableSeatTypes }: SeatGridSimpleProps) => {
   const dimensions = floorDimensions[floor.numeroPiso];
   if (!dimensions) return null;
 

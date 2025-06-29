@@ -37,7 +37,7 @@ export default function CrearViajeMasivoPage() {
     try {
       const session = await getSession();
       const token = session?.user?.accessToken;
-      const res = await fetch("https://en-ruta-api.onrender.com/viajes/generar/previsualizar", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/viajes/generar/previsualizar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default function CrearViajeMasivoPage() {
       const session = await getSession();
       const token = session?.user?.accessToken;
       const values = methods.getValues();
-      const res = await fetch("https://en-ruta-api.onrender.com/viajes/generar/ejecutar", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/viajes/generar/ejecutar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

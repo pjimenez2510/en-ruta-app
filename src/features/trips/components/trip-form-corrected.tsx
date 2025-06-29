@@ -43,7 +43,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
       setLoadingBuses(true);
       try {
         const api = await createAuthApi();
-        const response = await api.get("https://en-ruta-api.onrender.com/buses");
+        const response = await api.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/buses`);
         setExternalBuses(response.data.data || []);
         setErrorBuses(null);
       } catch (err) {
@@ -65,7 +65,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
       setLoadingDrivers(true);
       try {
         const api = await createAuthApi();
-        const response = await api.get("https://en-ruta-api.onrender.com/usuario-tenant?rol=CONDUCTOR");
+        const response = await api.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/usuario-tenant?rol=CONDUCTOR`);
         setExternalDrivers(response.data.data || []);
         setErrorDrivers(null);
       } catch (err) {
@@ -87,7 +87,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
       setLoadingHelpers(true);
       try {
         const api = await createAuthApi();
-        const response = await api.get("https://en-ruta-api.onrender.com/usuario-tenant?rol=AYUDANTE");
+        const response = await api.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/usuario-tenant?rol=AYUDANTE`);
         setExternalHelpers(response.data.data || []);
         setErrorHelpers(null);
       } catch (err) {

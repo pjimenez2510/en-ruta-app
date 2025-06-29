@@ -22,6 +22,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useClienteForm } from "../hooks/use-cliente-form";
 import type { Cliente } from "../interfaces/cliente.interface";
+import RHFDatePicker from "@/shared/components/rhf/RHFDatePicker";
 
 interface ClienteFormProps {
   cliente?: Cliente;
@@ -152,22 +153,7 @@ export function ClienteForm({ cliente }: ClienteFormProps) {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="fechaNacimiento"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha de Nacimiento</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormDescription>
-                Seleccione la fecha de nacimiento
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+         <RHFDatePicker name="fechaNacimiento" label="Fecha Nacimiento"></RHFDatePicker>
 
         <FormField
           control={form.control}
