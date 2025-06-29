@@ -28,6 +28,7 @@ export const useRutaForm = (ruta?: Ruta): UseRutaFormReturn => {
     defaultValues: {
       nombre: ruta?.nombre || "",
       resolucionId: ruta?.resolucionId || 0,
+      tipoRutaBusId: ruta?.tipoRutaBusId || 0,
       descripcion: ruta?.descripcion || "",
       activo: ruta?.activo ?? true,
     },
