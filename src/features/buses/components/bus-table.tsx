@@ -87,15 +87,16 @@ export const BusTable = ({
     <div className="space-y-4">
       {buses.map((bus) => (
         <Card key={bus.id} className="p-4 hover:shadow-md transition-shadow">
-          <div className="flex gap-4">
-            <div className="relative h-[140px] w-[220px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative w-70 h-40 sm:h-[140px] sm:w-[220px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
               {bus.fotoUrl ? (
                 <Image
                   src={bus.fotoUrl}
                   alt={`Bus ${bus.numero}`}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 220px) 100vw, 220px"
+                  sizes="(max-width: 640px) 100vw, 220px"
+                  style={{ objectFit: 'cover' }}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
@@ -104,8 +105,8 @@ export const BusTable = ({
               )}
             </div>
 
-            <div className="flex-1 space-y-3">
-              <div className="flex items-start justify-between">
+            <div className="flex-1 space-y-3 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                 <div>
                   <h3 className="text-lg font-medium">Bus #{bus.numero}</h3>
                   <p className="text-sm text-gray-500">Placa: {bus.placa}</p>
@@ -188,7 +189,7 @@ export const BusTable = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-gray-500">Modelo:</span>{" "}
                   <span className="font-medium">{bus.modeloBus.marca} - {bus.modeloBus.modelo}</span>
