@@ -179,9 +179,10 @@ class AxiosClient {
 
   put<T, R = AxiosResponse<ResponseAPI<T>>, D = unknown>(
     url: string,
+    data?: D,
     config?: RequestConfig<D>
   ): Promise<R> {
-    return this.axiosInstance.put(url, config);
+    return this.axiosInstance.put(url, data, config);
   }
 
   patch<T, R = AxiosResponse<ResponseAPI<T>>, D = unknown>(

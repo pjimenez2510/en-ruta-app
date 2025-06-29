@@ -40,6 +40,45 @@ import { ClienteAsiento } from "@/features/sell-tickets/interfaces/venta.interfa
 import { toast } from "sonner";
 import { confirmarVenta } from "@/features/sell-tickets/services/ventas.service";
 
+interface Viaje {
+  id: number;
+  fecha: string;
+  precio: number;
+  capacidadTotal: number;
+  asientosOcupados: number;
+  bus: {
+    id: number;
+    placa: string;
+  };
+  horarioRuta: {
+    horaSalida: string;
+    ruta: {
+      nombre: string;
+      paradas: Array<{
+        ciudad: {
+          id: number;
+          nombre: string;
+        };
+      }>;
+    };
+  };
+}
+
+interface AsientoSeleccionado {
+  id: number;
+  numero: string;
+  tipo: string;
+  precio: number;
+}
+
+interface ClienteAdaptado {
+  id: number;
+  nombre: string;
+  documento: string;
+  email: string;
+  telefono: string;
+}
+
 function getCssVariableValue(variableName: string) {
   if (typeof window === "undefined") return "";
   return getComputedStyle(document.documentElement)
@@ -61,7 +100,9 @@ function getContrastYIQ(hexcolor: string) {
 
 export function NuevaVentaForm() {
   const [paso, setPaso] = useState(1);
-  const [viajeSeleccionado, setViajeSeleccionado] = useState<any>(null);
+  const [viajeSeleccionado, setViajeSeleccionado] = useState<Viaje | null>(
+    null
+  );
   const [clienteAsientos, setClienteAsientos] = useState<ClienteAsiento[]>([]);
   const [metodoPago, setMetodoPago] = useState("");
 
@@ -76,7 +117,8 @@ export function NuevaVentaForm() {
   const [modalCliente, setModalCliente] = useState(false);
   const [modalAsientos, setModalAsientos] = useState(false);
   const [modalCrearCliente, setModalCrearCliente] = useState(false);
-  const [asientoParaCliente, setAsientoParaCliente] = useState<any>(null);
+  const [asientoParaCliente, setAsientoParaCliente] =
+    useState<AsientoSeleccionado | null>(null);
 
   const [, setSecondaryColor] = useState<string>("");
   const [secondaryContrast, setSecondaryContrast] = useState<"white" | "black">(
@@ -114,7 +156,7 @@ export function NuevaVentaForm() {
     );
   };
 
-  const handleViajeSeleccionado = (viaje: any) => {
+  const handleViajeSeleccionado = (viaje: Viaje) => {
     setViajeSeleccionado(viaje);
     setViajeId(viaje.id);
     setClienteAsientos([]);
@@ -129,7 +171,10 @@ export function NuevaVentaForm() {
     }
   };
 
-  const handleClienteSeleccionado = (cliente: any, asientoId: number) => {
+  const handleClienteSeleccionado = (
+    cliente: ClienteAdaptado,
+    asientoId: number
+  ) => {
     // Buscar el asiento correspondiente
     const asiento = clienteAsientos.find(
       (ca) => ca.asiento?.id === asientoId
@@ -148,17 +193,17 @@ export function NuevaVentaForm() {
     setClienteAsientos(nuevosClienteAsientos);
   };
 
-  const handleBuscarCliente = (asiento: any) => {
+  const handleBuscarCliente = (asiento: AsientoSeleccionado) => {
     setAsientoParaCliente(asiento);
     setModalCliente(true);
   };
 
-  const handleCrearCliente = (asientoId: number) => {
+  const handleCrearCliente = () => {
     setModalCliente(false);
     setModalCrearCliente(true);
   };
 
-  const handleClienteCreado = (cliente: any) => {
+  const handleClienteCreado = (cliente: ClienteAdaptado) => {
     if (asientoParaCliente) {
       // Agregar el nuevo cliente-asiento
       const nuevoClienteAsiento: ClienteAsiento = {
@@ -173,7 +218,10 @@ export function NuevaVentaForm() {
   };
 
   // Función para manejar cuando se asigna un cliente desde el modal de asientos
-  const handleClienteAsignado = (cliente: any, asientoId: number) => {
+  const handleClienteAsignado = (
+    cliente: ClienteAdaptado,
+    asientoId: number
+  ) => {
     // Buscar si ya existe un cliente-asiento para ese asiento
     const existeClienteAsiento = clienteAsientos.find(
       (ca) => ca.asiento?.id === asientoId
@@ -258,19 +306,6 @@ export function NuevaVentaForm() {
     } catch (error) {
       console.error("Error al procesar venta:", error);
       // El error ya se maneja en el hook
-    }
-  };
-
-  const puedeAvanzar = (pasoActual: number) => {
-    switch (pasoActual) {
-      case 1:
-        return viajeSeleccionado !== null;
-      case 2:
-        return clienteAsientos.length > 0;
-      case 3:
-        return metodoPago !== "";
-      default:
-        return false;
     }
   };
 
@@ -640,15 +675,17 @@ export function NuevaVentaForm() {
         asientoSeleccionado={asientoParaCliente}
       />
 
-      <SeleccionarAsientosModal
-        open={modalAsientos}
-        onOpenChange={setModalAsientos}
-        viaje={viajeSeleccionado}
-        onAsientosSeleccionados={handleAsientosSeleccionados}
-        clienteAsientosActuales={clienteAsientos}
-        onBuscarCliente={handleBuscarCliente}
-        onClienteAsignado={handleClienteAsignado}
-      />
+      {viajeSeleccionado && (
+        <SeleccionarAsientosModal
+          open={modalAsientos}
+          onOpenChange={setModalAsientos}
+          viaje={viajeSeleccionado}
+          onAsientosSeleccionados={handleAsientosSeleccionados}
+          clienteAsientosActuales={clienteAsientos}
+          onBuscarCliente={handleBuscarCliente}
+          onClienteAsignado={handleClienteAsignado}
+        />
+      )}
 
       <CrearClienteModal
         open={modalCrearCliente}
