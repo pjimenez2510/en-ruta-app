@@ -18,9 +18,11 @@ import { useState } from "react";
 interface RHFDatePickerProps {
   name: string;
   label: string;
+  fromDate?: Date;
+  toDate?: Date;
 }
 
-const RHFDatePicker: React.FC<RHFDatePickerProps> = ({ name, label }) => {
+const RHFDatePicker: React.FC<RHFDatePickerProps> = ({ name, label, fromDate, toDate }) => {
   const {
     control,
     formState: { errors },
@@ -73,7 +75,8 @@ const RHFDatePicker: React.FC<RHFDatePickerProps> = ({ name, label }) => {
                     selected={date}
                     onSelect={handleDateChange}
                     initialFocus
-                    fromDate={new Date()}
+                    fromDate={fromDate}
+                    toDate={toDate}
                   />
                 </PopoverContent>
               </Popover>
