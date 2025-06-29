@@ -14,11 +14,22 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Search, User, Plus, UserPlus, X } from "lucide-react";
 import { getClientesPorCedula } from "@/features/sell-tickets/services/clientes.service";
+import { Cliente } from "@/features/sell-tickets/interfaces/cliente.interface";
+
+interface ClienteAdaptado {
+  id: number;
+  nombre: string;
+  documento: string;
+  email: string;
+  telefono: string;
+  esDiscapacitado: boolean;
+  fechaNacimiento: string;
+}
 
 interface BuscarClienteModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onClienteSeleccionado: (cliente: any, asientoId: number) => void;
+  onClienteSeleccionado: (cliente: ClienteAdaptado, asientoId: number) => void;
   onCrearCliente: (asientoId: number) => void;
   asientoSeleccionado: {
     id: number;
@@ -56,7 +67,7 @@ export function BuscarClienteModal({
 }: BuscarClienteModalProps) {
   const [cedula, setCedula] = useState("");
   const [buscando, setBuscando] = useState(false);
-  const [clientes, setClientes] = useState<any[]>([]);
+  const [clientes, setClientes] = useState<ClienteAdaptado[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const buscarPorCedula = async () => {
@@ -65,7 +76,7 @@ export function BuscarClienteModal({
     setError(null);
     try {
       const clientesApi = await getClientesPorCedula(cedula);
-      const clientesAdaptados = (clientesApi || []).map((c: any) => ({
+      const clientesAdaptados = (clientesApi || []).map((c: Cliente) => ({
         id: c.id,
         nombre: `${c.nombres} ${c.apellidos}`,
         documento: c.numeroDocumento,
@@ -78,14 +89,14 @@ export function BuscarClienteModal({
       if (clientesAdaptados.length === 0) {
         setError("No se encontró ningún cliente con esa cédula");
       }
-    } catch (e) {
+    } catch {
       setError("Error al buscar cliente");
     } finally {
       setBuscando(false);
     }
   };
 
-  const seleccionarCliente = (cliente: any) => {
+  const seleccionarCliente = (cliente: ClienteAdaptado) => {
     if (!asientoSeleccionado) return;
     onClienteSeleccionado(cliente, asientoSeleccionado.id);
     onOpenChange(false);

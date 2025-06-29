@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,11 +24,22 @@ import { useCrearCliente } from "@/features/sell-tickets/hooks/use-crear-cliente
 import { useSRIData } from "@/features/sell-tickets/hooks/use-sri-data";
 import { useValidarDocumento } from "@/features/sell-tickets/hooks/use-validar-documento";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Cliente } from "@/features/sell-tickets/interfaces/cliente.interface";
+
+interface ClienteAdaptado {
+  id: number;
+  nombre: string;
+  documento: string;
+  email: string;
+  telefono: string;
+  esDiscapacitado: boolean;
+  fechaNacimiento: string;
+}
 
 interface CrearClienteModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onClienteCreado: (cliente: any) => void;
+  onClienteCreado: (cliente: ClienteAdaptado) => void;
 }
 
 // Funciones de validación
@@ -77,14 +88,14 @@ export function CrearClienteModal({
       ? validacionDocumento.data[0]
       : null;
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
 
     // Validar el campo inmediatamente cuando cambia
-    const error = validarCampo(field, value);
+    const error = validarCampo(field, value as string);
     setErrores((prev) => ({
       ...prev,
       [field]: error,
@@ -191,7 +202,7 @@ export function CrearClienteModal({
     try {
       const nuevoCliente = await crearClienteMutation.mutateAsync(clienteData);
 
-      const clienteAdaptado = {
+      const clienteAdaptado: ClienteAdaptado = {
         id: nuevoCliente.id,
         nombre: `${nuevoCliente.nombres} ${nuevoCliente.apellidos}`,
         documento: nuevoCliente.numeroDocumento,

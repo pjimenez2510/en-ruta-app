@@ -27,7 +27,7 @@ import { ViajePublico } from "@/features/sell-tickets/interfaces/viaje-publico.i
 interface BuscarViajeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onViajeSeleccionado: (viaje: any) => void;
+  onViajeSeleccionado: (viaje: ViajePublico) => void;
 }
 
 export function BuscarViajeModal({
@@ -51,7 +51,7 @@ export function BuscarViajeModal({
     useViajesPublicos(filtros);
   const viajes = (viajesRaw ?? []) as ViajePublico[];
 
-  const seleccionarViaje = (viaje: any) => {
+  const seleccionarViaje = (viaje: ViajePublico) => {
     onViajeSeleccionado(viaje);
     onOpenChange(false);
     setCiudadOrigen("");
