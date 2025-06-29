@@ -69,7 +69,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
 			try {
 				const api = await createAuthApi();
 				const response = await api.get(
-					"https://en-ruta-api.onrender.com/buses"
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/buses`
 				);
 				setExternalBuses(response.data.data || []);
 				setErrorBuses(null);
@@ -96,7 +96,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
 			try {
 				const api = await createAuthApi();
 				const response = await api.get(
-					"https://en-ruta-api.onrender.com/usuario-tenant?rol=CONDUCTOR"
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/usuario-tenant?rol=CONDUCTOR`
 				);
 				setExternalDrivers(response.data.data || []);
 				setErrorDrivers(null);
@@ -123,7 +123,7 @@ export const TripForm = ({ trip, onSubmit }: TripFormProps) => {
 			try {
 				const api = await createAuthApi();
 				const response = await api.get(
-					"https://en-ruta-api.onrender.com/usuario-tenant?rol=AYUDANTE"
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/usuario-tenant?rol=AYUDANTE`
 				);
 				setExternalHelpers(response.data.data || []);
 				setErrorHelpers(null);

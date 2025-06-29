@@ -10,37 +10,47 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTrips } from "../hooks/use-trips";
 import { Trip, CreateTripDTO } from "../interfaces/trips.interface";
 import { TripFilters } from "../components/trip-filters";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { TripForm } from "../components/trip-form";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MoreVertical, Trash2, Eye, Plus } from "lucide-react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { toZonedTime } from "date-fns-tz";
 
 export const TripsTable = () => {
-  const { trips, isLoading, isFetching, createTrip, updateTrip, deleteTrip, filters } = useTrips();
+  const { trips, isLoading, isFetching, createTrip, updateTrip, deleteTrip } =
+    useTrips();
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
   const router = useRouter();
-
-  // DEBUG: Log para ver qué está recibiendo
-  useEffect(() => {
-    console.log('=== DEBUG TRIPS TABLE ===');
-    console.log('trips:', trips);
-    console.log('trips.length:', trips?.length);
-    console.log('isLoading:', isLoading);
-    console.log('isFetching:', isFetching);
-    console.log('filters:', filters);
-    console.log('========================');
-  }, [trips, isLoading, isFetching, filters]);
 
   const handleCreate = async (data: CreateTripDTO) => {
     await createTrip.mutateAsync(data);
@@ -113,13 +123,14 @@ export const TripsTable = () => {
 
       {!trips || trips.length === 0 ? (
         <div className="w-full text-center text-gray-500 py-12 text-lg font-medium bg-white rounded-2xl shadow-lg border">
-          {isLoading ? 'Cargando...' : 'No hay viajes para mostrar.'}
+          {isLoading ? "Cargando..." : "No hay viajes para mostrar."}
         </div>
       ) : (
         <Card className="rounded-2xl shadow-lg w-full">
           <Table className="w-full text-sm">
             <TableHeader>
               <TableRow>
+                <TableHead className="text-center">#</TableHead>
                 <TableHead className="text-center">Fecha</TableHead>
                 <TableHead className="text-center">Hora Salida</TableHead>
                 <TableHead className="text-center">Ruta</TableHead>
@@ -131,22 +142,42 @@ export const TripsTable = () => {
             </TableHeader>
             <TableBody>
               {trips.map((trip) => (
-                <TableRow key={trip.id} className="hover:bg-accent/30 transition-colors align-middle">
+                <TableRow
+                  key={trip.id}
+                  className="hover:bg-accent/30 transition-colors align-middle"
+                >
                   <TableCell className="text-center align-middle">
-                    {format(toZonedTime(trip.fecha, "UTC"), "PP", { locale: es })}
+                    {trip.id}
                   </TableCell>
-                  <TableCell className="text-center align-middle">{trip.horarioRuta.horaSalida}</TableCell>
-                  <TableCell className="text-center align-middle max-w-[160px] truncate" title={trip.horarioRuta.ruta.nombre}>
+                  <TableCell className="text-center align-middle">
+                    {format(toZonedTime(trip.fecha, "UTC"), "PP", {
+                      locale: es,
+                    })}
+                  </TableCell>
+                  <TableCell className="text-center align-middle">
+                    {trip.horarioRuta.horaSalida}
+                  </TableCell>
+                  <TableCell
+                    className="text-center align-middle max-w-[160px] truncate"
+                    title={trip.horarioRuta.ruta.nombre}
+                  >
                     {trip.horarioRuta.ruta.nombre}
                   </TableCell>
-                  <TableCell className="text-center align-middle max-w-[160px] truncate" title={`${trip.bus.numero} (${trip.bus.placa})`}>
+                  <TableCell
+                    className="text-center align-middle max-w-[160px] truncate"
+                    title={`${trip.bus.numero} (${trip.bus.placa})`}
+                  >
                     {`${trip.bus.numero} (${trip.bus.placa})`}
                   </TableCell>
                   <TableCell className="text-center align-middle">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      trip.estado === 'COMPLETADO' ? 'bg-green-100 text-green-700' :
-                      trip.estado === 'CANCELADO' ? 'bg-red-100 text-red-700' :
-                      'bg-blue-100 text-blue-700'}`}
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        trip.estado === "COMPLETADO"
+                          ? "bg-green-100 text-green-700"
+                          : trip.estado === "CANCELADO"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-blue-100 text-blue-700"
+                      }`}
                     >
                       {trip.estado}
                     </span>
@@ -163,7 +194,9 @@ export const TripsTable = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setSelectedTrip(trip)}>
+                          <DropdownMenuItem
+                            onClick={() => setSelectedTrip(trip)}
+                          >
                             <Eye className="mr-2 h-4 w-4" />
                             Ver detalles/ editar
                           </DropdownMenuItem>
@@ -182,7 +215,10 @@ export const TripsTable = () => {
         </Card>
       )}
 
-      <Dialog open={!!selectedTrip} onOpenChange={(open) => !open && setSelectedTrip(null)}>
+      <Dialog
+        open={!!selectedTrip}
+        onOpenChange={(open) => !open && setSelectedTrip(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -190,21 +226,21 @@ export const TripsTable = () => {
             </DialogTitle>
           </DialogHeader>
           {selectedTrip && (
-            <TripForm
-              trip={selectedTrip}
-              onSubmit={handleUpdate}
-            />
+            <TripForm trip={selectedTrip} onSubmit={handleUpdate} />
           )}
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente este viaje
-              y toda su información asociada.
+              Esta acción no se puede deshacer. Se eliminará permanentemente
+              este viaje y toda su información asociada.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

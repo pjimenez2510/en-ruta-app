@@ -34,7 +34,7 @@ export const clienteSchema = z.object({
   tipoDocumento: z.enum(["CEDULA", "PASAPORTE", "NIT"], {
     required_error: "El tipo de documento es requerido",
   }),
-  fechaNacimiento: z
+  fechaNacimiento: z.coerce
     .string()
     .min(1, "La fecha de nacimiento es requerida")
     .refine((date) => {

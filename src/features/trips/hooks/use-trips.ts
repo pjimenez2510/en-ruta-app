@@ -54,14 +54,6 @@ export const useTrips = () => {
     },
   });
 
-  // Debug logging
-  console.log('=== USE TRIPS HOOK DEBUG ===');
-  console.log('Current filters:', filters);
-  console.log('Trips count:', trips.length);
-  console.log('AllTrips count:', allTrips.length);
-  console.log('Is loading:', isLoading);
-  console.log('Is fetching:', isFetching);
-  console.log('===========================');
 
   return {
     trips,
