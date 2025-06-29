@@ -8,6 +8,7 @@ export interface BusFilter {
     placa?: string;
     estado?: string;
     modeloBusId?: number;
+    tipoRutaBusId?: number;
     anioFabricacion?: number;
 }
 

@@ -16,6 +16,7 @@ interface Filters {
   placa?: string;
   estado?: string;
   modeloBusId?: number;
+  tipoRutaBusId?: number;
   anioFabricacion?: number;
 }
 
@@ -34,9 +35,10 @@ export const BusesView = () => {
       const matchPlaca = !filters.placa || bus.placa.toLowerCase().includes(filters.placa.toLowerCase());
       const matchEstado = !filters.estado || filters.estado === "all" || bus.estado === filters.estado;
       const matchModelo = !filters.modeloBusId || bus.modeloBusId === filters.modeloBusId;
+      const matchTipoRuta = !filters.tipoRutaBusId || bus.tipoRutaBusId === filters.tipoRutaBusId;
       const matchAnio = !filters.anioFabricacion || bus.anioFabricacion === filters.anioFabricacion;
 
-      return matchNumero && matchPlaca && matchEstado && matchModelo && matchAnio;
+      return matchNumero && matchPlaca && matchEstado && matchModelo && matchTipoRuta && matchAnio;
     });
   }, [buses, filters]);
 

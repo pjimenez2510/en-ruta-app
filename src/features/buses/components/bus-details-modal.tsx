@@ -136,6 +136,12 @@ export const BusDetailsModal = ({ bus, isOpen, onClose, onBusUpdate, onLoadCompl
                         <p className="text-sm text-gray-500">Combustible</p>
                         <p className="font-medium">{currentBus.tipoCombustible}</p>
                       </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Tipo de Ruta</p>
+                        <p className="font-medium">
+                          {currentBus.tipoRutaBus?.nombre || 'No especificado'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </Card>
