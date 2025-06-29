@@ -37,7 +37,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMetodosPago } from "@/features/sell-tickets/hooks/use-metodos-pago";
+import { useCrearVenta } from "@/features/sell-tickets/hooks/use-crear-venta";
 import { ClienteAsiento } from "@/features/sell-tickets/interfaces/venta.interface";
+import { toast } from "sonner";
 
 function getCssVariableValue(variableName: string) {
   if (typeof window === "undefined") return "";
@@ -83,6 +85,7 @@ export function NuevaVentaForm() {
   );
 
   const { metodosPago, isLoading: isLoadingMetodosPago } = useMetodosPago();
+  const crearVentaMutation = useCrearVenta();
 
   useEffect(() => {
     const cssColor = getCssVariableValue("--secondary");
@@ -202,22 +205,54 @@ export function NuevaVentaForm() {
     }
   }, [metodoPago]);
 
-  const procesarVenta = () => {
+  const procesarVenta = async () => {
+    // Validar que todos los campos requeridos estén presentes
+    if (!viajeId || !ciudadOrigenId || !ciudadDestinoId || !metodoPagoId) {
+      toast.error("Faltan datos requeridos para procesar la venta");
+      return;
+    }
+
+    if (!clienteAsientos || clienteAsientos.length === 0) {
+      toast.error("Debe seleccionar al menos un asiento con cliente");
+      return;
+    }
+
+    // Validar que todos los asientos tengan cliente asignado
+    const asientosSinCliente = clienteAsientos.filter((ca) => !ca.cliente);
+    if (asientosSinCliente.length > 0) {
+      toast.error("Todos los asientos deben tener un cliente asignado");
+      return;
+    }
+
     const boletos = clienteAsientos.map((ca) => ({
       clienteId: ca.cliente?.id || 0,
       asientoId: ca.asiento?.id || 0,
     }));
 
-    const data = {
+    const ventaData = {
       viajeId,
       ciudadOrigenId,
       ciudadDestinoId,
       metodoPagoId,
-      oficinistaId: 1, // TODO: Obtener del usuario logueado
       boletos,
     };
-    console.log("Procesando venta:", data);
-    // Aquí iría la lógica para procesar la venta
+
+    try {
+      await crearVentaMutation.mutateAsync(ventaData);
+
+      // Limpiar el formulario después de una venta exitosa
+      setViajeSeleccionado(null);
+      setClienteAsientos([]);
+      setMetodoPago("");
+      setViajeId(null);
+      setCiudadOrigenId(null);
+      setCiudadDestinoId(null);
+      setMetodoPagoId(null);
+      setPaso(1);
+    } catch (error) {
+      console.error("Error al procesar venta:", error);
+      // El error ya se maneja en el hook
+    }
   };
 
   const puedeAvanzar = (pasoActual: number) => {
@@ -504,10 +539,12 @@ export function NuevaVentaForm() {
                 </Button>
                 <Button
                   onClick={procesarVenta}
-                  disabled={!metodoPago}
+                  disabled={!metodoPago || crearVentaMutation.isPending}
                   className="flex-1"
                 >
-                  Procesar Venta
+                  {crearVentaMutation.isPending
+                    ? "Procesando..."
+                    : "Procesar Venta"}
                 </Button>
               </div>
             </CardContent>
