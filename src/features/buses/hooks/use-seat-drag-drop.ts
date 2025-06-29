@@ -4,10 +4,10 @@ import { FloorConfig, SourceInfo } from "../interfaces/bus-auxiliar.interface";
 
 interface UseSeatDragDropProps {
   setFloorConfigs: React.Dispatch<React.SetStateAction<FloorConfig[]>>;
-  reorderSeatNumbers: (seats: BusSeat[]) => BusSeat[];
+  reorderSeatNumbersGlobal: (floorConfigs: FloorConfig[]) => FloorConfig[];
 }
 
-export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeatDragDropProps) => {
+export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbersGlobal }: UseSeatDragDropProps) => {
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     const isFromTemplate = active.id.toString().startsWith('template-');
@@ -24,8 +24,8 @@ export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeat
         newConfigs[floorIdx].asientos = newConfigs[floorIdx].asientos.filter(
           seat => !(seat.fila === sourceInfo.row && seat.columna === sourceInfo.col)
         );
-        newConfigs[floorIdx].asientos = reorderSeatNumbers(newConfigs[floorIdx].asientos);
-        return newConfigs;
+        // Renumerar globalmente después de eliminar
+        return reorderSeatNumbersGlobal(newConfigs);
       });
       return;
     }
@@ -58,9 +58,9 @@ export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeat
             estado: 'DISPONIBLE',
           };
           newConfigs[destFloorIndex].asientos.push(newSeat);
-          newConfigs[destFloorIndex].asientos = reorderSeatNumbers(newConfigs[destFloorIndex].asientos);
         }
-        return newConfigs;
+        // Renumerar globalmente después de agregar asiento
+        return reorderSeatNumbersGlobal(newConfigs);
       }
 
       // Movimiento de asientos existentes
@@ -87,10 +87,8 @@ export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeat
         fila: destInfo.row,
         columna: destInfo.col,
       });
-      // Renumerar asientos
-      newConfigs[sourceFloorIndex].asientos = reorderSeatNumbers(newConfigs[sourceFloorIndex].asientos);
-      newConfigs[destFloorIndex].asientos = reorderSeatNumbers(newConfigs[destFloorIndex].asientos);
-      return newConfigs;
+      // Renumerar globalmente después del movimiento
+      return reorderSeatNumbersGlobal(newConfigs);
     });
   };
 

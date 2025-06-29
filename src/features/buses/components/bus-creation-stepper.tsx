@@ -75,11 +75,11 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
     setFloorConfigs, 
     floorDimensions, 
     updateFloorDimensions, 
-    reorderSeatNumbers,
+    reorderSeatNumbersGlobal,
     resetToDefault
   } = useFloorConfiguration({ busInfo, busModels, initialData });
 
-  const { onDragEnd } = useSeatDragDrop({ setFloorConfigs, reorderSeatNumbers });
+  const { onDragEnd } = useSeatDragDrop({ setFloorConfigs, reorderSeatNumbersGlobal });
 
   // Cargar plantillas cuando cambia el modelo de bus
   React.useEffect(() => {
@@ -168,22 +168,24 @@ export const BusCreationStepper = ({ onSubmit, onCancel, initialData }: BusCreat
     const defaultSeatType = availableSeatTypes[0];
 
     // Aplica cada plantilla a su piso correspondiente
-    setFloorConfigs(
-      templates.map(template => ({
-        pisoBusId: 0,
-        numeroPiso: template.numeroPiso,
-        leftColumns: Math.ceil(template.columnas / 2),
-        rightColumns: Math.floor(template.columnas / 2),
-        rows: template.filas,
-        asientos: (template.seats || []).map(seat => ({
-          numero: `${seat.fila}-${seat.columna}`,
-          fila: seat.fila,
-          columna: seat.columna,
-          tipoId: defaultSeatType.id,
-          estado: 'DISPONIBLE'
-        }))
+    const newFloorConfigs = templates.map(template => ({
+      pisoBusId: 0,
+      numeroPiso: template.numeroPiso,
+      leftColumns: Math.ceil(template.columnas / 2),
+      rightColumns: Math.floor(template.columnas / 2),
+      rows: template.filas,
+      asientos: (template.seats || []).map(seat => ({
+        numero: `${seat.fila}-${seat.columna}`,
+        fila: seat.fila,
+        columna: seat.columna,
+        tipoId: defaultSeatType.id,
+        estado: 'DISPONIBLE' as const
       }))
-    );
+    }));
+
+    // Aplicar numeración global a todos los pisos
+    const renumberedConfigs = reorderSeatNumbersGlobal(newFloorConfigs);
+    setFloorConfigs(renumberedConfigs);
 
     // Actualiza dimensiones de cada piso
     templates.forEach(template => {

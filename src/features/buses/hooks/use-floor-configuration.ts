@@ -175,6 +175,32 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
     }));
   };
 
+  const reorderSeatNumbersGlobal = (floorConfigs: FloorConfig[]): FloorConfig[] => {
+    let globalSeatNumber = 1;
+
+    return floorConfigs.map(floor => {
+      // Ordenar asientos del piso actual por fila y columna
+      const sortedSeats = [...floor.asientos].sort((a, b) => {
+        if (a.fila === b.fila) {
+          return a.columna - b.columna;
+        }
+        return a.fila - b.fila;
+      });
+
+      // Renumerar asientos del piso actual con números consecutivos globales
+      // Ejemplo: Piso 1 (25 asientos): 1-25, Piso 2 (30 asientos): 26-55
+      const renumberedSeats = sortedSeats.map(seat => ({
+        ...seat,
+        numero: `${globalSeatNumber++}`
+      }));
+
+      return {
+        ...floor,
+        asientos: renumberedSeats
+      };
+    });
+  };
+
   const resetToDefault = () => {
     if (busInfo.modeloBusId && busModels.length > 0) {
       const selectedModel = busModels.find(model => model.id === busInfo.modeloBusId);
@@ -190,6 +216,7 @@ export const useFloorConfiguration = ({ busInfo, busModels, initialData }: UseFl
     floorDimensions,
     updateFloorDimensions,
     reorderSeatNumbers,
+    reorderSeatNumbersGlobal,
     resetToDefault
   };
 };
