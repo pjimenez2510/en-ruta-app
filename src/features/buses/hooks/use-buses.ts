@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { BusService } from '../services/bus.service';
-import { useSession } from 'next-auth/react';
 import { Bus } from '../interfaces/bus.interface';
 import { BusCreationData } from '../interfaces/seat-config';
 import { toast } from 'sonner';
 import { SeatUpdate } from '../interfaces/seat.interface';
+import { useSession } from 'next-auth/react';
 
 // Cache global para buses
 let busesCache: Bus[] = [];
@@ -16,12 +16,46 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 // Cache para buses individuales
 const busDetailsCache: { [key: string]: { bus: Bus, timestamp: number } } = {};
 
+// Sistema de notificación centralizada
+let connectionErrorShown = false;
+const showConnectionError = () => {
+    if (!connectionErrorShown) {
+        connectionErrorShown = true;
+        toast.error('Error de conexión', {
+            description: 'No se pudo conectar con el servidor. Verifique su conexión e intente nuevamente.',
+            duration: 5000,
+        });
+        // Resetear después de 10 segundos para permitir futuras notificaciones
+        setTimeout(() => {
+            connectionErrorShown = false;
+        }, 10000);
+    }
+};
+
 export const useBuses = () => {
-    const { data: session } = useSession();
-    const token = session?.user?.accessToken;
     const [buses, setBuses] = useState<Bus[]>(busesCache);
     const [loading, setLoading] = useState(!busesCache.length);
     const [error, setError] = useState<string | null>(null);
+    const { data: session } = useSession();
+    const token = session?.user?.accessToken || "";
+
+    // Limpiar el caché cuando cambia la sesión (token)
+    useEffect(() => {
+        if (!token) {
+            // Si no hay token, solo limpia el cache y el estado, pero NO intentes fetch
+            busesCache = [];
+            lastFetch = 0;
+            setBuses([]);
+            setLoading(false);
+            return;
+        }
+        busesCache = [];
+        lastFetch = 0;
+        setBuses([]);
+        setLoading(true);
+        fetchBuses(true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]);
 
     const fetchBuses = useCallback(async (force = false) => {
         // Si hay datos en caché y no ha pasado el tiempo de expiración, usar caché
@@ -31,15 +65,9 @@ export const useBuses = () => {
             return;
         }
 
-        if (!token) {
-            setError('No hay una sesión activa');
-            setLoading(false);
-            return;
-        }
-
         try {
             setLoading(true);
-            const data = await BusService.getAll(token);
+            const data = await BusService.getAll();
             if (Array.isArray(data)) {
                 busesCache = data;
                 lastFetch = Date.now();
@@ -53,19 +81,14 @@ export const useBuses = () => {
         } catch (error) {
             console.error("Error fetching buses:", error);
             setError('Error al cargar los buses');
-            toast.error('Error al cargar los buses', {
-                description: 'No se pudieron obtener los datos de los buses. Por favor, intente nuevamente.'
-            });
+            // Mostrar notificación centralizada de error de conexión
+            showConnectionError();
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, []);
 
     const getBusById = useCallback(async (id: string) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         // Verificar caché de detalles
         const cachedBus = busDetailsCache[id];
         if (cachedBus && Date.now() - cachedBus.timestamp < CACHE_DURATION) {
@@ -73,7 +96,7 @@ export const useBuses = () => {
         }
 
         try {
-            const bus = await BusService.getById(id, token);
+            const bus = await BusService.getById(id);
             if (!bus) {
                 throw new Error('No se encontró el bus');
             }
@@ -87,20 +110,15 @@ export const useBuses = () => {
             return bus;
         } catch (error) {
             console.error("Error getting bus by id:", error);
-            toast.error('Error al obtener los detalles del bus', {
-                description: 'No se pudieron cargar los detalles del bus. Por favor, intente nuevamente.'
-            });
+            // Mostrar notificación centralizada de error de conexión
+            showConnectionError();
             throw error;
         }
-    }, [token]);
+    }, []);
 
     const createBus = async (data: BusCreationData) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            const newBus = await BusService.create(data, token);
+            const newBus = await BusService.create(data);
             if (newBus) {
                 await fetchBuses(true); // Forzar actualización del caché
                 toast.success('Bus creado exitosamente', {
@@ -119,12 +137,8 @@ export const useBuses = () => {
     };
 
     const updateBus = async (id: string, data: Partial<Bus>) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            const updatedBus = await BusService.update(id, data, token);
+            const updatedBus = await BusService.update(id, data);
             if (updatedBus) {
                 // Actualizar ambos cachés
                 delete busDetailsCache[id];
@@ -158,12 +172,8 @@ export const useBuses = () => {
             }>;
         }>
     ) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.updateSeats(busId, seats, token);
+            await BusService.updateSeats(busId, seats);
             // Invalidar caché de detalles para este bus
             delete busDetailsCache[busId];
 
@@ -190,12 +200,8 @@ export const useBuses = () => {
     };
 
     const updateSingleSeat = async (seatId: number, seatData: SeatUpdate) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.updateSingleSeat(seatId, seatData, token);
+            await BusService.updateSingleSeat(seatId, seatData);
 
             // Limpiar todo el caché de detalles
             Object.keys(busDetailsCache).forEach(key => {
@@ -220,12 +226,8 @@ export const useBuses = () => {
     };
 
     const setBusMantenimiento = async (id: string) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.setMantenimiento(id, token);
+            await BusService.setMantenimiento(id);
             setBuses(prevBuses =>
                 prevBuses.map(bus =>
                     bus.id === id ? { ...bus, estado: "MANTENIMIENTO" } : bus
@@ -247,12 +249,8 @@ export const useBuses = () => {
     };
 
     const setBusActivo = async (id: string) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.setActivo(id, token);
+            await BusService.setActivo(id);
             setBuses(prevBuses =>
                 prevBuses.map(bus =>
                     bus.id === id ? { ...bus, estado: "ACTIVO" } : bus
@@ -274,12 +272,8 @@ export const useBuses = () => {
     };
 
     const setBusRetirado = async (id: string) => {
-        if (!token) {
-            throw new Error('No hay una sesión activa');
-        }
-
         try {
-            await BusService.setRetirado(id, token);
+            await BusService.setRetirado(id);
             setBuses(prevBuses =>
                 prevBuses.map(bus =>
                     bus.id === id ? { ...bus, estado: "RETIRADO" } : bus
@@ -299,14 +293,6 @@ export const useBuses = () => {
             throw error;
         }
     };
-
-    useEffect(() => {
-        if (token) {
-            fetchBuses();
-        } else {
-            setLoading(false);
-        }
-    }, [fetchBuses, token]);
 
     return {
         buses,

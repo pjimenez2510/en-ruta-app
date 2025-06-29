@@ -2,16 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { BusModelService } from '../services/bus-model.service';
-import { useSession } from 'next-auth/react';
-
-interface BusModel {
-    id: number;
-    marca: string;
-    modelo: string;
-    tipoChasis: string;
-    tipoCarroceria: string;
-    numeroPisos: number;
-}
+import { BusModel } from '../interfaces/bus-model.interface';
 
 // Cache global para modelos de buses
 let busModelsCache: BusModel[] = [];
@@ -22,8 +13,12 @@ export const useBusModels = () => {
     const [busModels, setBusModels] = useState<BusModel[]>(busModelsCache);
     const [loading, setLoading] = useState(!busModelsCache.length);
     const [error, setError] = useState<string | null>(null);
-    const { data: session } = useSession();
-    const token = session?.user?.accessToken || "";
+
+    useEffect(() => {
+        busModelsCache = [];
+        lastFetch = 0;
+        fetchBusModels(true);
+    }, []);
 
     const fetchBusModels = useCallback(async (force = false) => {
         // Si hay datos en caché y no ha pasado el tiempo de expiración, usar caché
@@ -33,11 +28,9 @@ export const useBusModels = () => {
             return;
         }
 
-        if (!token) return;
-
         try {
             setLoading(true);
-            const data = await BusModelService.getAll(token);
+            const data = await BusModelService.getAll();
             if (Array.isArray(data)) {
                 busModelsCache = data;
                 lastFetch = Date.now();
@@ -53,7 +46,7 @@ export const useBusModels = () => {
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, []);
 
     const getBusModelById = useCallback(async (id: number) => {
         // Intentar encontrar primero en el caché
@@ -62,10 +55,8 @@ export const useBusModels = () => {
             return cachedModel;
         }
 
-        if (!token) throw new Error("No hay una sesión activa");
-
         try {
-            const model = await BusModelService.getById(id, token);
+            const model = await BusModelService.getById(id);
             if (model) {
                 // Actualizar el modelo en el caché si existe
                 const modelIndex = busModelsCache.findIndex(m => m.id === id);
@@ -80,7 +71,7 @@ export const useBusModels = () => {
             console.error("Error al obtener el modelo de bus:", error);
             throw error;
         }
-    }, [token]);
+    }, []);
 
     useEffect(() => {
         fetchBusModels();

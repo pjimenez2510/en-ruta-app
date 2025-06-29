@@ -1,14 +1,7 @@
+import { ValidationResponse } from "../interfaces/bus-auxiliar.interface";
 import { BusService } from "../services/bus.service";
-import { useSession } from "next-auth/react";
-
-interface ValidationResponse {
-    exists: boolean;
-    field: "numero" | "placa" | null;
-}
 
 export const useBusValidation = () => {
-    const { data: session } = useSession();
-
     const validateBusExists = async (
         numero: number | undefined,
         placa: string | undefined,
@@ -22,8 +15,7 @@ export const useBusValidation = () => {
             return await BusService.validateBusExists(
                 numero,
                 placa,
-                currentBusId,
-                session?.user.accessToken
+                currentBusId
             );
         } catch (error) {
             console.error('Error validating bus:', error);

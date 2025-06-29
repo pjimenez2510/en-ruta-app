@@ -8,6 +8,7 @@ import { SeatTypeFormValues } from "../interfaces/form-schema";
 import { FormFields } from "./seat-type-form-fields";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
 
 interface SeatTypeFormProps {
   initialData?: SeatType;
@@ -16,8 +17,9 @@ interface SeatTypeFormProps {
 }
 
 export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormProps) => {
-  const { form } = useSeatTypeForm(initialData);
+  const { form } = useSeatTypeForm(initialData) as { form: UseFormReturn<SeatTypeFormValues> };
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isValid } = form.formState;
 
   const handleSubmit = async (values: SeatTypeFormValues) => {
     try {
@@ -30,7 +32,7 @@ export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormPr
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data: SeatTypeFormValues) => handleSubmit(data))} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormFields control={form.control} />
         <div className="flex justify-end space-x-4">
           <Button 
@@ -43,7 +45,7 @@ export const SeatTypeForm = ({ initialData, onSubmit, onCancel }: SeatTypeFormPr
           </Button>
           <Button 
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isValid}
           >
             {isSubmitting ? (
               <>

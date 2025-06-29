@@ -18,15 +18,19 @@ export const useSeatTypeForm = (initialData?: SeatType) => {
         }
     }
 
+    const defaultValues: SeatTypeFormValues = {
+        nombre: initialData?.nombre ?? "",
+        descripcion: initialData?.descripcion ?? "",
+        factorPrecio: typeof initialData?.factorPrecio === 'number' ? initialData.factorPrecio : 1.0,
+        color: initialData?.color ?? "#000000",
+        icono: initialData?.icono ?? "Armchair",
+    };
+
     const form = useForm<SeatTypeFormValues>({
+        defaultValues,
         resolver: zodResolver(seatTypeFormSchema),
-        defaultValues: {
-            nombre: initialData?.nombre || "",
-            descripcion: initialData?.descripcion || "",
-            factorPrecio: initialData?.factorPrecio || 1.0,
-            color: initialData?.color || "#000000",
-            icono: initialData?.icono || "Armchair",
-        },
+        mode: "onChange",
+        reValidateMode: "onChange",
     });
 
     return { form, tenantId };

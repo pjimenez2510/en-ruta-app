@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,12 +8,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bus } from "../interfaces/bus.interface";
-import { MoreHorizontal, Pencil, Wrench, BusFront, Undo2, Loader2, Ban } from "lucide-react";
-import { useState } from "react";
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { 
+  MoreHorizontal,
+  Pencil,
+  Ban,
+  BusFront,
+  Loader2
+} from "lucide-react";
+import { Bus } from "../interfaces/bus.interface";
+import { EmptyState } from "./empty-state";
+import Image from "next/image";
 
 interface BusTableProps {
   buses: Bus[];
@@ -23,41 +30,73 @@ interface BusTableProps {
   onSetRetirado: (id: string) => Promise<void>;
   onViewDetails: (bus: Bus) => Promise<void>;
   isLoadingDetails: boolean;
+  isFiltered?: boolean;
+  onClearFilters: () => void;
+  onAddBus: () => void;
 }
 
-export const BusTable = ({
-  buses,
-  onEdit,
+export const BusTable = ({ 
+  buses, 
+  onEdit, 
   onSetMantenimiento,
   onSetActivo,
   onSetRetirado,
   onViewDetails,
-  isLoadingDetails
+  isLoadingDetails,
+  isFiltered = false,
+  onClearFilters,
+  onAddBus
 }: BusTableProps) => {
-  const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
+  const [loadingStates, setLoadingStates] = useState<{[key: string]: string}>({});
 
-  const handleAction = async (action: () => Promise<void>, busId: string) => {
+  if (!buses || buses.length === 0) {
+    return (
+      <EmptyState 
+        type={isFiltered ? "no-results" : "no-buses"}
+        onAction={isFiltered ? onClearFilters : onAddBus}
+      />
+    );
+  }
+
+  const handleAction = async (action: () => Promise<void>, busId: string, actionType: string) => {
     try {
-      setLoadingStates(prev => ({ ...prev, [busId]: true }));
+      setLoadingStates(prev => ({ ...prev, [busId]: actionType }));
       await action();
     } finally {
-      setLoadingStates(prev => ({ ...prev, [busId]: false }));
+      setLoadingStates(prev => ({ ...prev, [busId]: '' }));
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      ACTIVO: "bg-green-100 text-green-800 hover:bg-green-200",
+      MANTENIMIENTO: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+      RETIRADO: "bg-red-100 text-red-800 hover:bg-red-200"
+    }[status] || "bg-gray-100 text-gray-800 hover:bg-gray-200";
+
+    return (
+      <Badge className={statusConfig}>
+        {status.toLowerCase()}
+      </Badge>
+    );
+  };
+
+  const isBusLoading = (busId: string) => loadingStates[busId] !== undefined && loadingStates[busId] !== '';
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {buses.map((bus) => (
-        <Card key={bus.id} className="p-3 hover:shadow-md transition-shadow">
-          <div className="flex gap-4">
-            <div className="relative h-[140px] w-[220px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+        <Card key={bus.id} className="p-4 hover:shadow-md transition-shadow">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative w-70 h-40 sm:h-[140px] sm:w-[220px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
               {bus.fotoUrl ? (
                 <Image
                   src={bus.fotoUrl}
                   alt={`Bus ${bus.numero}`}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 220px) 100vw, 220px"
+                  sizes="(max-width: 640px) 100vw, 220px"
+                  style={{ objectFit: 'cover' }}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
@@ -66,33 +105,23 @@ export const BusTable = ({
               )}
             </div>
 
-            <div className="flex-1 space-y-3">
-              <div className="flex items-start justify-between">
+            <div className="flex-1 space-y-3 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                 <div>
                   <h3 className="text-lg font-medium">Bus #{bus.numero}</h3>
                   <p className="text-sm text-gray-500">Placa: {bus.placa}</p>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Badge
-                    className={
-                      bus.estado === 'ACTIVO'
-                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                        : bus.estado === 'MANTENIMIENTO'
-                        ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                        : 'bg-red-100 text-red-800 hover:bg-red-200'
-                    }
-                  >
-                    {bus.estado.toLowerCase()}
-                  </Badge>
+                  {getStatusBadge(bus.estado)}
 
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleAction(() => onViewDetails(bus), bus.id)}
-                    disabled={loadingStates[bus.id] || isLoadingDetails}
+                    onClick={() => handleAction(() => onViewDetails(bus), bus.id, 'details')}
+                    disabled={isBusLoading(bus.id) || isLoadingDetails}
                   >
-                    {loadingStates[bus.id] || isLoadingDetails ? (
+                    {loadingStates[bus.id] === 'details' || isLoadingDetails ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       'Ver detalles'
@@ -101,42 +130,57 @@ export const BusTable = ({
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" disabled={isBusLoading(bus.id)}>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => onEdit(bus)}>
+                      <DropdownMenuItem 
+                        onClick={() => onEdit(bus)}
+                        disabled={isBusLoading(bus.id)}
+                      >
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
                       {bus.estado === 'ACTIVO' && (
                         <DropdownMenuItem 
-                          onClick={() => handleAction(() => onSetMantenimiento(bus.id), bus.id)}
-                          disabled={loadingStates[bus.id]}
+                          onClick={() => handleAction(() => onSetMantenimiento(bus.id), bus.id, 'mantenimiento')}
+                          disabled={isBusLoading(bus.id)}
                         >
-                          <Wrench className="mr-2 h-4 w-4" />
+                          {loadingStates[bus.id] === 'mantenimiento' ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <span className="mr-2">🔧</span>
+                          )}
                           Poner en mantenimiento
                         </DropdownMenuItem>
                       )}
                       {bus.estado === 'MANTENIMIENTO' && (
                         <DropdownMenuItem 
-                          onClick={() => handleAction(() => onSetActivo(bus.id), bus.id)}
-                          disabled={loadingStates[bus.id]}
+                          onClick={() => handleAction(() => onSetActivo(bus.id), bus.id, 'activo')}
+                          disabled={isBusLoading(bus.id)}
                         >
-                          <Undo2 className="mr-2 h-4 w-4" />
+                          {loadingStates[bus.id] === 'activo' ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <span className="mr-2">✅</span>
+                          )}
                           Marcar como activo
                         </DropdownMenuItem>
                       )}
                       {bus.estado !== 'RETIRADO' && (
                         <DropdownMenuItem 
-                          onClick={() => handleAction(() => onSetRetirado(bus.id), bus.id)}
-                          disabled={loadingStates[bus.id]}
+                          onClick={() => handleAction(() => onSetRetirado(bus.id), bus.id, 'retirado')}
+                          disabled={isBusLoading(bus.id)}
                           className="text-destructive"
                         >
-                          <Ban className="mr-2 h-4 w-4" />
+                          {loadingStates[bus.id] === 'retirado' ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Ban className="mr-2 h-4 w-4" />
+                          )}
                           Retirar bus
                         </DropdownMenuItem>
                       )}
@@ -145,7 +189,7 @@ export const BusTable = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-gray-500">Modelo:</span>{" "}
                   <span className="font-medium">{bus.modeloBus.marca} - {bus.modeloBus.modelo}</span>
@@ -157,6 +201,10 @@ export const BusTable = ({
                 <div>
                   <span className="text-gray-500">Asientos:</span>{" "}
                   <span className="font-medium">{bus.totalAsientos}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Combustible:</span>{" "}
+                  <span className="font-medium">{bus.tipoCombustible}</span>
                 </div>
               </div>
             </div>

@@ -13,7 +13,8 @@ export const useBusForm = (initialData?: BusFormValues & { id?: string }): { for
             anioFabricacion: initialData?.anioFabricacion || new Date().getFullYear(),
             totalAsientos: initialData?.totalAsientos || 0,
             fotoUrl: initialData?.fotoUrl || "",
-            tipoCombustible: initialData?.tipoCombustible || "Diésel"
+            tipoCombustible: initialData?.tipoCombustible || "Diésel",
+            tipoRutaBusId: initialData?.tipoRutaBusId || 0
         },
     });
 

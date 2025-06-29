@@ -14,6 +14,9 @@ import {
   Ticket,
   CircleDollarSign,
   TicketPlus,
+  PersonStanding,
+  BanknoteArrowDown,
+  Route,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/presentation/context/auth.store";
 import { useEffect, useState } from "react";
@@ -144,6 +147,21 @@ export function AppSidebar() {
             title: "Configuración",
             path: "/main/configuration",
             icon: Settings,
+          },
+          {
+            title: "Clientes",
+            path: "/main/clientes",
+            icon: PersonStanding,
+          },
+          {
+            title: "Configuración de descuentos",
+            path: "/main/configuracion-descuentos",
+            icon: BanknoteArrowDown,
+          },
+          {
+            title: "Tipos de rutas-buses",
+            path: "/main/tipos-ruta-bus",
+            icon: Route,
           },
         ];
 

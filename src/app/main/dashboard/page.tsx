@@ -1,109 +1,60 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Overview } from "./overview";
-import { RecentActivity } from "./recent-activity";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
-import Link from "next/link";
 
-export default function Dashboard() {
+import { 
+  MetricasGeneralesCard,
+  MetricasFinancierasConFiltros,
+  ViajesRecientesCard,
+  BoletosRecientesCard,
+  OcupacionPorTipoRutaCard,
+  EstadisticasPorDiaCard
+} from "@/features/dashboard";
+
+export default function DashboardEjemploPage() {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Panel de Control
-          </h1>
-          <p className="text-muted-foreground">
-            Bienvenido al sistema de gestión de cooperativa de transporte.
-          </p>
-        </div>
-        <Link href="/dashboard/buses/new">
-          <Button className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Nuevo Bus
-          </Button>
-        </Link>
+    <div className="container mx-auto py-6 space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total de Buses
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">
-              +2 desde el mes pasado
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Frecuencias Activas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">16</div>
-            <p className="text-xs text-muted-foreground">
-              +3 desde el mes pasado
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Boletos Vendidos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,203</div>
-            <p className="text-xs text-muted-foreground">
-              +10% desde el mes pasado
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$12,234</div>
-            <p className="text-xs text-muted-foreground">
-              +12% desde el mes pasado
-            </p>
-          </CardContent>
-        </Card>
+      {/* Métricas Generales */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">Métricas Generales</h2>
+        <MetricasGeneralesCard />
+      </section>
+
+      {/* Métricas Financieras con Filtros */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">Métricas Financieras con Filtros de Fecha</h2>
+        <MetricasFinancierasConFiltros />
+      </section>
+
+      {/* Grid de 2 columnas */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Viajes Recientes */}
+        <section>
+          <h2 className="text-2xl font-semibold mb-4">Viajes Recientes (Límite: 3)</h2>
+          <ViajesRecientesCard limite={3} />
+        </section>
+
+        {/* Boletos Recientes */}
+        <section>
+          <h2 className="text-2xl font-semibold mb-4">Boletos Recientes (Límite: 5)</h2>
+          <BoletosRecientesCard limite={5} />
+        </section>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Resumen de Ventas</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <Overview />
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Actividad Reciente</CardTitle>
-            <CardDescription>Últimas 5 transacciones</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RecentActivity />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Ocupación por Tipo de Ruta */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">Ocupación por Tipo de Ruta</h2>
+        <OcupacionPorTipoRutaCard />
+      </section>
+
+      {/* Estadísticas por Día */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">Estadísticas por Día (Últimos 7 días)</h2>
+        <EstadisticasPorDiaCard dias={7} />
+      </section>
     </div>
   );
-}
+} 

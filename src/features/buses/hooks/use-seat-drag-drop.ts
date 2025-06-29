@@ -1,105 +1,101 @@
-import { DropResult } from "react-beautiful-dnd";
+import { DragEndEvent } from "@dnd-kit/core";
 import { BusSeat } from "../interfaces/seat-config";
-
-interface FloorConfig {
-  pisoBusId: number;
-  numeroPiso: number;
-  leftColumns: number;
-  rightColumns: number;
-  rows: number;
-  asientos: BusSeat[];
-  posicionPasillo?: number;
-}
+import { FloorConfig, SourceInfo } from "../interfaces/bus-auxiliar.interface";
 
 interface UseSeatDragDropProps {
-  floorConfigs: FloorConfig[];
   setFloorConfigs: React.Dispatch<React.SetStateAction<FloorConfig[]>>;
-  reorderSeatNumbers: (seats: BusSeat[]) => BusSeat[];
+  reorderSeatNumbersGlobal: (floorConfigs: FloorConfig[]) => FloorConfig[];
 }
 
-export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbers }: UseSeatDragDropProps) => {
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
+export const useSeatDragDrop = ({ setFloorConfigs, reorderSeatNumbersGlobal }: UseSeatDragDropProps) => {
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    const isFromTemplate = active.id.toString().startsWith('template-');
+    const sourceInfo: SourceInfo = isFromTemplate
+      ? { typeId: parseInt(active.id.toString().replace('template-', '')) }
+      : parseDroppableId(active.id.toString().replace('seat-', ''));
 
-    // Si no hay destino, el usuario soltó fuera de un área válida
-    if (!destination) return;
-
-    // Extraer información del origen y destino
-    const [sourceFloor, sourceRow, sourceCol] = source.droppableId.split('-').map(Number);
-    const [destFloor, destRow, destCol] = destination.droppableId.split('-').map(Number);
-
-    // Si es un arrastre desde la plantilla
-    if (source.droppableId.startsWith('template-')) {
-      const typeId = parseInt(source.droppableId.replace('template-', ''));
-      const newSeat: BusSeat = {
-        numero: `${destRow}-${destCol}`, // Número temporal que será reordenado
-        fila: destRow,
-        columna: destCol,
-        tipoId: typeId,
-        estado: 'DISPONIBLE',
-      };
-
+    // Eliminar asiento si se suelta fuera de la matriz
+    if (!over && !isFromTemplate && sourceInfo.floor && sourceInfo.row && sourceInfo.col) {
       setFloorConfigs(prev => {
         const newConfigs = [...prev];
-        const floorIndex = newConfigs.findIndex(f => f.numeroPiso === destFloor);
-        if (floorIndex === -1) return prev;
-
-        // Eliminar asiento existente si lo hay
-        newConfigs[floorIndex].asientos = newConfigs[floorIndex].asientos.filter(
-          seat => !(seat.fila === destRow && seat.columna === destCol)
+        const floorIdx = newConfigs.findIndex(f => f.numeroPiso === sourceInfo.floor);
+        if (floorIdx === -1) return prev;
+        newConfigs[floorIdx].asientos = newConfigs[floorIdx].asientos.filter(
+          seat => !(seat.fila === sourceInfo.row && seat.columna === sourceInfo.col)
         );
-
-        // Agregar nuevo asiento
-        newConfigs[floorIndex].asientos.push(newSeat);
-
-        // Renumerar todos los asientos
-        newConfigs[floorIndex].asientos = reorderSeatNumbers(newConfigs[floorIndex].asientos);
-
-        return newConfigs;
+        // Renumerar globalmente después de eliminar
+        return reorderSeatNumbersGlobal(newConfigs);
       });
       return;
     }
 
+    if (!over) return;
+
+    const destInfo = parseDroppableId(over.id.toString());
+
     setFloorConfigs(prev => {
       const newConfigs = [...prev];
-      const sourceFloorIndex = newConfigs.findIndex(f => f.numeroPiso === sourceFloor);
-      const destFloorIndex = newConfigs.findIndex(f => f.numeroPiso === destFloor);
+      const destFloorIndex = newConfigs.findIndex(f => f.numeroPiso === destInfo.floor);
+      if (destFloorIndex === -1) return prev;
+      const destFloor = newConfigs[destFloorIndex];
 
-      if (sourceFloorIndex === -1 || destFloorIndex === -1) return prev;
+      if (isFromTemplate && sourceInfo.typeId) {
+        const existingSeatIndex = destFloor.asientos.findIndex(
+          seat => seat.fila === destInfo.row && seat.columna === destInfo.col
+        );
+        if (existingSeatIndex !== -1) {
+          newConfigs[destFloorIndex].asientos[existingSeatIndex] = {
+            ...newConfigs[destFloorIndex].asientos[existingSeatIndex],
+            tipoId: sourceInfo.typeId
+          };
+        } else {
+          const newSeat: BusSeat = {
+            numero: `${destInfo.row}-${destInfo.col}`,
+            fila: destInfo.row,
+            columna: destInfo.col,
+            tipoId: sourceInfo.typeId,
+            estado: 'DISPONIBLE',
+          };
+          newConfigs[destFloorIndex].asientos.push(newSeat);
+        }
+        // Renumerar globalmente después de agregar asiento
+        return reorderSeatNumbersGlobal(newConfigs);
+      }
 
-      // Encontrar el asiento que se está moviendo
+      // Movimiento de asientos existentes
+      if (!sourceInfo.floor) return prev;
+      const sourceFloorIndex = newConfigs.findIndex(f => f.numeroPiso === sourceInfo.floor);
+      if (sourceFloorIndex === -1) return prev;
       const sourceIndex = newConfigs[sourceFloorIndex].asientos.findIndex(
-        seat => seat.fila === sourceRow && seat.columna === sourceCol
+        seat => seat.fila === sourceInfo.row && seat.columna === sourceInfo.col
       );
-
       if (sourceIndex === -1) return prev;
-
-      // Obtener el asiento
-      const [movedSeat] = newConfigs[sourceFloorIndex].asientos.splice(sourceIndex, 1);
-
+      const movedSeat = newConfigs[sourceFloorIndex].asientos[sourceIndex];
+      // Eliminar el asiento de la posición original
+      newConfigs[sourceFloorIndex].asientos.splice(sourceIndex, 1);
       // Eliminar asiento existente en el destino si lo hay
-      newConfigs[destFloorIndex].asientos = newConfigs[destFloorIndex].asientos.filter(
-        seat => !(seat.fila === destRow && seat.columna === destCol)
+      const existingSeatIndex = newConfigs[destFloorIndex].asientos.findIndex(
+        seat => seat.fila === destInfo.row && seat.columna === destInfo.col
       );
-
+      if (existingSeatIndex !== -1) {
+        newConfigs[destFloorIndex].asientos.splice(existingSeatIndex, 1);
+      }
       // Agregar el asiento en la nueva posición
       newConfigs[destFloorIndex].asientos.push({
         ...movedSeat,
-        fila: destRow,
-        columna: destCol
+        fila: destInfo.row,
+        columna: destInfo.col,
       });
-
-      // Renumerar asientos si es necesario
-      if (sourceFloor === destFloor) {
-        newConfigs[sourceFloorIndex].asientos = reorderSeatNumbers(newConfigs[sourceFloorIndex].asientos);
-      } else {
-        newConfigs[sourceFloorIndex].asientos = reorderSeatNumbers(newConfigs[sourceFloorIndex].asientos);
-        newConfigs[destFloorIndex].asientos = reorderSeatNumbers(newConfigs[destFloorIndex].asientos);
-      }
-
-      return newConfigs;
+      // Renumerar globalmente después del movimiento
+      return reorderSeatNumbersGlobal(newConfigs);
     });
   };
 
   return { onDragEnd };
 };
+
+function parseDroppableId(id: string) {
+  const [floor, row, col] = id.split('-').map(Number);
+  return { floor, row, col };
+}

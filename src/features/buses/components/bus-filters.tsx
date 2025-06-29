@@ -13,33 +13,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useBusModels } from "../hooks/use-bus-models";
+import { useTipoRutaBus } from "../hooks/use-tipo-ruta-bus";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-
-export interface BusFilters {
-  numero?: string;
-  placa?: string;
-  estado?: string;
-  modeloBusId?: number;
-  anioFabricacion?: number;
-}
+import { BusFilter } from "../interfaces/bus-auxiliar.interface";
 
 interface BusFiltersProps {
-  onFiltersChange: (filters: BusFilters) => void;
+  onFiltersChange: (filters: BusFilter) => void;
 }
 
 export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
   const { busModels } = useBusModels();
-  const [filters, setFilters] = useState<BusFilters>({});
+  const { tiposRuta } = useTipoRutaBus();
+  const [filters, setFilters] = useState<BusFilter>({});
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
-  const handleFilterChange = (key: keyof BusFilters, value: string | number | null) => {
+  const handleFilterChange = (key: keyof BusFilter, value: string | number | null) => {
     const newFilters = { ...filters };
     
     if (value === null || value === "") {
       delete newFilters[key];
     } else {
-      if (key === "modeloBusId" || key === "anioFabricacion") {
+      if (key === "modeloBusId" || key === "tipoRutaBusId" || key === "anioFabricacion") {
         newFilters[key] = typeof value === "string" ? parseInt(value) : value;
       } else {
         newFilters[key] = value as string;
@@ -68,7 +63,7 @@ export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
             </Badge>
             <Button 
               variant="ghost" 
-              size="sm"
+              size="sm" 
               onClick={clearFilters}
               className="h-8 px-2"
             >
@@ -79,7 +74,7 @@ export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <div className="space-y-2">
           <Label>Número de Bus</Label>
           <Input
@@ -137,6 +132,26 @@ export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
         </div>
 
         <div className="space-y-2">
+          <Label>Tipo de Ruta</Label>
+          <Select
+            value={filters.tipoRutaBusId?.toString() || "all"}
+            onValueChange={(value) => handleFilterChange("tipoRutaBusId", value === "all" ? null : parseInt(value))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar tipo de ruta" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {tiposRuta.map((tipo) => (
+                <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                  {tipo.nombre}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
           <Label>Año de Fabricación</Label>
           <Input
             type="number"
@@ -148,4 +163,4 @@ export const BusFilters = ({ onFiltersChange }: BusFiltersProps) => {
       </div>
     </Card>
   );
-};
+};  
