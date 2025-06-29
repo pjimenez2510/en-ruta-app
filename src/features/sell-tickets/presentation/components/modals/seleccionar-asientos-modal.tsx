@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Armchair, Check, BedDouble, User, X } from "lucide-react";
+import { Armchair, User, X } from "lucide-react";
 import { useBusDisponibilidad } from "@/features/sell-tickets/hooks/use-bus-disponibilidad";
 import { AVAILABLE_ICONS } from "@/features/seating/constants/available-icons";
 import React from "react";
@@ -20,14 +20,50 @@ import {
 } from "@/features/sell-tickets/interfaces/bus-disponibilidad.interface";
 import { ClienteAsiento } from "@/features/sell-tickets/interfaces/venta.interface";
 
+interface Viaje {
+  id: number;
+  fecha: string;
+  bus: {
+    id: number;
+    placa: string;
+  };
+  horarioRuta: {
+    horaSalida: string;
+    ruta: {
+      nombre: string;
+      paradas: Array<{
+        ciudad: {
+          id: number;
+          nombre: string;
+        };
+      }>;
+    };
+  };
+}
+
+interface AsientoSeleccionado {
+  id: number;
+  numero: string;
+  tipo: string;
+  precio: number;
+}
+
+interface ClienteAdaptado {
+  id: number;
+  nombre: string;
+  documento: string;
+  email: string;
+  telefono: string;
+}
+
 interface SeleccionarAsientosModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  viaje: any;
+  viaje: Viaje;
   onAsientosSeleccionados: (clienteAsientos: ClienteAsiento[]) => void;
   clienteAsientosActuales: ClienteAsiento[];
-  onBuscarCliente: (asiento: any) => void;
-  onClienteAsignado?: (cliente: any, asientoId: number) => void;
+  onBuscarCliente: (asiento: AsientoSeleccionado) => void;
+  onClienteAsignado?: (cliente: ClienteAdaptado, asientoId: number) => void;
 }
 
 // Función para determinar el color de icono según el fondo
@@ -85,7 +121,7 @@ export function SeleccionarAsientosModal({
   }
 
   // Obtener asientos del piso activo
-  const pisos: PisoDisponibilidad[] = (data as any)?.pisos || [];
+  const pisos: PisoDisponibilidad[] = data?.pisos || [];
   const piso: PisoDisponibilidad | undefined = pisos.find(
     (p: PisoDisponibilidad) => p.numeroPiso === pisoActivo
   );
@@ -94,7 +130,7 @@ export function SeleccionarAsientosModal({
     ...new Set(asientosPorPiso.map((a: AsientoDisponibilidad) => a.fila)),
   ].sort((a, b) => a - b);
 
-  const toggleAsiento = (asiento: any) => {
+  const toggleAsiento = (asiento: AsientoDisponibilidad) => {
     if (!asiento.disponible) return;
 
     const asientoSeleccionado = clienteAsientos.find(
@@ -114,60 +150,6 @@ export function SeleccionarAsientosModal({
         tipo: asiento.tipo.nombre,
         precio: Number(asiento.precio),
       });
-    }
-  };
-
-  const asignarClienteAAsiento = (asiento: any, cliente: any) => {
-    const nuevoClienteAsiento: ClienteAsiento = {
-      id: `${asiento.id}-${Date.now()}`, // ID único para el formulario
-      cliente: {
-        id: cliente.id,
-        nombre: cliente.nombre,
-        documento: cliente.documento,
-        email: cliente.email,
-        telefono: cliente.telefono,
-      },
-      asiento: {
-        id: asiento.id,
-        numero: asiento.numero,
-        tipo: asiento.tipo.nombre,
-        precio: Number(asiento.precio),
-      },
-    };
-
-    setClienteAsientos([...clienteAsientos, nuevoClienteAsiento]);
-  };
-
-  // Función para manejar cuando se asigna un cliente desde el modal de buscar cliente
-  const handleClienteAsignado = (cliente: any, asientoId: number) => {
-    // Buscar el asiento correspondiente
-    const asiento = asientosPorPiso.find((a) => a.id === asientoId);
-    if (!asiento) return;
-
-    // Crear el nuevo cliente-asiento
-    const nuevoClienteAsiento: ClienteAsiento = {
-      id: `${asientoId}-${Date.now()}`,
-      cliente: {
-        id: cliente.id,
-        nombre: cliente.nombre,
-        documento: cliente.documento,
-        email: cliente.email,
-        telefono: cliente.telefono,
-      },
-      asiento: {
-        id: asiento.id,
-        numero: asiento.numero,
-        tipo: asiento.tipo.nombre,
-        precio: Number(asiento.precio),
-      },
-    };
-
-    // Agregar al estado
-    setClienteAsientos((prev) => [...prev, nuevoClienteAsiento]);
-
-    // Notificar al componente padre
-    if (onClienteAsignado) {
-      onClienteAsignado(cliente, asientoId);
     }
   };
 
@@ -191,7 +173,7 @@ export function SeleccionarAsientosModal({
     );
   };
 
-  const getEstadoAsiento = (asiento: any) => {
+  const getEstadoAsiento = (asiento: AsientoDisponibilidad) => {
     if (!asiento.disponible) return "ocupado";
     if (
       clienteAsientos &&
@@ -201,7 +183,7 @@ export function SeleccionarAsientosModal({
     return "disponible";
   };
 
-  const getColorAsiento = (asiento: any) => {
+  const getColorAsiento = (asiento: AsientoDisponibilidad) => {
     const estado = getEstadoAsiento(asiento);
     switch (estado) {
       case "ocupado":
