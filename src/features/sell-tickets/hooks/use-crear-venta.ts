@@ -17,7 +17,7 @@ export function useCrearVenta() {
       console.log("[useCrearVenta] Session obtenida:", session);
       const rol = session?.user?.role;
       const usuarioId = session?.user?.usuarioId;
-      console.log("[useCrearVenta] Rol del usuario:", rol," oooo");
+      
 
       let ventaDataWithOficinista: any;
       console.log(rol === "OFICINISTA");
