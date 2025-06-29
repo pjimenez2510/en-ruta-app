@@ -48,11 +48,13 @@ import { es } from "date-fns/locale";
 import Link from "next/link";
 import { useVentas } from "@/features/sell-tickets/hooks/use-ventas";
 import { VentaLista } from "@/features/sell-tickets/interfaces/venta-lista.interface";
+import { VentaDetalleModal } from "./modals/venta-detalle-modal";
 
 export function VentasManagement() {
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroFecha, setFiltroFecha] = useState<Date>();
+  const [ventaDetalleId, setVentaDetalleId] = useState<number | null>(null);
 
   // Hook de datos reales
   const { data: ventasRaw = [], isLoading } = useVentas({
@@ -218,9 +220,9 @@ export function VentasManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID Venta</TableHead>
+                  <TableHead>#</TableHead>
                   <TableHead>Fecha/Hora</TableHead>
-                  <TableHead>Cliente</TableHead>
+                  <TableHead>Placa Bus</TableHead>
                   <TableHead>Ruta</TableHead>
                   <TableHead>Boletos</TableHead>
                   <TableHead>Total</TableHead>
@@ -243,9 +245,9 @@ export function VentasManagement() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  ventasFiltradas.map((venta) => (
+                  ventasFiltradas.map((venta, idx) => (
                     <TableRow key={venta.id}>
-                      <TableCell className="font-medium">{venta.id}</TableCell>
+                      <TableCell className="font-medium">{idx + 1}</TableCell>
                       <TableCell>
                         <div className="space-y-1">
                           <p className="text-sm">{venta.fecha}</p>
@@ -256,20 +258,10 @@ export function VentasManagement() {
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <p className="text-sm font-medium">{venta.cliente}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {venta.documento}
-                          </p>
+                          <p className="text-sm font-medium">{venta.viaje}</p>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <p className="text-sm">{venta.ruta}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {venta.viaje}
-                          </p>
-                        </div>
-                      </TableCell>
+                      <TableCell>{venta.ruta}</TableCell>
                       <TableCell>{venta.boletos}</TableCell>
                       <TableCell>
                         <div className="space-y-1">
@@ -285,7 +277,11 @@ export function VentasManagement() {
                       <TableCell>{getEstadoBadge(venta.estado)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setVentaDetalleId(venta.id)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                           {venta.estado === "PENDIENTE" && (
@@ -316,6 +312,11 @@ export function VentasManagement() {
           </div>
         </CardContent>
       </Card>
+      {/* Modal de Detalle de Venta */}
+      <VentaDetalleModal
+        ventaDetalleId={ventaDetalleId}
+        onClose={() => setVentaDetalleId(null)}
+      />
     </div>
   );
 }

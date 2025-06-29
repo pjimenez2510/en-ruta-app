@@ -6,6 +6,7 @@ import {
   Venta,
 } from "@/features/sell-tickets/interfaces/venta.interface";
 import { VentaLista } from "@/features/sell-tickets/interfaces/venta-lista.interface";
+import { VentaDetalle } from "@/features/sell-tickets/interfaces/venta-detalle.interface";
 
 export async function crearVenta(ventaData: CrearVentaData): Promise<Venta> {
   const client = AxiosClient.getInstance();
@@ -24,4 +25,11 @@ export async function getVentas(params?: {
   const client = AxiosClient.getInstance();
   const { data } = await client.get(API_ROUTES.VENTAS.GET_ALL, { params });
   return data.data as VentaLista[];
+}
+
+export async function getVentaById(id: number): Promise<VentaDetalle> {
+  const client = AxiosClient.getInstance();
+  const url = API_ROUTES.VENTAS.GET_BY_ID.replace(":id", id.toString());
+  const { data } = await client.get(url);
+  return data.data as VentaDetalle;
 }
