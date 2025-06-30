@@ -37,7 +37,10 @@ export async function middleware(request: NextRequest) {
         new URL("/main/admin/dashboard", request.url)
       );
     }
-    if (role === "PERSONAL_COOPERATIVA") {
+    if (role === "OFICINISTA") {
+      return NextResponse.redirect(new URL("/main/tickets/sell", request.url));
+    }
+    if (role === "ADMIN_COOPERATIVA") {
       return NextResponse.redirect(new URL("/main/dashboard", request.url));
     }
     if (role === "CLIENTE") {

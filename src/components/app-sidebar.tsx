@@ -11,6 +11,9 @@ import {
   FileText,
   Map,
   Plus,
+  Ticket,
+  CircleDollarSign,
+  TicketPlus,
   PersonStanding,
   BanknoteArrowDown,
   Route,
@@ -43,60 +46,124 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
-const menuItems: MenuItem[] = [
-  { title: "Dashboard", path: "/main/dashboard", icon: ChartLine },
-  { title: "Usuarios", path: "/main/user-tenant", icon: Users },
-
-  {
-    title: "Unidades",
-    icon: Bus,
-    children: [
-      {
-        title: "Buses",
-        children: [
-          { title: "Agregar Bus", path: "/main/buses/add", icon: Plus },
-          { title: "Mis Buses", path: "/main/buses", icon: List },
-        ],
-      },
-      {
-        title: "Asientos",
-        children: [
-          {
-            title: "Tipos de Asientos",
-            path: "/main/seating/types",
-            icon: Bus,
-          },
-        ],
-      },
-    ],
-  },
-
-  { title: "Resoluciones", path: "/main/resolution", icon: FileText },
-  { title: "Rutas", path: "/main/routes", icon: Map },
-  { title: "Viajes", path: "/main/trips", icon: List },
-  { title: "Configuración", path: "/main/configuration", icon: Settings },
-  {
-    title: "Clientes",
-    path: "/main/clientes",
-    icon: PersonStanding,
-  },
-  {
-    title: "Configuración de descuentos",
-    path: "/main/configuracion-descuentos",
-    icon: BanknoteArrowDown,
-  },
-  {
-    title: "Tipos de rutas-buses",
-    path: "/main/tipos-ruta-bus",
-    icon: Route,
-  },
-];
-
 export function AppSidebar() {
   const router = useRouter();
   const userRole = useAuthStore((state) => state.userRole);
   const [openMenus, setOpenMenus] = useState<string[]>([]);
   const { logoUrl } = useTenantColors();
+
+  const menuItems: MenuItem[] =
+    userRole === "OFICINISTA"
+      ? [
+          {
+            title: "Unidades",
+            icon: Bus,
+            children: [
+              {
+                title: "Buses",
+                children: [
+                  { title: "Agregar Bus", path: "/main/buses/add", icon: Plus },
+                  { title: "Mis Buses", path: "/main/buses", icon: List },
+                ],
+              },
+              {
+                title: "Asientos",
+                children: [
+                  {
+                    title: "Tipos de Asientos",
+                    path: "/main/seating/types",
+                    icon: Bus,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            title: "Tickets",
+            icon: Ticket,
+            children: [
+              {
+                title: "Ventas",
+                path: "/main/tickets/sell",
+                icon: CircleDollarSign,
+              },
+              {
+                title: "Nueva Venta",
+                path: "/main/tickets/sell/new",
+                icon: TicketPlus,
+              },
+            ],
+          },
+          { title: "Resoluciones", path: "/main/resolution", icon: FileText },
+          { title: "Rutas", path: "/main/routes", icon: Map },
+          { title: "Viajes", path: "/main/trips", icon: List },
+        ]
+      : [
+          { title: "Dashboard", path: "/main/dashboard", icon: ChartLine },
+          { title: "Usuarios", path: "/main/user-tenant", icon: Users },
+          {
+            title: "Unidades",
+            icon: Bus,
+            children: [
+              {
+                title: "Buses",
+                children: [
+                  { title: "Agregar Bus", path: "/main/buses/add", icon: Plus },
+                  { title: "Mis Buses", path: "/main/buses", icon: List },
+                ],
+              },
+              {
+                title: "Asientos",
+                children: [
+                  {
+                    title: "Tipos de Asientos",
+                    path: "/main/seating/types",
+                    icon: Bus,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            title: "Tickets",
+            icon: Ticket,
+            children: [
+              {
+                title: "Ventas",
+                path: "/main/tickets/sell",
+                icon: CircleDollarSign,
+              },
+              {
+                title: "Nueva Venta",
+                path: "/main/tickets/sell/new",
+                icon: TicketPlus,
+              },
+            ],
+          },
+          { title: "Resoluciones", path: "/main/resolution", icon: FileText },
+          { title: "Rutas", path: "/main/routes", icon: Map },
+          { title: "Viajes", path: "/main/trips", icon: List },
+          {
+            title: "Configuración",
+            path: "/main/configuration",
+            icon: Settings,
+          },
+          {
+            title: "Clientes",
+            path: "/main/clientes",
+            icon: PersonStanding,
+          },
+          {
+            title: "Configuración de descuentos",
+            path: "/main/configuracion-descuentos",
+            icon: BanknoteArrowDown,
+          },
+          {
+            title: "Tipos de rutas-buses",
+            path: "/main/tipos-ruta-bus",
+            icon: Route,
+          },
+        ];
 
   const handleToggle = (title: string) => {
     setOpenMenus((prev) =>
@@ -118,10 +185,10 @@ export function AppSidebar() {
     if (!userRole) return;
     if (userRole === "ADMIN_SISTEMA") router.push("/main/admin/dashboard");
     else if (userRole === "CLIENTE") router.push("/cliente/dashboard");
-    else if (userRole !== "PERSONAL_COOPERATIVA") router.push("/unauthorized");
+    else if (userRole === "OFICINISTA") router.push("/main/tickets/sell");
   }, [userRole, router]);
 
-  if (userRole !== "PERSONAL_COOPERATIVA") return null;
+  if (userRole === "OFICINISTA") return null;
 
   const renderMenu = (items: MenuItem[], depth = 0) =>
     items.map((item) => {
