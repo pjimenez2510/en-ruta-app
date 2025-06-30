@@ -19,6 +19,7 @@ export const API_ROUTES = {
   CLIENTES: {
     GET_ALL: "/clientes",
     CREATE: "/clientes",
+    POST: "/clientes",
     GET_BY_ID: "/clientes/:id",
     UPDATE: "/clientes/:id",
     DELETE: "/clientes/:id",
@@ -99,12 +100,34 @@ export const API_ROUTES = {
     DELETE: "/usuario-tenant/:id",
     POST_PERSONAL_INFO: "/usuario-tenant/:id/asignar-info-personal",
   },
+  VIAJES: {
+    GET_ALL: "/viajes",
+    GET_BY_ID: "/viajes/:id",
+    PUBLICO: "/viajes/publico",
+  },
+  METODOS_PAGO: {
+    GET_ALL: "/metodos-pago",
+    POST: "/metodos-pago",
+    UPDATE: "/metodos-pago/:id",
+    DELETE: "/metodos-pago/:id",
+  },
+  VENTAS: {
+    POST: "/ventas",
+    GET_ALL: "/ventas",
+    GET_BY_ID: "/ventas/:id",
+    UPDATE: "/ventas/:id",
+    CONFIRMAR: "/ventas/:id/confirmar",
+    CANCELAR: "/ventas/:id/cancelar",
+    VERIFICAR: "/ventas/:id/verificar",
+    RECHAZAR: "/ventas/:id/rechazar",
+  },
   BUSES: {
     BASE: "/buses",
     MODELOS: "/modelos-bus",
     PISOS: "/pisos-bus",
     ASIENTOS: "/asientos",
-    ASIENTOS_MASIVO: "/asientos/masivo"
+    ASIENTOS_MASIVO: "/asientos/masivo",
+    DISPONIBILIDAD: "/buses/:id/disponibilidad",
   },
   BUS_TEMPLATES: {
     FLOOR_TEMPLATE: "/plantilla-pisos",
