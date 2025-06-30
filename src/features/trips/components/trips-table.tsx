@@ -12,8 +12,11 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { useTrips } from "../hooks/use-trips";
-import { Trip, CreateTripDTO } from "../interfaces/trips.interface";
-import { TripFilters } from "../components/trip-filters";
+import {
+  Trip,
+  CreateTripDTO,
+  TripFilters,
+} from "../interfaces/trips.interface";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -21,7 +24,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { TripForm } from "../components/trip-form";
 import {
@@ -30,7 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Trash2, Eye, Plus } from "lucide-react";
+import { MoreVertical, Trash2, Eye } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,20 +43,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
 import { toZonedTime } from "date-fns-tz";
 
-export const TripsTable = () => {
-  const { trips, isLoading, isFetching, createTrip, updateTrip, deleteTrip } =
-    useTrips();
+interface TripsTableProps {
+  filters: TripFilters;
+  allTrips: Trip[];
+}
+
+export const TripsTable = ({ filters }: TripsTableProps) => {
+  const { trips, isLoading, updateTrip, deleteTrip } =
+    useTrips(filters);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
-  const router = useRouter();
-
-  const handleCreate = async (data: CreateTripDTO) => {
-    await createTrip.mutateAsync(data);
-  };
 
   const handleUpdate = async (data: CreateTripDTO) => {
     if (selectedTrip) {
@@ -87,40 +88,6 @@ export const TripsTable = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-bold text-center">Hoja de Ruta</h2>
-          {isFetching && !isLoading && (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-          )}
-        </div>
-        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 bg-primary text-white hover:bg-primary/90 rounded-lg shadow-sm px-4 py-2">
-                <Plus className="h-4 w-4" />
-                Crear Viaje
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Crear Nuevo Viaje</DialogTitle>
-              </DialogHeader>
-              <TripForm onSubmit={handleCreate} />
-            </DialogContent>
-          </Dialog>
-          <Button
-            className="flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg shadow-sm px-4 py-2"
-            onClick={() => router.push("/main/trips/crear-masivo")}
-          >
-            <Plus className="h-4 w-4" />
-            Crear Viaje Masivo
-          </Button>
-        </div>
-      </div>
-
-      <TripFilters />
-
       {!trips || trips.length === 0 ? (
         <div className="w-full text-center text-gray-500 py-12 text-lg font-medium bg-white rounded-2xl shadow-lg border">
           {isLoading ? "Cargando..." : "No hay viajes para mostrar."}

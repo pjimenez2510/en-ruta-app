@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { TripsService } from '../services/trips.service';
-import { Trip, CreateTripDTO, TripFilters } from '../interfaces/trips.interface';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { TripsService } from "../services/trips.service";
+import {
+  Trip,
+  CreateTripDTO,
+  TripFilters,
+} from "../interfaces/trips.interface";
 
-export const useTrips = () => {
-  const [filters, setFilters] = useState<TripFilters>({});
+export const useTrips = (filters?: TripFilters) => {
   const queryClient = useQueryClient();
 
   // Query para obtener trips filtrados
@@ -12,12 +14,12 @@ export const useTrips = () => {
     data: trips = [],
     isLoading,
     isFetching,
-    error
+    error,
   } = useQuery<Trip[]>({
-    queryKey: ['trips', filters], // CRÍTICO: los filtros en el queryKey
+    queryKey: ["trips", filters],
     queryFn: () => {
-      console.log('=== EXECUTING QUERY ===');
-      console.log('Filtros enviados a service:', filters);
+      console.log("=== EXECUTING QUERY ===");
+      console.log("Filtros enviados a service:", filters);
       return TripsService.getAll(filters);
     },
     staleTime: 1 * 60 * 1000, // 1 minuto
@@ -26,7 +28,7 @@ export const useTrips = () => {
 
   // Query para obtener todos los trips (sin filtros) para las opciones de filtros
   const { data: allTrips = [] } = useQuery<Trip[]>({
-    queryKey: ['trips', 'all'],
+    queryKey: ["trips", "all"],
     queryFn: () => TripsService.getAll(),
     staleTime: 10 * 60 * 1000, // 10 minutos
   });
@@ -35,7 +37,7 @@ export const useTrips = () => {
   const createTrip = useMutation({
     mutationFn: (data: CreateTripDTO) => TripsService.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trips'] });
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
     },
   });
 
@@ -43,17 +45,16 @@ export const useTrips = () => {
     mutationFn: ({ id, trip }: { id: number; trip: CreateTripDTO }) =>
       TripsService.update(id, trip),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trips'] });
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
     },
   });
 
   const deleteTrip = useMutation({
     mutationFn: (id: number) => TripsService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trips'] });
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
     },
   });
-
 
   return {
     trips,
@@ -61,8 +62,6 @@ export const useTrips = () => {
     isLoading,
     isFetching,
     error,
-    filters,
-    setFilters,
     createTrip,
     updateTrip,
     deleteTrip,

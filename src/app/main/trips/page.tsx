@@ -1,9 +1,9 @@
-import { TripsTable } from "@/features/trips/components/trips-table";
+import TripsPage from "@/features/trips/TripsPage";
 
-export default function TripsPage() {
+export default function Page() {
   return (
     <div className="container mx-auto py-8">
-      <TripsTable />
+      <TripsPage />
     </div>
   );
 }
