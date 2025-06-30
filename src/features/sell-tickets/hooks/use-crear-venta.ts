@@ -25,28 +25,27 @@ export function useCrearVenta() {
       const session = await getSession();
       console.log("[useCrearVenta] Session obtenida:", session);
       const rol = session?.user?.role;
-      const usuarioId = session?.user?.usuarioId;
+      //const usuarioId = session?.user?.usuarioId;
 
-      let ventaDataWithOficinista:
+      const ventaDataWithOficinista:
         | CrearVentaData
-        | Omit<CrearVentaData, "oficinistaId">;
+        | Omit<CrearVentaData, "oficinistaId"> = { ...ventaData };
       console.log(rol === "OFICINISTA");
-      if (rol === "OFICINISTA") {
-        if (!usuarioId) {
-          console.error(
-            "[useCrearVenta] No se pudo obtener el usuarioId del oficinista. Session:",
-            session
-          );
-          throw new Error("No se pudo obtener el usuarioId del oficinista");
-        }
-        ventaDataWithOficinista = {
-          ...ventaData,
-          oficinistaId: usuarioId,
-        };
-      } else {
-        // No incluir oficinistaId
-        ventaDataWithOficinista = { ...ventaData };
-      }
+      // if (rol === "OFICINISTA") {
+      //   if (!usuarioId) {
+      //     console.error(
+      //       "[useCrearVenta] No se pudo obtener el usuarioId del oficinista. Session:",
+      //       session
+      //     );
+      //     throw new Error("No se pudo obtener el usuarioId del oficinista");
+      //   }
+      //   ventaDataWithOficinista = {
+      //     ...ventaData,
+      //     oficinistaId: usuarioId,
+      //   };
+      // } else {
+      // No incluir oficinistaId
+      // }
 
       console.log(
         "[useCrearVenta] Datos finales enviados al servicio:",
@@ -60,7 +59,6 @@ export function useCrearVenta() {
       return data;
     },
     onError: (error: ApiError) => {
-      // Manejar errores del backend
       if (error?.response?.data?.error) {
         const backendError = error.response.data.error;
         if (Array.isArray(backendError)) {

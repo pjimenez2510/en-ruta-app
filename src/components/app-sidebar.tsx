@@ -56,29 +56,6 @@ export function AppSidebar() {
     userRole === "OFICINISTA"
       ? [
           {
-            title: "Unidades",
-            icon: Bus,
-            children: [
-              {
-                title: "Buses",
-                children: [
-                  { title: "Agregar Bus", path: "/main/buses/add", icon: Plus },
-                  { title: "Mis Buses", path: "/main/buses", icon: List },
-                ],
-              },
-              {
-                title: "Asientos",
-                children: [
-                  {
-                    title: "Tipos de Asientos",
-                    path: "/main/seating/types",
-                    icon: Bus,
-                  },
-                ],
-              },
-            ],
-          },
-          {
             title: "Tickets",
             icon: Ticket,
             children: [
@@ -94,9 +71,6 @@ export function AppSidebar() {
               },
             ],
           },
-          { title: "Resoluciones", path: "/main/resolution", icon: FileText },
-          { title: "Rutas", path: "/main/routes", icon: Map },
-          { title: "Viajes", path: "/main/trips", icon: List },
         ]
       : [
           { title: "Dashboard", path: "/main/dashboard", icon: ChartLine },
@@ -187,8 +161,6 @@ export function AppSidebar() {
     else if (userRole === "CLIENTE") router.push("/cliente/dashboard");
     else if (userRole === "OFICINISTA") router.push("/main/tickets/sell");
   }, [userRole, router]);
-
-  if (userRole === "OFICINISTA") return null;
 
   const renderMenu = (items: MenuItem[], depth = 0) =>
     items.map((item) => {
