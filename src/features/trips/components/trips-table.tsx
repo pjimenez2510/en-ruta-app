@@ -12,8 +12,11 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { useTrips } from "../hooks/use-trips";
-import { Trip, CreateTripDTO } from "../interfaces/trips.interface";
-import { TripFilters } from "../components/trip-filters";
+import {
+  Trip,
+  CreateTripDTO,
+  TripFilters,
+} from "../interfaces/trips.interface";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -21,7 +24,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { TripForm } from "../components/trip-form";
 import {
@@ -30,7 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Trash2, Eye, Plus } from "lucide-react";
+import { MoreVertical, Trash2, Eye } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,25 +43,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
 import { toZonedTime } from "date-fns-tz";
 
 interface TripsTableProps {
-  filters: any;
+  filters: TripFilters;
   allTrips: Trip[];
 }
 
-export const TripsTable = ({ filters, allTrips }: TripsTableProps) => {
-  const { trips, isLoading, isFetching, createTrip, updateTrip, deleteTrip } =
+export const TripsTable = ({ filters }: TripsTableProps) => {
+  const { trips, isLoading, updateTrip, deleteTrip } =
     useTrips(filters);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
-  const router = useRouter();
-
-  const handleCreate = async (data: CreateTripDTO) => {
-    await createTrip.mutateAsync(data);
-  };
 
   const handleUpdate = async (data: CreateTripDTO) => {
     if (selectedTrip) {

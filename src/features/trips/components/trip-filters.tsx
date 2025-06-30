@@ -11,10 +11,11 @@ import {
 } from "@/components/ui/select";
 import { FC, useState, useEffect } from "react";
 import { Trip } from "../interfaces/trips.interface";
+import type { TripFilters as TripFiltersType } from "../interfaces/trips.interface";
 
 interface TripFiltersProps {
-  filters: any;
-  setFilters: (filters: any) => void;
+  filters: TripFiltersType;
+  setFilters: (filters: TripFiltersType) => void;
   allTrips: Trip[];
 }
 
